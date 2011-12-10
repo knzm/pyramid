@@ -205,24 +205,43 @@ mentality は、 競争的だが信じられないほど似たようなアプリ
 Pyramid Uses A Zope Component Architecture ("ZCA") Registry
 -----------------------------------------------------------
 
-:app:`Pyramid` uses a :term:`Zope Component Architecture` (ZCA) "component
-registry" as its :term:`application registry` under the hood.  This is a
-point of some contention.  :app:`Pyramid` is of a :term:`Zope` pedigree, so
-it was natural for its developers to use a ZCA registry at its inception.
-However, we understand that using a ZCA registry has issues and consequences,
-which we've attempted to address as best we can.  Here's an introspection
-about :app:`Pyramid` use of a ZCA registry, and the trade-offs its usage
-involves.
+.. :app:`Pyramid` uses a :term:`Zope Component Architecture` (ZCA) "component
+.. registry" as its :term:`application registry` under the hood.  This is a
+.. point of some contention.  :app:`Pyramid` is of a :term:`Zope` pedigree, so
+.. it was natural for its developers to use a ZCA registry at its inception.
+.. However, we understand that using a ZCA registry has issues and consequences,
+.. which we've attempted to address as best we can.  Here's an introspection
+.. about :app:`Pyramid` use of a ZCA registry, and the trade-offs its usage
+.. involves.
+
+:app:`Pyramid` はアプリケーションレジストリとして内部で Zope の
+:term:`Zope Component Architecture` (ZCA) "コンポーネントレジストリ" を
+使用します。これはいくらか議論のポイントです。 :app:`Pyramid` は
+:term:`Zope` の系列です。したがって、開発者がその初期で ZCA レジストリ
+を使用することは自然でした。しかしながら、私たちは ZCA レジストリの使用
+には issues と consequences があることを理解しています。私たちはできる
+限りそれに対処しようとしました。以下は :app:`Pyramid` で ZCA レジストリ
+を使用すること、およびその使用によるトレードオフの内省です。
+
 
 Problems
 ++++++++
 
-The global API that may be used to access data in a ZCA component registry
-is not particularly pretty or intuitive, and sometimes it's just plain
-obtuse.  Likewise, the conceptual load on a casual source code reader of code
-that uses the ZCA global API is somewhat high.  Consider a ZCA neophyte
-reading the code that performs a typical "unnamed utility" lookup using the
-:func:`zope.component.getUtility` global API:
+.. The global API that may be used to access data in a ZCA component registry
+.. is not particularly pretty or intuitive, and sometimes it's just plain
+.. obtuse.  Likewise, the conceptual load on a casual source code reader of code
+.. that uses the ZCA global API is somewhat high.  Consider a ZCA neophyte
+.. reading the code that performs a typical "unnamed utility" lookup using the
+.. :func:`zope.component.getUtility` global API:
+
+ZCA コンポーネントレジストリの中のデータにアクセスするために使用される
+グローバル API は、特に pretty でなく直感的でもありません。また、時々
+それはまったく plain obtuse です。同様に ZCA のグローバル API を使用す
+るコードのカジュアルソースコードリーディングをする人に対する概念的負荷
+は多少高いです。 ZCA 新参者が :func:`zope.component.getUtility` の
+グローバル API を使用した典型的な「無名のユーティリティ」の検索を行なう
+コードを読むことを考慮してください:
+
 
 .. ignore-next-block
 .. code-block:: python
@@ -232,53 +251,111 @@ reading the code that performs a typical "unnamed utility" lookup using the
    from zope.component import getUtility
    settings = getUtility(ISettings)
 
-After this code runs, ``settings`` will be a Python dictionary.  But it's
-unlikely that any civilian would know that just by reading the code.  There
-are a number of comprehension issues with the bit of code above that are
-obvious.
 
-First, what's a "utility"?  Well, for the purposes of this discussion, and
-for the purpose of the code above, it's just not very important.  If you
-really want to know, you can read `this
-<http://www.muthukadan.net/docs/zca.html#utility>`_.  However, still, readers
-of such code need to understand the concept in order to parse it.  This is
-problem number one.
+.. After this code runs, ``settings`` will be a Python dictionary.  But it's
+.. unlikely that any civilian would know that just by reading the code.  There
+.. are a number of comprehension issues with the bit of code above that are
+.. obvious.
 
-Second, what's this ``ISettings`` thing?  It's an :term:`interface`.  Is that
-important here?  Not really, we're just using it as a key for some lookup
-based on its identity as a marker: it represents an object that has the
-dictionary API, but that's not very important in this context.  That's
-problem number two.
+このコードが実行された後、 ``settings`` は Python 辞書になります。しかし、
+普通の人はコードを読むだけではそれは知りようもありません。上記のコード断片には
+明らかに、理解しやすさに多くの問題があります。
 
-Third of all, what does the ``getUtility`` function do?  It's performing a
-lookup for the ``ISettings`` "utility" that should return.. well, a utility.
-Note how we've already built up a dependency on the understanding of an
-:term:`interface` and the concept of "utility" to answer this question: a bad
-sign so far.  Note also that the answer is circular, a *really* bad sign.
 
-Fourth, where does ``getUtility`` look to get the data?  Well, the "component
-registry" of course.  What's a component registry?  Problem number four.
+.. First, what's a "utility"?  Well, for the purposes of this discussion, and
+.. for the purpose of the code above, it's just not very important.  If you
+.. really want to know, you can read `this
+.. <http://www.muthukadan.net/docs/zca.html#utility>`_.  However, still, readers
+.. of such code need to understand the concept in order to parse it.  This is
+.. problem number one.
 
-Fifth, assuming you buy that there's some magical registry hanging around,
-where *is* this registry?  *Homina homina*... "around"?  That's sort of the
-best answer in this context (a more specific answer would require knowledge
-of internals).  Can there be more than one registry?  Yes.  So *which*
-registry does it find the registration in?  Well, the "current" registry of
-course.  In terms of :app:`Pyramid`, the current registry is a thread local
-variable.  Using an API that consults a thread local makes understanding how
-it works non-local.
+まず、 "utility" とは何でしょうか。もちろん、この議論のために、そして
+上記のコードの目的にとって、それはそれほど重要ではありません。本当に知り
+たければ、 `これ <http://www.muthukadan.net/docs/zca.html#utility>`_
+を読めば良いでしょう。しかしながら、コードの読者はコードをパースするた
+めに依然としてその概念を理解する必要があります。これは問題その1です。
 
-You've now bought in to the fact that there's a registry that is just hanging
-around.  But how does the registry get populated?  Why, via code that calls
-directives like ``config.add_view``.  In this particular case, however, the
-registration of ``ISettings`` is made by the framework itself under the hood:
-it's not present in any user configuration.  This is extremely hard to
-comprehend.  Problem number six.
 
-Clearly there's some amount of cognitive load here that needs to be borne by
-a reader of code that extends the :app:`Pyramid` framework due to its use of
-the ZCA, even if he or she is already an expert Python programmer and whom is
-an expert in the domain of web applications.  This is suboptimal.
+.. Second, what's this ``ISettings`` thing?  It's an :term:`interface`.  Is that
+.. important here?  Not really, we're just using it as a key for some lookup
+.. based on its identity as a marker: it represents an object that has the
+.. dictionary API, but that's not very important in this context.  That's
+.. problem number two.
+
+次に、この ``ISettings`` というのは一体何でしょう。それは
+:term:`interface` です。それはここで重要ですか？ そうではありません。
+単に同一性に基づく検索のためのキーにマーカーとして使用しているだけです:
+それは辞書 API を持ったオブジェクトを表していますが、この文脈において
+それはあまり重要ではありません。これが問題その2です。
+
+
+.. Third of all, what does the ``getUtility`` function do?  It's performing a
+.. lookup for the ``ISettings`` "utility" that should return.. well, a utility.
+.. Note how we've already built up a dependency on the understanding of an
+.. :term:`interface` and the concept of "utility" to answer this question: a bad
+.. sign so far.  Note also that the answer is circular, a *really* bad sign.
+
+第三に、 ``getUtility`` 関数は何を行いますか？ それは ``ISettings``
+「ユーティリティ」の検索を行なって、それを返すはずです……さて、ユーティリティとは。
+ここまでで :term:`interface` についての理解と、この質問に答えるために
+「ユーティリティ」概念に対する依存性をどのように構築したか注意してください:
+非常に悪いサインです。さらに答えが循環的であることに注目してください。
+*本当に* 悪いサインです。
+
+
+.. Fourth, where does ``getUtility`` look to get the data?  Well, the "component
+.. registry" of course.  What's a component registry?  Problem number four.
+
+４番目に、 ``getUtility`` はデータを得るためにどこを見るのでしょうか？
+ええ、もちろん「コンポーネントレジストリ」です。
+コンポーネントレジストリとは何でしょうか。問題その4。
+
+
+.. Fifth, assuming you buy that there's some magical registry hanging around,
+.. where *is* this registry?  *Homina homina*... "around"?  That's sort of the
+.. best answer in this context (a more specific answer would require knowledge
+.. of internals).  Can there be more than one registry?  Yes.  So *which*
+.. registry does it find the registration in?  Well, the "current" registry of
+.. course.  In terms of :app:`Pyramid`, the current registry is a thread local
+.. variable.  Using an API that consults a thread local makes understanding how
+.. it works non-local.
+
+５番目に、何らかの魔法のレジストリが近くにある (hanging around) こと
+を受け入れたとして、このレジストリはどこに *ある* のでしょうか？
+はてさて... "あちこち (around)"？ それは、確かにこの文脈で最良の答えでしょう
+(より具体的な答えは、内部についての知識を要求します)。複数のレジストリ
+があり得ますか？ はい。そうすると、それは *どの* レジストリから検索しま
+すか？ ええ、もちろん「カレント」レジストリです。 :app:`Pyramid` においては、
+カレントレジストリはスレッドローカル変数です。スレッドローカル変数を参照する
+API の使用は、それがどのように作動するか理解することを非局所的にします。
+
+
+.. You've now bought in to the fact that there's a registry that is just hanging
+.. around.  But how does the registry get populated?  Why, via code that calls
+.. directives like ``config.add_view``.  In this particular case, however, the
+.. registration of ``ISettings`` is made by the framework itself under the hood:
+.. it's not present in any user configuration.  This is extremely hard to
+.. comprehend.  Problem number six.
+
+今、単にレジストリが hanging around しているという事実を buy in しました。
+しかし、レジストリはどのようにして populate されるのでしょうか？
+なぜ ``config.add_view`` のようなディレクティブを呼び出すコードによって？
+しかしながら、特にこの場合 ``ISettings`` の登録はフレームワーク自体によって
+内部で作られます: それはユーザ設定の中には全く存在していません。
+これは理解するのが非常に難しいです。問題その6。
+
+
+.. Clearly there's some amount of cognitive load here that needs to be borne by
+.. a reader of code that extends the :app:`Pyramid` framework due to its use of
+.. the ZCA, even if he or she is already an expert Python programmer and whom is
+.. an expert in the domain of web applications.  This is suboptimal.
+
+ここには明らかに、 ZCA を使用することで :app:`Pyramid` フレームワークを
+拡張しようとするコードの読者が負担する必要のある一定の認知負荷があります。
+仮に彼または彼女が既にエキスパート Python プログラマでも、
+そしてウェブアプリケーション領域のエキスパートであってもです。
+これは準最適です。
+
 
 Ameliorations
 +++++++++++++
