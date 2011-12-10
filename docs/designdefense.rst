@@ -3,100 +3,204 @@
 Defending Pyramid's Design
 ==========================
 
-From time to time, challenges to various aspects of :app:`Pyramid` design are
-lodged.  To give context to discussions that follow, we detail some of the
-design decisions and trade-offs here.  In some cases, we acknowledge that the
-framework can be made better and we describe future steps which will be taken
-to improve it; in some cases we just file the challenge as noted, as
-obviously you can't please everyone all of the time.
+.. From time to time, challenges to various aspects of :app:`Pyramid` design are
+.. lodged.  To give context to discussions that follow, we detail some of the
+.. design decisions and trade-offs here.  In some cases, we acknowledge that the
+.. framework can be made better and we describe future steps which will be taken
+.. to improve it; in some cases we just file the challenge as noted, as
+.. obviously you can't please everyone all of the time.
+
+時々 :app:`Pyramid` の設計の様々な様相に対する挑戦が申し立てられます。
+続く議論にコンテキストを与えるために、私たちは、ここで設計に関する意思
+決定とトレードオフのうちのいくつかを詳述します。ある場合には、フレーム
+ワークをより一層よくすることができ、それを改善するために取られる将来の
+ステップについて記述することを認めます; ある場合には、注意として、挑戦
+を単に記録します。明らかに、常に皆を喜ばせることができるとは限らないた
+めです。
+
 
 Pyramid Provides More Than One Way to Do It
 -------------------------------------------
 
-A canon of Python popular culture is "TIOOWTDI" ("there is only one way to do
-it", a slighting, tongue-in-cheek reference to Perl's "TIMTOWTDI", which is
-an acronym for "there is more than one way to do it").
+.. A canon of Python popular culture is "TIOOWTDI" ("there is only one way to do
+.. it", a slighting, tongue-in-cheek reference to Perl's "TIMTOWTDI", which is
+.. an acronym for "there is more than one way to do it").
 
-:app:`Pyramid` is, for better or worse, a "TIMTOWTDI" system.  For example,
-it includes more than one way to resolve a URL to a :term:`view callable`:
-via :term:`url dispatch` or :term:`traversal`.  Multiple methods of
-configuration exist: :term:`imperative configuration`, :term:`configuration
-decoration`, and :term:`ZCML` (optionally via :term:`pyramid_zcml`). It works
-with multiple different kinds of persistence and templating systems.  And so
-on.  However, the existence of most of these overlapping ways to do things
-are not without reason and purpose: we have a number of audiences to serve,
-and we believe that TIMTOWTI at the web framework level actually *prevents* a
-much more insidious and harmful set of duplication at higher levels in the
-Python web community.
+Python のポピュラーな文化の基準は、 "TIOOWTDI" です (「やり方はひとつだけ」
+-- これは Perl の「やり方は一つじゃない」の頭文字 "TIMTOWTDI" に対する
+軽視的でからかい半分の言及です)
 
-:app:`Pyramid` began its life as :mod:`repoze.bfg`, written by a team of
-people with many years of prior :term:`Zope` experience.  The idea of
-:term:`traversal` and the way :term:`view lookup` works was stolen entirely
-from Zope.  The authorization subsystem provided by :app:`Pyramid` is a
-derivative of Zope's.  The idea that an application can be *extended* without
-forking is also a Zope derivative.
 
-Implementations of these features were *required* to allow the :app:`Pyramid`
-authors to build the bread-and-butter CMS-type systems for customers in the
-way they were accustomed to building them.  No other system save Zope itself
-had such features.  And Zope itself was beginning to show signs of its age.
-We were becoming hampered by consequences of its early design mistakes.
-Zope's lack of documentation was also difficult to work around: it was hard
-to hire smart people to work on Zope applications, because there was no
-comprehensive documentation set to point them at which explained "it all" in
-one consumble place, and it was too large and self-inconsistent to document
-properly.  Before :mod:`repoze.bfg` went under development, its authors
-obviously looked around for other frameworks that fit the bill.  But no
-non-Zope framework did.  So we embarked on building :mod:`repoze.bfg`.
+.. :app:`Pyramid` is, for better or worse, a "TIMTOWTDI" system.  For example,
+.. it includes more than one way to resolve a URL to a :term:`view callable`:
+.. via :term:`url dispatch` or :term:`traversal`.  Multiple methods of
+.. configuration exist: :term:`imperative configuration`, :term:`configuration
+.. decoration`, and :term:`ZCML` (optionally via :term:`pyramid_zcml`). It works
+.. with multiple different kinds of persistence and templating systems.  And so
+.. on.  However, the existence of most of these overlapping ways to do things
+.. are not without reason and purpose: we have a number of audiences to serve,
+.. and we believe that TIMTOWTI at the web framework level actually *prevents* a
+.. much more insidious and harmful set of duplication at higher levels in the
+.. Python web community.
 
-As the result of our research, however, it became apparent that, despite the
-fact that no *one* framework had all the features we required, lots of
-existing frameworks had good, and sometimes very compelling ideas.  In
-particular, :term:`URL dispatch` is a more direct mechanism to map URLs to
-code.
+:app:`Pyramid` は良くも悪くも "TIMTOWTDI" なシステムです。例えば、
+:app:`Pyramid` は URL を :term:`view callable` に解決する方法を複数
+含んでいます: :term:`url dispatch` と :term:`traversal` です。
+configuration のための複数の方法があります:
+:term:`imperative configuration`, :term:`configuration decoration`,
+:term:`ZCML` (オプションで :term:`pyramid_zcml` 経由で)。
+多数の異なる種類の永続化とテンプレートのシステムで作動します。などなど。
+しかしながら、これらの物事を行うのに重複する方法のほとんどは、
+存在する理由や目的がないわけではありません: 私たちには serve すべき多く
+の聴衆がいます。そして私たちは、ウェブフレームワークレベルの TIMTOWTI が、
+はるかに油断ならず有害な、 Python ウェブコミュニティー内での高レベルな
+重複の数々を実際に *防ぐ* と信じています。
 
-So although we couldn't find a framework save for Zope that fit our needs,
-and while we incorporated a lot of Zope ideas into BFG, we also emulated the
-features we found compelling in other frameworks (such as :term:`url
-dispatch`).  After the initial public release of BFG, as time went on,
-features were added to support people allergic to various Zope-isms in the
-system, such as the ability to configure the application using
-:term:`imperative configuration` and :term:`configuration decoration` rather
-than solely using :term:`ZCML`, and the elimination of the required use of
-:term:`interface` objects.  It soon became clear that we had a system that
-was very generic, and was beginning to appeal to non-Zope users as well as
-ex-Zope users.
 
-As the result of this generalization, it became obvious BFG shared 90% of its
-featureset with the featureset of Pylons 1, and thus had a very similar
-target market.  Because they were so similar, choosing between the two
-systems was an exercise in frustration for an otherwise non-partisan
-developer.  It was also strange for the Pylons and BFG development
-communities to be in competition for the same set of users, given how similar
-the two frameworks were.  So the Pylons and BFG teams began to work together
-to form a plan to merge.  The features missing from BFG (notably :term:`view
-handler` classes, flash messaging, and other minor missing bits), were added,
-to provide familiarity to ex-Pylons users.  The result is :app:`Pyramid`.
+.. :app:`Pyramid` began its life as :mod:`repoze.bfg`, written by a team of
+.. people with many years of prior :term:`Zope` experience.  The idea of
+.. :term:`traversal` and the way :term:`view lookup` works was stolen entirely
+.. from Zope.  The authorization subsystem provided by :app:`Pyramid` is a
+.. derivative of Zope's.  The idea that an application can be *extended* without
+.. forking is also a Zope derivative.
 
-The Python web framework space is currently notoriously balkanized.  We're
-truly hoping that the amalgamation of components in :app:`Pyramid` will
-appeal to at least two currently very distinct sets of users: Pylons and BFG
-users.  By unifying the best concepts from Pylons and BFG into a single
-codebase and leaving the bad concepts from their ancestors behind, we'll be
-able to consolidate our efforts better, share more code, and promote our
-efforts as a unit rather than competing pointlessly.  We hope to be able to
-shortcut the pack mentality which results in a *much larger* duplication of
-effort, represented by competing but incredibly similar applications and
-libraries, each built upon a specific low level stack that is incompatible
-with the other.  We'll also shrink the choice of credible Python web
-frameworks down by at least one.  We're also hoping to attract users from
-other communities (such as Zope's and TurboGears') by providing the features
-they require, while allowing enough flexibility to do things in a familiar
-fashion.  Some overlap of functionality to achieve these goals is expected
-and unavoidable, at least if we aim to prevent pointless duplication at
-higher levels.  If we've done our job well enough, the various audiences will
-be able to coexist and cooperate rather than firing at each other across some
-imaginary web framework DMZ.
+:app:`Pyramid` は、 :mod:`repoze.bfg` としてその生を開始しました。
+それ以前の何年もの :term:`Zope` の経験を持つ人々のチームによって書かれています。
+:term:`traversal` に関するアイデアと :term:`view lookup` が動作する方法
+は、完全に Zope から取られました。 :app:`Pyramid` によって提供される認可
+(authorization) サブシステムは Zope からの派生です。アプリケーションを
+fork せずに *拡張する* ことができるというアイデアも Zope からの派生です。
+
+
+.. Implementations of these features were *required* to allow the :app:`Pyramid`
+.. authors to build the bread-and-butter CMS-type systems for customers in the
+.. way they were accustomed to building them.  No other system save Zope itself
+.. had such features.  And Zope itself was beginning to show signs of its age.
+.. We were becoming hampered by consequences of its early design mistakes.
+.. Zope's lack of documentation was also difficult to work around: it was hard
+.. to hire smart people to work on Zope applications, because there was no
+.. comprehensive documentation set to point them at which explained "it all" in
+.. one consumble place, and it was too large and self-inconsistent to document
+.. properly.  Before :mod:`repoze.bfg` went under development, its authors
+.. obviously looked around for other frameworks that fit the bill.  But no
+.. non-Zope framework did.  So we embarked on building :mod:`repoze.bfg`.
+
+これらの特徴の実装は、 :app:`Pyramid` の作者達が仕事で顧客のための CMS
+タイプのシステムを自分達が慣れたやり方で構築できるように *要求* されました。
+そのような特徴を持つシステムは、 Zope 自身を除いて他にありませんでした。
+また、 Zope 自身は、その寿命のサインを示し始めていました。私たちは、
+初期の設計ミスの結果によって阻害されるようになっていました。
+Zope のドキュメンテーションの不足もまた、 work around を難しくしていました:
+一箇所でそれらを指す「それですべて」といえるような包括的なドキュメント集がなく、
+適切に説明するには大きすぎて自己一貫性がないことから、
+Zope アプリケーションで働くために賢い人々を雇うことが難しい状況でした。
+:mod:`repoze.bfg` を開発する前に、作者達は当然条件を満たした他のフレー
+ムワークを探しましたが、非 Zope フレームワークで条件を満たすものは
+ありませんでした。そこで、私たちは :mod:`repoze.bfg` の構築に乗り出しました。
+
+
+.. As the result of our research, however, it became apparent that, despite the
+.. fact that no *one* framework had all the features we required, lots of
+.. existing frameworks had good, and sometimes very compelling ideas.  In
+.. particular, :term:`URL dispatch` is a more direct mechanism to map URLs to
+.. code.
+
+しかし、調査の結果どの *単一の* フレームワークも私たちが要求した特徴を
+すべて持つものはないという事実にもかかわらず、多くの既存のフレームワーク
+には優れた、時には非常に魅力的なアイデアがあることが明らかになりました。
+特に、 :term:`URL dispatch` は URL をコードにマッピングするより直接的な
+メカニズムです。
+
+
+.. So although we couldn't find a framework save for Zope that fit our needs,
+.. and while we incorporated a lot of Zope ideas into BFG, we also emulated the
+.. features we found compelling in other frameworks (such as :term:`url
+.. dispatch`).  After the initial public release of BFG, as time went on,
+.. features were added to support people allergic to various Zope-isms in the
+.. system, such as the ability to configure the application using
+.. :term:`imperative configuration` and :term:`configuration decoration` rather
+.. than solely using :term:`ZCML`, and the elimination of the required use of
+.. :term:`interface` objects.  It soon became clear that we had a system that
+.. was very generic, and was beginning to appeal to non-Zope users as well as
+.. ex-Zope users.
+
+そのため、 Zope を除いて私たちのニーズに適合したフレームワークを見つけ
+ることはできませんでしたが (そして私たちは BFG に Zope の多くのアイデア
+を組み込みましたが)、さらに他のフレームワークの中で見つけた魅力的な特徴
+(例えば :term:`url dispatch`) をエミュレートしました。 BFG の最初の
+パブリックリリースの後、時間が進むにつれて、システムに含まれる Zope 主義に
+対してアレルギーを持つ人々をサポートするために様々な特徴が付け加えられました。
+例えば :term:`ZCML` を単独で使用するのではなく
+:term:`imperative configuration` と :term:`configuration decoration` を
+使用してアプリケーションを設定する機能や、 :term:`interface` オブジェクトの
+required な使用の除去などです。すぐに、このシステムが非常に一般的で、
+元 Zope ユーザにも非 Zope ユーザにもアピールすることははっきりしました。
+
+
+.. As the result of this generalization, it became obvious BFG shared 90% of its
+.. featureset with the featureset of Pylons 1, and thus had a very similar
+.. target market.  Because they were so similar, choosing between the two
+.. systems was an exercise in frustration for an otherwise non-partisan
+.. developer.  It was also strange for the Pylons and BFG development
+.. communities to be in competition for the same set of users, given how similar
+.. the two frameworks were.  So the Pylons and BFG teams began to work together
+.. to form a plan to merge.  The features missing from BFG (notably :term:`view
+.. handler` classes, flash messaging, and other minor missing bits), were added,
+.. to provide familiarity to ex-Pylons users.  The result is :app:`Pyramid`.
+
+この一般化の結果、 BFG は Pylons 1 の機能セットと 90% を共有し、
+したがってターゲット市場が非常に類似していることが明らかになりました。
+それらが非常に似ていたので、 2つのシステムのどちらかを選ぶことは、その
+他の面では超党派の開発者にとってはフラストレーションの溜まる訓練でした。
+さらに、 Pylons と BFG の開発者コミュニティが同じユーザセットに対して
+競争しているのは、2つのフレームワークがどれくらい類似しているかを考えると
+奇妙なことでした。そこで Pylons と BFG のチームはマージ計画を立てるため
+の活動を共に始めました。 BFG に足りない特徴 (特に :term:`view handler`
+クラス、フラッシュメッセージ、その他のマイナーな欠落) が、元 Pylons ユーザ
+に親しさを供給するために加えられました。その結果が :app:`Pyramid` です。
+
+
+.. The Python web framework space is currently notoriously balkanized.  We're
+.. truly hoping that the amalgamation of components in :app:`Pyramid` will
+.. appeal to at least two currently very distinct sets of users: Pylons and BFG
+.. users.  By unifying the best concepts from Pylons and BFG into a single
+.. codebase and leaving the bad concepts from their ancestors behind, we'll be
+.. able to consolidate our efforts better, share more code, and promote our
+.. efforts as a unit rather than competing pointlessly.  We hope to be able to
+.. shortcut the pack mentality which results in a *much larger* duplication of
+.. effort, represented by competing but incredibly similar applications and
+.. libraries, each built upon a specific low level stack that is incompatible
+.. with the other.  We'll also shrink the choice of credible Python web
+.. frameworks down by at least one.  We're also hoping to attract users from
+.. other communities (such as Zope's and TurboGears') by providing the features
+.. they require, while allowing enough flexibility to do things in a familiar
+.. fashion.  Some overlap of functionality to achieve these goals is expected
+.. and unavoidable, at least if we aim to prevent pointless duplication at
+.. higher levels.  If we've done our job well enough, the various audiences will
+.. be able to coexist and cooperate rather than firing at each other across some
+.. imaginary web framework DMZ.
+
+Python ウェブフレームワークの世界は現在、分断された状態にあるという悪評
+が立っています。私たちは、 :app:`Pyramid` におけるコンポーネントの融合
+が少なくとも 2 つの、現在は非常に distinct なユーザセットに訴えること
+を本当に望んでいます: Pylons と BFG のユーザです。 Pylons と BFG から
+最良の概念を単一のコードベースの中へ統一し、それらの背後にある先祖からの
+悪い概念を捨て去ることで、私たちの努力をより集約し、より多くのコードを
+共有し、意味のない競争ではなく単一のユニットとして私たちの努力を促進する
+ことができるでしょう。私たちは、努力の *非常に大きな* 重複に繋がる
+pack mentality をショートカットできることを望みます。このような
+mentality は、 競争的だが信じられないほど似たようなアプリケーションとラ
+イブラリ(お互い互換性がない特定の低レベルスタックの上に構築された) によっ
+て表わされます。さらに、信頼できる Python ウェブフレームワークの選択を
+少なくとも1つ縮小するでしょう。また、 Zope や TurboGears のような他の
+コミュニティーのユーザに対して、物事を慣れた方法で行う十分な柔軟性を
+可能にしながら要求する特徴を提供することで、私たちはそのようなユーザを
+引きつけることを望んでいます。これらのゴールを達成するためにある程度の
+機能のオーバーラップは想定され、避けることができません。少なくとも私た
+ちが高レベルの無意味な複製を防ぐつもりならば。もし私たちが仕事を十分に
+果たしていれば、様々な聴衆は、ある種の想像上のウェブフレームワーク DMZ
+で互いに発砲しあうのではなく、共存し協力することができるでしょう。
+
 
 Pyramid Uses A Zope Component Architecture ("ZCA") Registry
 -----------------------------------------------------------
