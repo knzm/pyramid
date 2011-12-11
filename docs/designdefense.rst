@@ -572,85 +572,179 @@ API を理解させることはトレードオフです。私たち (:app:`Pyram
 Rationale
 +++++++++
 
-Here are the main rationales involved in the :app:`Pyramid` decision to use
-the ZCA registry:
+.. Here are the main rationales involved in the :app:`Pyramid` decision to use
+.. the ZCA registry:
 
-- History.  A nontrivial part of the answer to this question is "history".
-  Much of the design of :app:`Pyramid` is stolen directly from :term:`Zope`.
-  Zope uses the ZCA registry to do a number of tricks.  :app:`Pyramid` mimics
-  these tricks, and, because the ZCA registry works well for that set of
-  tricks, :app:`Pyramid` uses it for the same purposes.  For example, the way
-  that :app:`Pyramid` maps a :term:`request` to a :term:`view callable` using
-  :term:`traversal` is lifted almost entirely from Zope.  The ZCA registry
-  plays an important role in the particulars of how this request to view
-  mapping is done.
+これらは、 ZCA レジストリを使用するという :app:`Pyramid` の意思決定に
+関係する主な根拠です:
 
-- Features.  The ZCA component registry essentially provides what can be
-  considered something like a superdictionary, which allows for more complex
-  lookups than retrieving a value based on a single key.  Some of this lookup
-  capability is very useful for end users, such as being able to register a
-  view that is only found when the context is some class of object, or when
-  the context implements some :term:`interface`.
 
-- Singularity.  There's only one place where "application configuration"
-  lives in a :app:`Pyramid` application: in a component registry.  The
-  component registry answers questions made to it by the framework at runtime
-  based on the configuration of *an application*.  Note: "an application" is
-  not the same as "a process", multiple independently configured copies of
-  the same :app:`Pyramid` application are capable of running in the same
-  process space.
+.. - History.  A nontrivial part of the answer to this question is "history".
+..   Much of the design of :app:`Pyramid` is stolen directly from :term:`Zope`.
+..   Zope uses the ZCA registry to do a number of tricks.  :app:`Pyramid` mimics
+..   these tricks, and, because the ZCA registry works well for that set of
+..   tricks, :app:`Pyramid` uses it for the same purposes.  For example, the way
+..   that :app:`Pyramid` maps a :term:`request` to a :term:`view callable` using
+..   :term:`traversal` is lifted almost entirely from Zope.  The ZCA registry
+..   plays an important role in the particulars of how this request to view
+..   mapping is done.
 
-- Composability.  A ZCA component registry can be populated imperatively, or
-  there's an existing mechanism to populate a registry via the use of a
-  configuration file (ZCML, via the optional :term:`pyramid_zcml` package).
-  We didn't need to write a frontend from scratch to make use of
-  configuration-file-driven registry population.
+- 歴史。この質問に対する答えの自明でない部分は「歴史的理由」です。
+  :app:`Pyramid` の設計の多くは Zope から直接取られています。 Zopeは
+  多くのトリックを行うために ZCA レジストリを使用します。
+  :app:`Pyramid` はこれらのトリックを模倣します。そして ZCA レジストリ
+  はそのようなトリックの数々についてうまく働くので、 :app:`Pyramid` でも
+  同じ目的にそれを使用します。例えば :app:`Pyramid` が :term:`traversal`
+  を使って :term:`request` を :term:`view callable` にマッピングする
+  方法は、ほとんど完全に Zope から持ち込まれています。 ZCA レジストリは、
+  このリクエストからビューへのマッピングがどのように行われるかの詳細に
+  重要な役割を果たします。
 
-- Pluggability.  Use of the ZCA registry allows for framework extensibility
-  via a well-defined and widely understood plugin architecture.  As long as
-  framework developers and extenders understand the ZCA registry, it's
-  possible to extend :app:`Pyramid` almost arbitrarily.  For example, it's
-  relatively easy to build a directive that registers several views all at
-  once, allowing app developers to use that directive as a "macro" in code
-  that they write.  This is somewhat of a differentiating feature from other
-  (non-Zope) frameworks.
 
-- Testability.  Judicious use of the ZCA registry in framework code makes
-  testing that code slightly easier.  Instead of using monkeypatching or
-  other facilities to register mock objects for testing, we inject
-  dependencies via ZCA registrations and then use lookups in the code find
-  our mock objects.
+.. - Features.  The ZCA component registry essentially provides what can be
+..   considered something like a superdictionary, which allows for more complex
+..   lookups than retrieving a value based on a single key.  Some of this lookup
+..   capability is very useful for end users, such as being able to register a
+..   view that is only found when the context is some class of object, or when
+..   the context implements some :term:`interface`.
 
-- Speed.  The ZCA registry is very fast for a specific set of complex lookup
-  scenarios that :app:`Pyramid` uses, having been optimized through the years
-  for just these purposes.  The ZCA registry contains optional C code for
-  this purpose which demonstrably has no (or very few) bugs.
+- 機能。ZCA コンポーネントレジストリは、本質的にスーパー辞書とでも呼べ
+  るものを提供します。それは単一のキーに基づいて値を検索するより複雑な
+  検索を可能にします。この検索能力のうちのいくらかはエンドユーザに非常
+  に役立ちます。例えば、コンテキストがあるクラスのオブジェクトである場合
+  だけ、あるいはコンテキストが何らかの :term:`interface` を実装してい
+  る場合だけ検索されるビューを登録するといったことが可能になります。
 
-- Ecosystem.  Many existing Zope packages can be used in :app:`Pyramid` with
-  few (or no) changes due to our use of the ZCA registry.
+
+.. - Singularity.  There's only one place where "application configuration"
+..   lives in a :app:`Pyramid` application: in a component registry.  The
+..   component registry answers questions made to it by the framework at runtime
+..   based on the configuration of *an application*.  Note: "an application" is
+..   not the same as "a process", multiple independently configured copies of
+..   the same :app:`Pyramid` application are capable of running in the same
+..   process space.
+
+- 単一性 (singularity)。 :app:`Pyramid` アプリケーションの中に、
+  「アプリケーション設定」はたった一箇所にしかありません: コンポーネント
+  レジストリの中です。コンポーネントレジストリは、実行時にフレームワーク
+  によってなされる質問に対して *アプリケーション* の設定に基づいて答えます。
+  注:「アプリケーション」は「プロセス」と同じではありません。同じ
+  :app:`Pyramid` アプリケーションの複数の独立して設定されたコピーが
+  同じプロセス空間で走ることもあります。
+
+
+.. - Composability.  A ZCA component registry can be populated imperatively, or
+..   there's an existing mechanism to populate a registry via the use of a
+..   configuration file (ZCML, via the optional :term:`pyramid_zcml` package).
+..   We didn't need to write a frontend from scratch to make use of
+..   configuration-file-driven registry population.
+
+- 構成可能性 (composability)。 ZCA コンポーネントレジストリは命令的に
+  populate されることができます。あるいは、設定ファイルを使って
+  レジストリを populate する既存のメカニズムがあります (オプションの
+  :term:`pyramid_zcml` パッケージによる ZCML)。設定ファイル駆動による
+  レジストリ population を利用するためのフロントエンドをゼロから書く必要は
+  ありませんでした。
+
+
+.. - Pluggability.  Use of the ZCA registry allows for framework extensibility
+..   via a well-defined and widely understood plugin architecture.  As long as
+..   framework developers and extenders understand the ZCA registry, it's
+..   possible to extend :app:`Pyramid` almost arbitrarily.  For example, it's
+..   relatively easy to build a directive that registers several views all at
+..   once, allowing app developers to use that directive as a "macro" in code
+..   that they write.  This is somewhat of a differentiating feature from other
+..   (non-Zope) frameworks.
+
+- プラグ可能性 (pluggability)。 ZCA レジストリの使用は、十分に定義され
+  広く理解されたプラグインアーキテクチャーによってフレームワークの拡張を
+  可能にします。フレームワーク開発者および拡張者は ZCA レジストリを理解
+  しさえすれば、 :app:`Pyramid` をほとんど任意に拡張することが可能です。
+  例えば、アプリ開発者が、いくつかのビューを同時に登録するディレクティブ
+  を構築して、コードの中で「マクロ」としてそのディレクティブを使用する
+  ことは比較的簡単です。これは多少他の (非 Zope) フレームワークと異なる
+  特徴です。
+
+
+.. - Testability.  Judicious use of the ZCA registry in framework code makes
+..   testing that code slightly easier.  Instead of using monkeypatching or
+..   other facilities to register mock objects for testing, we inject
+..   dependencies via ZCA registrations and then use lookups in the code find
+..   our mock objects.
+
+- テスト容易性。フレームワークコード中で ZCA レジストリを賢く使えば、
+  コードのテストを行うのがより簡単になります。モンキーパッチやテストの
+  ためにモックオブジェクトを登録する他の機能の代わりに、私たちは ZCA
+  レジストリによって依存性を注入し、次にコードの中で検索を使用することで
+  モックオブジェクトを見つけます。
+
+
+.. - Speed.  The ZCA registry is very fast for a specific set of complex lookup
+..   scenarios that :app:`Pyramid` uses, having been optimized through the years
+..   for just these purposes.  The ZCA registry contains optional C code for
+..   this purpose which demonstrably has no (or very few) bugs.
+
+- スピード。 ZCA レジストリは、 :app:`Pyramid` が使用する複雑な検索
+  シナリオの特定のセットに対しては非常に高速です。何年もの間この目的の
+  ためだけに最適化されています。またこの目的のために、 ZCA レジストリには
+  バグがない(あるいは非常に少ない)ことが実証済の、オプションの C コード
+  が含まれています。
+
+
+.. - Ecosystem.  Many existing Zope packages can be used in :app:`Pyramid` with
+..   few (or no) changes due to our use of the ZCA registry.
+
+- エコシステム。 ZCA レジストリを使っていることで、多くの既存の Zope
+  パッケージをほとんど(あるいはまったく)変更することなく
+  :app:`Pyramid` の中で使用できます。
+
 
 Conclusion
 ++++++++++
 
-If you only *develop applications* using :app:`Pyramid`, there's not much to
-complain about here.  You just should never need to understand the ZCA
-registry API: use documented :app:`Pyramid` APIs instead.  However, you may
-be an application developer who doesn't read API documentation because it's
-unmanly. Instead you read the raw source code, and because you haven't read
-the documentation, you don't know what functions, classes, and methods even
-*form* the :app:`Pyramid` API.  As a result, you've now written code that
-uses internals and you've painted yourself into a conceptual corner as a
-result of needing to wrestle with some ZCA-using implementation detail.  If
-this is you, it's extremely hard to have a lot of sympathy for you.  You'll
-either need to get familiar with how we're using the ZCA registry or you'll
-need to use only the documented APIs; that's why we document them as APIs.
+.. If you only *develop applications* using :app:`Pyramid`, there's not much to
+.. complain about here.  You just should never need to understand the ZCA
+.. registry API: use documented :app:`Pyramid` APIs instead.  However, you may
+.. be an application developer who doesn't read API documentation because it's
+.. unmanly. Instead you read the raw source code, and because you haven't read
+.. the documentation, you don't know what functions, classes, and methods even
+.. *form* the :app:`Pyramid` API.  As a result, you've now written code that
+.. uses internals and you've painted yourself into a conceptual corner as a
+.. result of needing to wrestle with some ZCA-using implementation detail.  If
+.. this is you, it's extremely hard to have a lot of sympathy for you.  You'll
+.. either need to get familiar with how we're using the ZCA registry or you'll
+.. need to use only the documented APIs; that's why we document them as APIs.
 
-If you *extend* or *develop* :app:`Pyramid` (create new directives, use some
-of the more obscure hooks as described in :ref:`hooks_chapter`, or work on
-the :app:`Pyramid` core code), you will be faced with needing to understand
-at least some ZCA concepts.  In some places it's used unabashedly, and will
-be forever.  We know it's quirky, but it's also useful and fundamentally
-understandable if you take the time to do some reading about it.
+:app:`Pyramid` を使用して、単に *アプリケーションを開発* するだけなら、
+ここで不満を言うことは多くありません。 ZCA レジストリ API を理解する
+必要はまったくありません: 代わりに文書化された :app:`Pyramid` API を
+使用してください。しかし、もしかしたら軟弱であるという理由で API
+ドキュメントを読まないアプリケーション開発者がいるかもしれません。
+その場合は代わりに生のソースコードを読むことになります。ドキュメント
+を読んでいないので、どの関数、クラス、メソッドが :app:`Pyramid` API
+を *構成* するかは依然として知りません。そのせいで内部コードを使用する
+コードを書いたとしたら、 ZCA を使用する実装詳細と悪戦苦闘した末に自分自身を
+概念の窮地に追い込むことになるでしょう。もしこれがあなたのことなら、
+同情の余地はほとんどありません。私たちが ZCA レジストリを使用している
+方法に精通するか、文書化された API だけを使用する必要があるでしょう;
+そのために、私たちは API を文書化しています。
+
+
+.. If you *extend* or *develop* :app:`Pyramid` (create new directives, use some
+.. of the more obscure hooks as described in :ref:`hooks_chapter`, or work on
+.. the :app:`Pyramid` core code), you will be faced with needing to understand
+.. at least some ZCA concepts.  In some places it's used unabashedly, and will
+.. be forever.  We know it's quirky, but it's also useful and fundamentally
+.. understandable if you take the time to do some reading about it.
+
+:app:`Pyramid` を *拡張* または *開発* する (新しいディレクティブを作る、
+:ref:`hooks_chapter` で説明されているよりもっと不明瞭ないくつかのフック
+を使う、 :app:`Pyramid` 中核コードを変更する) 場合は、少なくともいくつ
+かの ZCA 概念を理解する必要性に直面するでしょう。いくつかの場所では、
+それは臆面もなく使用され、今後もそれは変わらないでしょう。それが一種独特
+であることは私たちも知っています。しかし同時に有用でもあり、時間を取って
+少し読み込めば、基本的に理解することができます。
+
 
 Pyramid Uses Interfaces Too Liberally
 -------------------------------------
