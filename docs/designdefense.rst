@@ -360,16 +360,30 @@ API の使用は、それがどのように作動するか理解することを�
 Ameliorations
 +++++++++++++
 
-First, the primary amelioration: :app:`Pyramid` *does not expect application
-developers to understand ZCA concepts or any of its APIs*.  If an
-*application* developer needs to understand a ZCA concept or API during the
-creation of a :app:`Pyramid` application, we've failed on some axis.
+.. First, the primary amelioration: :app:`Pyramid` *does not expect application
+.. developers to understand ZCA concepts or any of its APIs*.  If an
+.. *application* developer needs to understand a ZCA concept or API during the
+.. creation of a :app:`Pyramid` application, we've failed on some axis.
 
-Instead, the framework hides the presence of the ZCA registry behind
-special-purpose API functions that *do* use ZCA APIs.  Take for example the
-``pyramid.security.authenticated_userid`` function, which returns the userid
-present in the current request or ``None`` if no userid is present in the
-current request.  The application developer calls it like so:
+最初に、主要な改善: :app:`Pyramid` は、 *アプリケーション開発者が ZCA
+概念あるいはその API を理解することを期待しません* 。 *アプリケーション*
+開発者が :app:`Pyramid` アプリケーションの生成中に ZCA 概念または API
+を理解する必要があるとすれば、ある評価軸において失敗しています。
+
+
+.. Instead, the framework hides the presence of the ZCA registry behind
+.. special-purpose API functions that *do* use ZCA APIs.  Take for example the
+.. ``pyramid.security.authenticated_userid`` function, which returns the userid
+.. present in the current request or ``None`` if no userid is present in the
+.. current request.  The application developer calls it like so:
+
+代わりに、フレームワークは ZCA レジストリの存在を ZCA API を使用する特殊
+目的 API 関数の背後に隠します。例えば
+``pyramid.security.authenticated_userid`` 関数を例に取ります。この関数
+は、現在のリクエスト中にある userid を返します。あるいは userid が 現在
+のリクエストの中にない場合は ``None`` を返します。
+アプリケーション開発者はそれを以下のように呼び出します:
+
 
 .. ignore-next-block
 .. code-block:: python
@@ -378,10 +392,18 @@ current request.  The application developer calls it like so:
    from pyramid.security import authenticated_userid
    userid = authenticated_userid(request)
 
-He now has the current user id.
 
-Under its hood however, the implementation of ``authenticated_userid``
-is this:
+.. He now has the current user id.
+
+これでカレントユーザー id を得ることができます。
+
+
+.. Under its hood however, the implementation of ``authenticated_userid``
+.. is this:
+
+しかしながら、内部では ``authenticated_userid`` の実装はこのように
+なっています:
+
 
 .. code-block:: python
    :linenos:
@@ -397,60 +419,124 @@ is this:
            return None
        return policy.authenticated_userid(request)
 
-Using such wrappers, we strive to always hide the ZCA API from application
-developers.  Application developers should just never know about the ZCA API:
-they should call a Python function with some object germane to the domain as
-an argument, and it should returns a result.  A corollary that follows is
-that any reader of an application that has been written using :app:`Pyramid`
-needn't understand the ZCA API either.
 
-Hiding the ZCA API from application developers and code readers is a form of
-enhancing domain specificity.  No application developer wants to need to
-understand the small, detailed mechanics of how a web framework does its
-thing.  People want to deal in concepts that are closer to the domain they're
-working in: for example, web developers want to know about *users*, not
-*utilities*.  :app:`Pyramid` uses the ZCA as an implementation detail, not as
-a feature which is exposed to end users.
+.. Using such wrappers, we strive to always hide the ZCA API from application
+.. developers.  Application developers should just never know about the ZCA API:
+.. they should call a Python function with some object germane to the domain as
+.. an argument, and it should returns a result.  A corollary that follows is
+.. that any reader of an application that has been written using :app:`Pyramid`
+.. needn't understand the ZCA API either.
 
-However, unlike application developers, *framework developers*, including
-people who want to override :app:`Pyramid` functionality via preordained
-framework plugpoints like traversal or view lookup *must* understand the ZCA
-registry API.
+このようなラッパーを使用して、アプリケーション開発者に ZCA API を見せな
+いように、私たちは常に努力しています。アプリケーション開発者は ZCA API
+のことを知るべきではありません: ドメインと密接に関係するいくつかの
+オブジェクトを引数に取って結果を返す Python 関数を呼び出すべきです。
+そこからの帰結は、 :app:`Pyramid` を使って書かれたアプリケーションの
+読者は ZCA API を理解する必要もないということです。
 
-:app:`Pyramid` framework developers were so concerned about conceptual load
-issues of the ZCA registry API for framework developers that a `replacement
-registry implementation <http://svn.repoze.org/repoze.component/trunk>`_
-named :mod:`repoze.component` was actually developed.  Though this package
-has a registry implementation which is fully functional and well-tested, and
-its API is much nicer than the ZCA registry API, work on it was largely
-abandoned and it is not used in :app:`Pyramid`.  We continued to use a ZCA
-registry within :app:`Pyramid` because it ultimately proved a better fit.
+
+.. Hiding the ZCA API from application developers and code readers is a form of
+.. enhancing domain specificity.  No application developer wants to need to
+.. understand the small, detailed mechanics of how a web framework does its
+.. thing.  People want to deal in concepts that are closer to the domain they're
+.. working in: for example, web developers want to know about *users*, not
+.. *utilities*.  :app:`Pyramid` uses the ZCA as an implementation detail, not as
+.. a feature which is exposed to end users.
+
+ZCA API をアプリケーション開発者およびコードの読者に見せないようにして
+おくことは、ドメイン固有性を増強する一つの形です。アプリケーション開発
+者は、ウェブフレームワークがどのように物事を行うかの細かい詳細な仕組み
+を理解したいとは思いません。人々は、自分が活動している領域に近い概念を
+扱うことを望みます: 例えば、ウェブ開発者は *ユーティリティ* のことでは
+なくて *ユーザ* のことを知りたいでしょう。 :app:`Pyramid` は、エンド
+ユーザに対して露出された機能としてではなく、実装詳細として ZCA を
+使用します。
+
+
+.. However, unlike application developers, *framework developers*, including
+.. people who want to override :app:`Pyramid` functionality via preordained
+.. framework plugpoints like traversal or view lookup *must* understand the ZCA
+.. registry API.
+
+しかし、アプリケーション開発者とは異なり、 *フレームワーク開発者* は
+ZCA レジストリ API を理解しなければなりません。これには traversal や
+view lookup のようなあらかじめ用意されたフレームワークのプラグポイント
+を通して :app:`Pyramid` の機能をオーバーライドしたい人々も含まれます。
+
+
+.. :app:`Pyramid` framework developers were so concerned about conceptual load
+.. issues of the ZCA registry API for framework developers that a `replacement
+.. registry implementation <http://svn.repoze.org/repoze.component/trunk>`_
+.. named :mod:`repoze.component` was actually developed.  Though this package
+.. has a registry implementation which is fully functional and well-tested, and
+.. its API is much nicer than the ZCA registry API, work on it was largely
+.. abandoned and it is not used in :app:`Pyramid`.  We continued to use a ZCA
+.. registry within :app:`Pyramid` because it ultimately proved a better fit.
+
+:app:`Pyramid` フレームワークの開発者はフレームワーク開発者に対する
+ZCA レジストリ API の概念負荷の問題について非常に関心を持っていたので、
+`代替のレジストリ実装 <http://svn.repoze.org/repoze.component/trunk>`_
+:mod:`repoze.component` が実際に開発されました。このパッケージは、完全に
+機能し十分テストされたレジストリ実装を持ち、その API は ZCA レジストリ
+API よりはるかに良いものでしたが、その作業の大部分は放棄されました。
+また :app:`Pyramid` の中でも使用されていません。最終的に ZCA レジストリ
+がより良い適合を示すことが証明されたので、私たちは :app:`Pyramid` の中で
+それを使用し続けました。
+
 
 .. note::
 
-   We continued using ZCA registry rather than disusing it in
-   favor of using the registry implementation in
-   :mod:`repoze.component` largely because the ZCA concept of
-   interfaces provides for use of an interface hierarchy, which is
-   useful in a lot of scenarios (such as context type inheritance).
-   Coming up with a marker type that was something like an interface
-   that allowed for this functionality seemed like it was just
-   reinventing the wheel.
+   .. We continued using ZCA registry rather than disusing it in
+   .. favor of using the registry implementation in
+   .. :mod:`repoze.component` largely because the ZCA concept of
+   .. interfaces provides for use of an interface hierarchy, which is
+   .. useful in a lot of scenarios (such as context type inheritance).
+   .. Coming up with a marker type that was something like an interface
+   .. that allowed for this functionality seemed like it was just
+   .. reinventing the wheel.
 
-Making framework developers and extenders understand the ZCA registry API is
-a trade-off.  We (the :app:`Pyramid` developers) like the features that the
-ZCA registry gives us, and we have long-ago borne the weight of understanding
-what it does and how it works.  The authors of :app:`Pyramid` understand the
-ZCA deeply and can read code that uses it as easily as any other code.
+   私たちは :mod:`repoze.component` に含まれるレジストリ実装を使用する
+   ことを支持して ZCA レジストリを廃止するのではなく、それを使用し続ける
+   ことにしましたが、その大きな理由は ZCA のインタフェース概念が
+   インタフェース階層を使用するために必要だからです。それは (コンテキスト
+   タイプ継承のような) 多くのシナリオで役に立ちます。この機能を可能にする
+   インタフェースのような何らかのマーカー型を考え出すことは、単に車輪の
+   再発明のように思われました。
 
-But we recognize that developers who might want to extend the framework are not
-as comfortable with the ZCA registry API as the original developers are with
-it.  So, for the purposes of being kind to third-party :app:`Pyramid`
-framework developers in, we've drawn some lines in the sand.
 
-In all core code, We've made use of ZCA global API functions such as
-``zope.component.getUtility`` and ``zope.component.getAdapter`` the exception
-instead of the rule.  So instead of:
+.. Making framework developers and extenders understand the ZCA registry API is
+.. a trade-off.  We (the :app:`Pyramid` developers) like the features that the
+.. ZCA registry gives us, and we have long-ago borne the weight of understanding
+.. what it does and how it works.  The authors of :app:`Pyramid` understand the
+.. ZCA deeply and can read code that uses it as easily as any other code.
+
+フレームワークの開発者および機能を拡張しようとする人に ZCA レジストリ
+API を理解させることはトレードオフです。私たち (:app:`Pyramid` 開発者)
+は、 ZCA レジストリによって得られる特徴が好きです。また、私たちはそれが
+何を行うか、またそれがどのようにして作動するかを理解することの重みにずっと
+耐えてきました。 :app:`Pyramid` の作者は ZCA を深く理解し、それを使用す
+るコードを他のコードと同じくらい容易に読むことができます。
+
+
+.. But we recognize that developers who might want to extend the framework are not
+.. as comfortable with the ZCA registry API as the original developers are with
+.. it.  So, for the purposes of being kind to third-party :app:`Pyramid`
+.. framework developers in, we've drawn some lines in the sand.
+
+しかし、潜在的にフレームワークを拡張したい開発者が ZCA レジストリ API
+にオリジナルの開発者ほど満足していないことは認識しています。したがって、
+サードパーティの :app:`Pyramid` フレームワーク開発者のことを考慮して、
+私たちは妥協点を示しています (draw some lines in the sand)。
+
+
+.. In all core code, We've made use of ZCA global API functions such as
+.. ``zope.component.getUtility`` and ``zope.component.getAdapter`` the exception
+.. instead of the rule.  So instead of:
+
+私たちは、すべての中核コードの中で ``zope.component.getUtility`` や
+``zope.component.getAdapter`` のような ZCA のグローバル API 関数を使用
+することを、ルールではなく例外としました。したがって、次のようにする代わりに:
+
 
 .. code-block:: python
    :linenos:
@@ -459,7 +545,11 @@ instead of the rule.  So instead of:
    from zope.component import getUtility
    policy = getUtility(IAuthenticationPolicy)
 
-:app:`Pyramid` code will usually do:
+
+.. :app:`Pyramid` code will usually do:
+
+:app:`Pyramid` コードは通常このようになります:
+
 
 .. code-block:: python
    :linenos:
@@ -469,9 +559,15 @@ instead of the rule.  So instead of:
    registry = get_current_registry()
    policy = registry.getUtility(IAuthenticationPolicy)
 
-While the latter is more verbose, it also arguably makes it more obvious
-what's going on.  All of the :app:`Pyramid` core code uses this pattern
-rather than the ZCA global API.
+
+.. While the latter is more verbose, it also arguably makes it more obvious
+.. what's going on.  All of the :app:`Pyramid` core code uses this pattern
+.. rather than the ZCA global API.
+
+後者は冗長ですが、間違いなく何が起こっているかがより明確です。
+:app:`Pyramid` 中核コードはすべて、 ZCA のグローバル API ではなく、この
+パターンを使用します。
+
 
 Rationale
 +++++++++
