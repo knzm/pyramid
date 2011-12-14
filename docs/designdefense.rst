@@ -749,20 +749,38 @@ Conclusion
 Pyramid Uses Interfaces Too Liberally
 -------------------------------------
 
-In this `TOPP Engineering blog entry
-<http://www.coactivate.org/projects/topp-engineering/blog/2008/10/20/what-bothers-me-about-the-component-architecture/>`_,
-Ian Bicking asserts that the way :mod:`repoze.bfg` used a Zope interface to
-represent an HTTP request method added too much indirection for not enough
-gain.  We agreed in general, and for this reason, :mod:`repoze.bfg` version
-1.1 (and subsequent versions including :app:`Pyramid` 1.0+) added :term:`view
-predicate` and :term:`route predicate` modifiers to view configuration.
-Predicates are request-specific (or :term:`context` -specific) matching
-narrowers which don't use interfaces.  Instead, each predicate uses a
-domain-specific string as a match value.
+.. In this `TOPP Engineering blog entry
+.. <http://www.coactivate.org/projects/topp-engineering/blog/2008/10/20/what-bothers-me-about-the-component-architecture/>`_,
+.. Ian Bicking asserts that the way :mod:`repoze.bfg` used a Zope interface to
+.. represent an HTTP request method added too much indirection for not enough
+.. gain.  We agreed in general, and for this reason, :mod:`repoze.bfg` version
+.. 1.1 (and subsequent versions including :app:`Pyramid` 1.0+) added :term:`view
+.. predicate` and :term:`route predicate` modifiers to view configuration.
+.. Predicates are request-specific (or :term:`context` -specific) matching
+.. narrowers which don't use interfaces.  Instead, each predicate uses a
+.. domain-specific string as a match value.
 
-For example, to write a view configuration which matches only requests with
-the ``POST`` HTTP request method, you might write a ``@view_config``
-decorator which mentioned the ``request_method`` predicate:
+`TOPP Engineering blog entry
+<http://www.coactivate.org/projects/topp-engineering/blog/2008/10/20/what-bothers-me-about-the-component-architecture/>`_
+で Ian Bicking は、 HTTP リクエストメソッドを表わすのに
+:mod:`repoze.bfg` が Zope インタフェースを使用する方法は、十分な見返り
+もなくあまりにも多くの間接性を加えたと主張しています。私たちはこれに
+大筋で同意し、この理由で :mod:`repoze.bfg` バージョン1.1 (そして
+:app:`Pyramid` 1.0+ を含む後のバージョン) はビュー設定に :term:`view
+predicate` と :term:`route predicate` 修飾子を追加しました。 predicate
+は、リクエスト固有の (あるいは :term:`context` 固有の) matching
+narrowers で、インタフェースを使いません。代わりに、それぞれの
+predicate は match value としてドメイン固有の文字列を使用します。
+
+
+.. For example, to write a view configuration which matches only requests with
+.. the ``POST`` HTTP request method, you might write a ``@view_config``
+.. decorator which mentioned the ``request_method`` predicate:
+
+例えば、 ``POST`` HTTP リクエストメソッドを用いたリクエストだけに一致さ
+せたいビュー設定を書くために、 ``request_method`` predicate に mention
+した ``@view_config`` デコレータを書くことができます:
+
 
 .. code-block:: python
    :linenos:
@@ -772,8 +790,13 @@ decorator which mentioned the ``request_method`` predicate:
    def post_view(request):
        return 'POSTed'
 
-You might further narrow the matching scenario by adding an ``accept``
-predicate that narrows matching to something that accepts a JSON response:
+
+.. You might further narrow the matching scenario by adding an ``accept``
+.. predicate that narrows matching to something that accepts a JSON response:
+
+JSON レスポンスを受理するものにマッチを狭める ``accept`` predicate を
+加えることで、マッチシナリオをさらに狭めることができます。
+
 
 .. code-block:: python
    :linenos:
@@ -784,18 +807,36 @@ predicate that narrows matching to something that accepts a JSON response:
    def post_view(request):
        return 'POSTed'
 
-Such a view would only match when the request indicated that HTTP request
-method was ``POST`` and that the remote user agent passed
-``application/json`` (or, for that matter, ``application/*``) in its
-``Accept`` request header.
 
-Under the hood, these features make no use of interfaces.
+.. Such a view would only match when the request indicated that HTTP request
+.. method was ``POST`` and that the remote user agent passed
+.. ``application/json`` (or, for that matter, ``application/*``) in its
+.. ``Accept`` request header.
 
-Many prebaked predicates exist.  However, use of only prebaked predicates,
-however, doesn't entirely meet Ian's criterion.  He would like to be able to
-match a request using a lambda or another function which interrogates the
-request imperatively.  In :mod:`repoze.bfg` version 1.2, we acommodate this
-by allowing people to define custom view predicates:
+このようなビューは、 HTTP リクエストメソッドが POST で、リモートユーザー
+エージェントが ``Accept`` リクエストヘッダーに ``application/json`` (あ
+るいはさらに言えば ``application/*``) を渡したことをリクエストが示す時
+だけ一致するでしょう。
+
+
+.. Under the hood, these features make no use of interfaces.
+
+内部では、これらの機能はインタフェースを利用しません。
+
+
+.. Many prebaked predicates exist.  However, use of only prebaked predicates,
+.. however, doesn't entirely meet Ian's criterion.  He would like to be able to
+.. match a request using a lambda or another function which interrogates the
+.. request imperatively.  In :mod:`repoze.bfg` version 1.2, we acommodate this
+.. by allowing people to define custom view predicates:
+
+事前準備された多くの predicate が存在しています。しかしながら、事前準備
+された predicate を使用することは、しかしながら Ian の基準を完全に満た
+すわけではありません。彼はリクエストを命令的に interrogate する lambda
+か他の関数を使用してリクエストとマッチできるようにしたいと思っています。
+:mod:`repoze.bfg` バージョン 1.2 では、これに対応するためにカスタムビュー
+predicate が定義できるようになります:
+
 
 .. code-block:: python
    :linenos:
@@ -810,8 +851,13 @@ by allowing people to define custom view predicates:
    def aview(request):
        return Response('OK')
 
-The above view will only match when the first element of the request's
-:term:`subpath` is ``abc``.
+
+.. The above view will only match when the first element of the request's
+.. :term:`subpath` is ``abc``.
+
+上記のビューは、リクエストの :term:`subpath` の最初の要素が ``abc``
+だった場合にだけマッチします。
+
 
 .. _zcml_encouragement:
 
