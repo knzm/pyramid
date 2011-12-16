@@ -915,45 +915,96 @@ Pyramid Uses "Model" To Represent A Node In The Graph of Objects Traversed
 Pyramid Does Traversal, And I Don't Like Traversal
 --------------------------------------------------
 
-In :app:`Pyramid`, :term:`traversal` is the act of resolving a URL path to a
-:term:`resource` object in a resource tree.  Some people are uncomfortable
-with this notion, and believe it is wrong.  Thankfully, if you use
-:app:`Pyramid`, and you don't want to model your application in terms of a
-resource tree, you needn't use it at all.  Instead, use :term:`URL dispatch`
-to map URL paths to views.
+.. In :app:`Pyramid`, :term:`traversal` is the act of resolving a URL path to a
+.. :term:`resource` object in a resource tree.  Some people are uncomfortable
+.. with this notion, and believe it is wrong.  Thankfully, if you use
+.. :app:`Pyramid`, and you don't want to model your application in terms of a
+.. resource tree, you needn't use it at all.  Instead, use :term:`URL dispatch`
+.. to map URL paths to views.
 
-The idea that some folks believe traversal is unilaterally wrong is
-understandable.  The people who believe it is wrong almost invariably have
-all of their data in a relational database.  Relational databases aren't
-naturally hierarchical, so traversing one like a tree is not possible.
+:app:`Pyramid` で :term:`traversal` とは、 URL パスをリソースツリーの中
+の :term:`resource` オブジェクトへと解決する行為です。この概念を快く思
+わない人もいて、彼らはそれが間違っていると信じています。幸いなことに、
+:app:`Pyramid` を使用していて、リソースツリーの観点に基づいて
+アプリケーションをモデル化したくなければ、それを使用する必要は全くあり
+ません。代わりに、URL パスをビューへマップするために :term:`URL
+dispatch` を使用してください。
 
-However, folks who deem traversal unilaterally wrong are neglecting to take
-into account that many persistence mechanisms *are* hierarchical.  Examples
-include a filesystem, an LDAP database, a :term:`ZODB` (or another type of
-graph) database, an XML document, and the Python module namespace.  It is
-often convenient to model the frontend to a hierarchical data store as a
-graph, using traversal to apply views to objects that either *are* the
-resources in the tree being traversed (such as in the case of ZODB) or at
-least ones which stand in for them (such as in the case of wrappers for files
-from the filesystem).
 
-Also, many website structures are naturally hierarchical, even if the data
-which drives them isn't.  For example, newspaper websites are often extremely
-hierarchical: sections within sections within sections, ad infinitum.  If you
-want your URLs to indicate this structure, and the structure is indefinite
-(the number of nested sections can be "N" instead of some fixed number), a
-resource tree is an excellent way to model this, even if the backend is a
-relational database.  In this situation, the resource tree a just a site
-structure.
+.. The idea that some folks believe traversal is unilaterally wrong is
+.. understandable.  The people who believe it is wrong almost invariably have
+.. all of their data in a relational database.  Relational databases aren't
+.. naturally hierarchical, so traversing one like a tree is not possible.
 
-Traversal also offers better composability of applications than URL dispatch,
-because it doesn't rely on a fixed ordering of URL matching.  You can compose
-a set of disparate functionality (and add to it later) around a mapping of
-view to resource more predictably than trying to get the right ordering of
-URL pattern matching.
+トラバーサルが一方的に間違っていると信じる一部の人がいるという考えは
+理解できます。それがほとんど常に間違っていると信じる人々は、すべての
+データをリレーショナルデータベースの中に持っています。リレーショナル
+データベースはその性質上階層的ではないので、ツリーのようにトラバース
+することができません。
 
-But the point is ultimately moot.  If you don't want to use traversal, you
-needn't.  Use URL dispatch instead.
+
+.. However, folks who deem traversal unilaterally wrong are neglecting to take
+.. into account that many persistence mechanisms *are* hierarchical.  Examples
+.. include a filesystem, an LDAP database, a :term:`ZODB` (or another type of
+.. graph) database, an XML document, and the Python module namespace.  It is
+.. often convenient to model the frontend to a hierarchical data store as a
+.. graph, using traversal to apply views to objects that either *are* the
+.. resources in the tree being traversed (such as in the case of ZODB) or at
+.. least ones which stand in for them (such as in the case of wrappers for files
+.. from the filesystem).
+
+しかしながら、トラバーサルが一方的に間違っていると考える人々は、多くの
+永続化メカニズムが階層的 *である* ことを考慮に入れることを怠っています。
+例として、ファイルシステム、 LDAP データベース、 :term:`ZODB` (あるいは
+別の種類のグラフ) データベース、 XML ドキュメント、 Python モジュールの
+ネームスペースなどがあります。フロントエンドを階層型データストアにグラフ
+としてモデル化することは多くの場合に便利で、ビューをオブジェクトへ適用
+するためにトラバーサルが使用されます。そのようなオブジェクトは、
+トラバースされているツリーのリソースであるか (ZODB の場合のように) 、
+あるいは少なくともいくつかのものがそれらの代わりを務めるものであるか
+(ファイルシステムから読み出されたファイルに対するラッパーの場合のように)
+のいずれかです。
+
+
+.. Also, many website structures are naturally hierarchical, even if the data
+.. which drives them isn't.  For example, newspaper websites are often extremely
+.. hierarchical: sections within sections within sections, ad infinitum.  If you
+.. want your URLs to indicate this structure, and the structure is indefinite
+.. (the number of nested sections can be "N" instead of some fixed number), a
+.. resource tree is an excellent way to model this, even if the backend is a
+.. relational database.  In this situation, the resource tree a just a site
+.. structure.
+
+さらに、多くのウェブサイトの構造は性質上、たとえそれを駆動するためのデー
+タが階層的でなかったとしても階層的です。例えば、新聞社のウェブサイトは
+多くの場合非常に階層的です: セクションの中にセクションがあり、その中に
+またセクションがあるという風に無制限に続きます。この構造を URL が示すよ
+うにしようとして、かつ構造が不定 (入れ子のセクションの数がある定数の代
+わりに "N" になる可能性がある) であれば、仮にバックエンドがリレーショナ
+ルデータベースであっても、リソースツリーはこれをモデル化する優れた方法
+です。この状況では、リソースツリーは単なるサイト構造です。
+
+
+.. Traversal also offers better composability of applications than URL dispatch,
+.. because it doesn't rely on a fixed ordering of URL matching.  You can compose
+.. a set of disparate functionality (and add to it later) around a mapping of
+.. view to resource more predictably than trying to get the right ordering of
+.. URL pattern matching.
+
+また、トラバーサルは URL マッチングの固定された順番に依存しないので、
+URL ディスパッチよりアプリケーションの合成可能性が高まります。 URL パター
+ンマッチングの正しい順番を維持することと比較すると、ビューのリソースへ
+のマッピングの周辺に1セットの異種の機能性をより予想可能な形で構成する
+(そして後でそれを増やす)ことができます。
+
+
+.. But the point is ultimately moot.  If you don't want to use traversal, you
+.. needn't.  Use URL dispatch instead.
+
+しかし、このポイントは究極的には議論の余地があります。トラバーサルを使用
+したくなければ、使用する必要はありません。代わりに URL ディスパッチを
+使用してください。
+
 
 Pyramid Does URL Dispatch, And I Don't Like URL Dispatch
 --------------------------------------------------------
