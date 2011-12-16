@@ -892,14 +892,25 @@ Pyramid "Encourages Use of ZCML"
 Pyramid Uses "Model" To Represent A Node In The Graph of Objects Traversed
 --------------------------------------------------------------------------
 
-The ``repoze.bfg`` documentation used to refer to the graph being traversed
-when :term:`traversal` is used as a "model graph".  A terminology overlap
-confused people who wrote applications that always use ORM packages such as
-SQLAlchemy, which has a different notion of the definition of a "model".  As
-a result, in Pyramid 1.0a7, the tree of objects traversed is now renamed to
-:term:`resource tree` and its components are now named :term:`resource`
-objects.  Associated APIs have been changed.  This hopefully alleviates the
-terminology confusion caused by overriding the term "model".
+.. The ``repoze.bfg`` documentation used to refer to the graph being traversed
+.. when :term:`traversal` is used as a "model graph".  A terminology overlap
+.. confused people who wrote applications that always use ORM packages such as
+.. SQLAlchemy, which has a different notion of the definition of a "model".  As
+.. a result, in Pyramid 1.0a7, the tree of objects traversed is now renamed to
+.. :term:`resource tree` and its components are now named :term:`resource`
+.. objects.  Associated APIs have been changed.  This hopefully alleviates the
+.. terminology confusion caused by overriding the term "model".
+
+``repoze.bfg`` のドキュメンテーションでは、以前は :term:`traversal` が
+使用される場合にトラバーサルされているグラフのことを「モデルグラフ」と
+呼んでいました。用語のオーバーラップは、 SQLAlchemy のような ORM パッケージ
+を常に使用するアプリケーションを書いている人々を混乱させました(ORM
+にはモデルの定義についての異なる概念があります)。その結果、トラバースさ
+れたオブジェクトのツリーは、 Pyramid 1.0a7 で :term:`resource tree` に
+改名され、そのコンポーネントは :term:`resource` オブジェクトという名前
+になりました。関連する API が変更されました。これにより、用語「モデル」
+のオーバーライドによって引き起こされた用語上の混乱が軽減されることが
+期待されます。
 
 Pyramid Does Traversal, And I Don't Like Traversal
 --------------------------------------------------
