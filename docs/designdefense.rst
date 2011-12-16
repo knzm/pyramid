@@ -864,15 +864,28 @@ predicate が定義できるようになります:
 Pyramid "Encourages Use of ZCML"
 --------------------------------
 
-:term:`ZCML` is a configuration language that can be used to configure the
-:term:`Zope Component Architecture` registry that :app:`Pyramid` uses for
-application configuration.  Often people claim that Pyramid "needs ZCML".
+.. :term:`ZCML` is a configuration language that can be used to configure the
+.. :term:`Zope Component Architecture` registry that :app:`Pyramid` uses for
+.. application configuration.  Often people claim that Pyramid "needs ZCML".
 
-It doesn't.  In :app:`Pyramid` 1.0, ZCML doesn't ship as part of the core;
-instead it ships in the :term:`pyramid_zcml` add-on package, which is
-completely optional.  No ZCML is required at all to use :app:`Pyramid`, nor
-any other sort of frameworky declarative frontend to application
-configuration.
+:term:`ZCML` は、 :app:`Pyramid` がアプリケーション設定に使用している
+:term:`Zope Component Architecture` レジストリを設定するために使用する
+ことができる設定言語です。よく、 Pyramid は「ZCML を必要としている」と
+言われます。
+
+
+.. It doesn't.  In :app:`Pyramid` 1.0, ZCML doesn't ship as part of the core;
+.. instead it ships in the :term:`pyramid_zcml` add-on package, which is
+.. completely optional.  No ZCML is required at all to use :app:`Pyramid`, nor
+.. any other sort of frameworky declarative frontend to application
+.. configuration.
+
+そうではありません。 :app:`Pyramid` 1.0 では、ZCML は中核コードの一部と
+しては含まれません; 代わりに :term:`pyramid_zcml` アドオンパッケージの
+一部として提供されており、それは完全にオプションです。 :app:`Pyramid` を
+使用するために　ZCML や他の種類のフレームワーク的なアプリケーション設定
+に対する宣言的なフロント・エンドは全く必要ありません。
+
 
 .. _model_traversal_confusion:
 
