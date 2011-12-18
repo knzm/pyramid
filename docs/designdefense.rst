@@ -1224,54 +1224,116 @@ Pyramid Provides Too Few "Rails"
 Pyramid Provides Too Many "Rails"
 ---------------------------------
 
-:app:`Pyramid` provides some features that other web frameworks do not.
-These are features meant for use cases that might not make sense to you if
-you're building a simple bespoke web application:
+.. :app:`Pyramid` provides some features that other web frameworks do not.
+.. These are features meant for use cases that might not make sense to you if
+.. you're building a simple bespoke web application:
 
-- An optional way to map URLs to code using :term:`traversal` which implies a
-  walk of a :term:`resource tree`.
+:app:`Pyramid` は、他のウェブフレームワークにはないいくつかの特徴を提供
+します。これらの特徴は、単純な特注の (bespoke) ウェブアプリケーションを
+構築しているなら意味を成さないかもしれないユースケースのために意図され
+た特徴です:
 
-- The ability to aggregate Pyramid application configuration from multiple
-  sources using :meth:`pyramid.config.Configurator.include`.
 
-- View and subscriber registrations made using :term:`interface` objects
-  instead of class objects (e.g. :ref:`using_resource_interfaces`).
+.. - An optional way to map URLs to code using :term:`traversal` which implies a
+..   walk of a :term:`resource tree`.
 
-- A declarative :term:`authorization` system.
+- :term:`resource tree` の walk を意味する :term:`traversal` を使用して
+  URL をコードにマッピングするオプションの方法。
 
-- Multiple separate I18N :term:`translation string` factories, each of which
-  can name its own domain.
 
-These features are important to the authors of :app:`Pyramid`.  The
-:app:`Pyramid` authors are often commissioned to build CMS-style
-applications.  Such applications are often frameworky because they have more
-than one deployment.  Each deployment requires a slightly different
-composition of sub-applications, and the framework and sub-applications often
-need to be *extensible*.  Because the application has more than one
-deployment, pluggability and extensibility is important, as maintaining
-multiple forks of the application, one per deployment, is extremely
-undesirable.  Because it's easier to extend a system that uses
-:term:`traversal` from the outside than it is to do the same in a system that
-uses :term:`URL dispatch`, each deployment uses a :term:`resource tree`
-composed of a persistent tree of domain model objects, and uses
-:term:`traversal` to map :term:`view callable` code to resources in the tree.
-The resource tree contains very granular security declarations, as resources
-are owned and accessible by different sets of users.  Interfaces are used to
-make unit testing and implementation substitutability easier.
+.. - The ability to aggregate Pyramid application configuration from multiple
+..   sources using :meth:`pyramid.config.Configurator.include`.
 
-In a bespoke web application, usually there's a single canonical deployment,
-and therefore no possibility of multiple code forks.  Extensibility is not
-required; the code is just changed in-place.  Security requirements are often
-less granular.  Using the features listed above will often be overkill for
-such an application.
+- :meth:`pyramid.config.Configurator.include` を使用して、複数のソースから
+  Pyramid アプリケーション設定を集める能力。
 
-If you don't like these features, it doesn't mean you can't or shouldn't use
-:app:`Pyramid`.  They are all optional, and a lot of time has been spent
-making sure you don't need to know about them up-front.  You can build
-"Pylons-1.X-style" applications using :app:`Pyramid` that are purely bespoke
-by ignoring the features above.  You may find these features handy later
-after building a bespoke web application that suddenly becomes popular and
-requires extensibility because it must be deployed in multiple locations.
+
+.. - View and subscriber registrations made using :term:`interface` objects
+..   instead of class objects (e.g. :ref:`using_resource_interfaces`).
+
+- クラスオブジェクトの代わりに :term:`interface` オブジェクトを使用して
+  作られたビューと subscriber の登録。(例 :ref:`using_resource_interfaces`)
+
+
+.. - A declarative :term:`authorization` system.
+
+- 宣言的な :term:`authorization` システム。
+
+
+.. - Multiple separate I18N :term:`translation string` factories, each of which
+..   can name its own domain.
+
+- 複数の独立した I18N :term:`translation string` ファクトリ。各々の
+  ファクトリは自分自身のドメインを名乗ることができます。
+
+
+.. These features are important to the authors of :app:`Pyramid`.  The
+.. :app:`Pyramid` authors are often commissioned to build CMS-style
+.. applications.  Such applications are often frameworky because they have more
+.. than one deployment.  Each deployment requires a slightly different
+.. composition of sub-applications, and the framework and sub-applications often
+.. need to be *extensible*.  Because the application has more than one
+.. deployment, pluggability and extensibility is important, as maintaining
+.. multiple forks of the application, one per deployment, is extremely
+.. undesirable.  Because it's easier to extend a system that uses
+.. :term:`traversal` from the outside than it is to do the same in a system that
+.. uses :term:`URL dispatch`, each deployment uses a :term:`resource tree`
+.. composed of a persistent tree of domain model objects, and uses
+.. :term:`traversal` to map :term:`view callable` code to resources in the tree.
+.. The resource tree contains very granular security declarations, as resources
+.. are owned and accessible by different sets of users.  Interfaces are used to
+.. make unit testing and implementation substitutability easier.
+
+これらの特徴は :app:`Pyramid` の作者たちにとって重要です。
+:app:`Pyramid` の作者たちは、しばしば CMS スタイルのアプリケーションを
+構築するために委任されます。そのようなアプリケーションは複数のデプロイ
+があるので、多くの場合フレームワーク的です。個々のデプロイはそれぞれ、
+サブアプリケーションのわずかに異なる構成を要求します。また、フレームワーク
+およびサブアプリケーションはしばしば *拡張可能* である必要があります。
+アプリケーションに複数のデプロイがあるので、プラグ可能性と伸長性は重要です。
+アプリケーション (デプロイあたり1つ) のマルチフォークの維持は非常に
+望ましくない (undesirable) ので。 :term:`traversal` を使用するシステム
+を外部から拡張する方が、 :term:`URL dispatch` を使用するシステムで
+同じことをするより簡単なので、個々のデプロイはドメインモデルオブジェクト
+の永続的なツリーから構成される :term:`resource tree` を使用し、
+:term:`view callable` コードをツリー中のリソースにマッピングするために
+:term:`traversal` を使用します。リソースが異なるユーザ集合によって所有
+されアクセス可能なので、リソースツリーは非常に粒度の細かいセキュリティ
+宣言を含んでいます。インタフェースはユニットテストおよび実装交換可能性
+をより簡単にするために使用されます。
+
+
+.. In a bespoke web application, usually there's a single canonical deployment,
+.. and therefore no possibility of multiple code forks.  Extensibility is not
+.. required; the code is just changed in-place.  Security requirements are often
+.. less granular.  Using the features listed above will often be overkill for
+.. such an application.
+
+特注のウェブアプリケーションでは、通常単一の正統なデプロイがあります。
+そしてしたがって、多数のコードフォークの可能性はありません。拡張可能性
+は必要ではありません; コードは単に in-place で変更されます。セキュリティ
+要件は多くの場合それほど細かい粒度ではありません。上記にリストされた特徴
+を使用することは、多くの場合そのようなアプリケーションには行き過ぎ
+(overkill) でしょう。
+
+
+.. If you don't like these features, it doesn't mean you can't or shouldn't use
+.. :app:`Pyramid`.  They are all optional, and a lot of time has been spent
+.. making sure you don't need to know about them up-front.  You can build
+.. "Pylons-1.X-style" applications using :app:`Pyramid` that are purely bespoke
+.. by ignoring the features above.  You may find these features handy later
+.. after building a bespoke web application that suddenly becomes popular and
+.. requires extensibility because it must be deployed in multiple locations.
+
+あなたがこれらの特徴を好きでない場合、それは :app:`Pyramid` を使用でき
+ない、また使用すべきでないことを意味しません。それらはすべてオプションで、
+それらのことを前もって知っている必要がないことを確かめるために多くの時間が
+費やされました。上記の特徴を無視することにより、 :app:`Pyramid` を使用
+して純粋に特注の "Pylons 1.X スタイル" のアプリケーションを構築すること
+ができます。特注のウェブアプリケーションを構築した後で急に有名になり、
+複数の場所にデプロイしなければならないため拡張性が必要になってから、
+これらの特徴が便利なことに気がつくかもしれません。
+
 
 Pyramid Is Too Big
 ------------------
