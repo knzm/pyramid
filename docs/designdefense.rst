@@ -1103,19 +1103,28 @@ URL ディスパッチを使用することが有用だと知るでしょう。�
 しかし、このポイントは究極的には議論の余地があります。 :app:`Pyramid`
 を使用し、あなたが本当に URL ディスパッチを使用したくなければ、使用する
 必要は全くありません。代わりに、ちょうど Zope の中で行うように、URL
-パスをビューへと写像するためにトラバーサルを排他的に使用してください。
+パスをビューへとマッピングするためにトラバーサルを排他的に使用してください。
 
 
 Pyramid Views Do Not Accept Arbitrary Keyword Arguments
 -------------------------------------------------------
 
-Many web frameworks (Zope, TurboGears, Pylons 1.X, Django) allow for their
-variant of a :term:`view callable` to accept arbitrary keyword or positional
-arguments, which are filled in using values present in the ``request.POST``
-or ``request.GET`` dictionaries or by values present in the route match
-dictionary.  For example, a Django view will accept positional arguments
-which match information in an associated "urlconf" such as
-``r'^polls/(?P<poll_id>\d+)/$``:
+.. Many web frameworks (Zope, TurboGears, Pylons 1.X, Django) allow for their
+.. variant of a :term:`view callable` to accept arbitrary keyword or positional
+.. arguments, which are filled in using values present in the ``request.POST``
+.. or ``request.GET`` dictionaries or by values present in the route match
+.. dictionary.  For example, a Django view will accept positional arguments
+.. which match information in an associated "urlconf" such as
+.. ``r'^polls/(?P<poll_id>\d+)/$``:
+
+多くのウェブフレームワーク (Zope, TurboGears, Pylons 1.X, Django) では、
+:term:`view callable` の変種が任意のキーワード引数または位置引数を
+受け取ることができるようになっています。それらは ``request.POST`` や
+``request.GET`` 辞書に含まれる値や、ルートマッチ辞書に含まれる値によって
+満たされます。例えば Django ビューは、 ``r'^polls/(?P<poll_id>\d+)/$``
+のようなビューと関連付けられた "urlconf" の中の情報と一致する位置引数を
+受け取ります:
+
 
 .. code-block:: python
    :linenos:
@@ -1123,8 +1132,13 @@ which match information in an associated "urlconf" such as
    def aview(request, poll_id):
        return HttpResponse(poll_id)
 
-Zope, likewise allows you to add arbitrary keyword and positional
-arguments to any method of a resource object found via traversal:
+
+.. Zope, likewise allows you to add arbitrary keyword and positional
+.. arguments to any method of a resource object found via traversal:
+
+Zope も同様に、トラバーサルによって見つかったリソースオブジェクトの任意
+のメソッドに任意のキーワード引数および位置引数を加えることができます:
+
 
 .. ignore-next-block
 .. code-block:: python
@@ -1136,24 +1150,49 @@ arguments to any method of a resource object found via traversal:
         def aview(self, a, b, c=None):
             return '%s %s %c' % (a, b, c)
 
-When this method is called as the result of being the published callable, the
-Zope request object's GET and POST namespaces are searched for keys which
-match the names of the positional and keyword arguments in the request, and
-the method is called (if possible) with its argument list filled with values
-mentioned therein.  TurboGears and Pylons 1.X operate similarly.
 
-Out of the box, :app:`Pyramid` is configured to have none of these features.
-By default, :mod:`pyramid` view callables always accept only ``request`` and
-no other arguments.  The rationale: this argument specification matching done
-aggressively can be costly, and :app:`Pyramid` has performance as one of its
-main goals, so we've decided to make people, by default, obtain information
-by interrogating the request object within the view callable body instead of
-providing magic to do unpacking into the view argument list.
+.. When this method is called as the result of being the published callable, the
+.. Zope request object's GET and POST namespaces are searched for keys which
+.. match the names of the positional and keyword arguments in the request, and
+.. the method is called (if possible) with its argument list filled with values
+.. mentioned therein.  TurboGears and Pylons 1.X operate similarly.
 
-However, as of :app:`Pyramid` 1.0a9, user code can influence the way view
-callables are expected to be called, making it possible to compose a system
-out of view callables which are called with arbitrary arguments.  See
-:ref:`using_a_view_mapper`.
+このメソッドが published callable であることの結果として呼び出される場合、
+リクエストの中で位置引数およびキーワード引数の名前と一致するキーを求めて
+Zope リクエストオブジェクトの GET および POST 名前空間が探索されます。
+そして、メソッドは (可能なら)そこに mention された値で満たされた引数
+リストで呼ばれます。 TurboGears および Pylons 1.X も同様に作動します。
+
+
+.. Out of the box, :app:`Pyramid` is configured to have none of these features.
+.. By default, :mod:`pyramid` view callables always accept only ``request`` and
+.. no other arguments.  The rationale: this argument specification matching done
+.. aggressively can be costly, and :app:`Pyramid` has performance as one of its
+.. main goals, so we've decided to make people, by default, obtain information
+.. by interrogating the request object within the view callable body instead of
+.. providing magic to do unpacking into the view argument list.
+
+初期状態 (out of the box; 箱から出した状態) では、 :app:`Pyramid` は
+これらの特徴のどれも持たないように構成されます。デフォルトで、
+:mod:`pyramid` ビュー callable は常に ``request`` だけを受け取り、他の
+引数はありません。論理的根拠: この引数特定のマッチングを積極的に使うと
+高コストになり得ます。また、 :app:`Pyramid` の主なゴールの1つとして
+パフォーマンスがあります。したがって私たちは、ビューの引数リストに
+unpack するためにマジックを提供する代わりに、デフォルトではビュー
+callbale の本体内で request オブジェクトに問い合わせることにより情報を
+得てもらうことに決めました。
+
+
+.. However, as of :app:`Pyramid` 1.0a9, user code can influence the way view
+.. callables are expected to be called, making it possible to compose a system
+.. out of view callables which are called with arbitrary arguments.  See
+.. :ref:`using_a_view_mapper`.
+
+しかしながら、 :app:`Pyramid` 1.0a9 からは、ユーザコードが期待される
+ビュー callable の呼ばれ方に影響を及ぼすことができるようになりました。
+これにより、任意の引数で呼ばれるビュー callable からシステムを構成する
+ことが可能になります。 :ref:`using_a_view_mapper` を参照してください。
+
 
 Pyramid Provides Too Few "Rails"
 --------------------------------
