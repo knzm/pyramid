@@ -1009,49 +1009,102 @@ URL ディスパッチよりアプリケーションの合成可能性が高ま�
 Pyramid Does URL Dispatch, And I Don't Like URL Dispatch
 --------------------------------------------------------
 
-In :app:`Pyramid`, :term:`url dispatch` is the act of resolving a URL path to
-a :term:`view` callable by performing pattern matching against some set of
-ordered route definitions.  The route definitions are examined in order: the
-first pattern which matches is used to associate the URL with a view
-callable.
+.. In :app:`Pyramid`, :term:`url dispatch` is the act of resolving a URL path to
+.. a :term:`view` callable by performing pattern matching against some set of
+.. ordered route definitions.  The route definitions are examined in order: the
+.. first pattern which matches is used to associate the URL with a view
+.. callable.
 
-Some people are uncomfortable with this notion, and believe it is wrong.
-These are usually people who are steeped deeply in :term:`Zope`.  Zope does
-not provide any mechanism except :term:`traversal` to map code to URLs.  This
-is mainly because Zope effectively requires use of :term:`ZODB`, which is a
-hierarchical object store.  Zope also supports relational databases, but
-typically the code that calls into the database lives somewhere in the ZODB
-object graph (or at least is a :term:`view` related to a node in the object
-graph), and traversal is required to reach this code.
+:app:`Pyramid` では、 :term:`url dispatch` とは 1セットの順序付けられた
+ルーティング定義に対してパターンマッチングを行なうことで URL パスをビュー
+callable に解決する行為です。ルーティング定義は順番に検査されます: 一致
+する最初のパターンが URL をビュー callable に関連付けるために使用されま
+す。
 
-I'll argue that URL dispatch is ultimately useful, even if you want to use
-traversal as well.  You can actually *combine* URL dispatch and traversal in
-:app:`Pyramid` (see :ref:`hybrid_chapter`).  One example of such a usage: if
-you want to emulate something like Zope 2's "Zope Management Interface" UI on
-top of your object graph (or any administrative interface), you can register
-a route like ``config.add_route('manage', '/manage/*traverse')`` and then
-associate "management" views in your code by using the ``route_name``
-argument to a ``view`` configuration,
-e.g. ``config.add_view('.some.callable', context=".some.Resource",
-route_name='manage')``.  If you wire things up this way someone then walks up
-to for example, ``/manage/ob1/ob2``, they might be presented with a
-management interface, but walking up to ``/ob1/ob2`` would present them with
-the default object view.  There are other tricks you can pull in these hybrid
-configurations if you're clever (and maybe masochistic) too.
 
-Also, if you are a URL dispatch hater, if you should ever be asked to write
-an application that must use some legacy relational database structure, you
-might find that using URL dispatch comes in handy for one-off associations
-between views and URL paths.  Sometimes it's just pointless to add a node to
-the object graph that effectively represents the entry point for some bit of
-code.  You can just use a route and be done with it.  If a route matches, a
-view associated with the route will be called; if no route matches,
-:app:`Pyramid` falls back to using traversal.
+.. Some people are uncomfortable with this notion, and believe it is wrong.
+.. These are usually people who are steeped deeply in :term:`Zope`.  Zope does
+.. not provide any mechanism except :term:`traversal` to map code to URLs.  This
+.. is mainly because Zope effectively requires use of :term:`ZODB`, which is a
+.. hierarchical object store.  Zope also supports relational databases, but
+.. typically the code that calls into the database lives somewhere in the ZODB
+.. object graph (or at least is a :term:`view` related to a node in the object
+.. graph), and traversal is required to reach this code.
 
-But the point is ultimately moot.  If you use :app:`Pyramid`, and you really
-don't want to use URL dispatch, you needn't use it at all.  Instead, use
-:term:`traversal` exclusively to map URL paths to views, just like you do in
-:term:`Zope`.
+一部の人々はこの概念で不快で、それが間違っていると信じています。彼らは通常
+:term:`Zope` に深く没頭している人々です。 Zope は :term:`traversal`
+以外にコードを URL にマップするメカニズムを提供していません。これは主として
+Zope が事実上 ZODB の使用を要求するからです。 ZODB は階層的オブジェクト
+ストアです。 Zope はリレーショナルデータベースもサポートしていますが、
+典型的には、そのデータベースに対して問い合わを行うコードは ZODB オブジェクト
+グラフのどこかに存在しています (あるいは、少なくともそれはオブジェクト
+グラフ中のノードと関係する :term:`view` です)。また、このコードにたどり
+着くためにトラバーサルが必要とされます。
+
+
+.. I'll argue that URL dispatch is ultimately useful, even if you want to use
+.. traversal as well.  You can actually *combine* URL dispatch and traversal in
+.. :app:`Pyramid` (see :ref:`hybrid_chapter`).  One example of such a usage: if
+.. you want to emulate something like Zope 2's "Zope Management Interface" UI on
+.. top of your object graph (or any administrative interface), you can register
+.. a route like ``config.add_route('manage', '/manage/*traverse')`` and then
+.. associate "management" views in your code by using the ``route_name``
+.. argument to a ``view`` configuration,
+.. e.g. ``config.add_view('.some.callable', context=".some.Resource",
+.. route_name='manage')``.  If you wire things up this way someone then walks up
+.. to for example, ``/manage/ob1/ob2``, they might be presented with a
+.. management interface, but walking up to ``/ob1/ob2`` would present them with
+.. the default object view.  There are other tricks you can pull in these hybrid
+.. configurations if you're clever (and maybe masochistic) too.
+
+あなたがこれと同様にトラバーサルを使用したかったとしても、私は究極的に
+は URLディスパッチが有用であると主張しましょう。実際に :app:`Pyramid`
+の中で URL ディスパッチとトラバーサルを *組み合わせる* ことができます
+(:ref:`hybrid_chapter` を参照)。そのような使用法の一例: オブジェクト
+グラフ上に Zope 2 の "Zope Management Interface" UI のようなもの
+(あるいは任意の管理インターフェース) をエミュレートしたければ、
+``config.add_route('manage', '/manage/*traverse')`` のようにルーティング
+を登録し、次に ``view`` 設定で ``route_name`` 引数を使用することにより
+(例えば ``config.add_view('.some.callable', context=".some.Resource",
+route_name='manage')``)、 "management" ビューをコードに関連付けることが
+できます。この方法で物事を構成 (wire things up) して、その後で誰かが、
+例えば ``/manage/ob1/ob2`` に walk up to した場合、管理インタフェースが
+表示されるでしょう。しかし ``/ob1/ob2`` に walk up to to した場合は
+デフォルトオブジェクトビューが表示されるでしょう。あなたが利口なら
+(かつ、恐らくマゾヒストなら)、これらのハイブリッド設定に pull in
+することのできる他のトリックもあります。
+
+
+.. Also, if you are a URL dispatch hater, if you should ever be asked to write
+.. an application that must use some legacy relational database structure, you
+.. might find that using URL dispatch comes in handy for one-off associations
+.. between views and URL paths.  Sometimes it's just pointless to add a node to
+.. the object graph that effectively represents the entry point for some bit of
+.. code.  You can just use a route and be done with it.  If a route matches, a
+.. view associated with the route will be called; if no route matches,
+.. :app:`Pyramid` falls back to using traversal.
+
+さらに、もしあなたが URL ディスパッチ嫌いだったとして、いつの日かレガシー
+リレーショナルデータベース構造を使用しなければならないアプリケーションを
+書くように依頼されたら、ビューと URL パスの間の1回限りの関連性のために
+URL ディスパッチを使用することが有用だと知るでしょう。オブジェクトグラフに
+事実上ちょっとしたコードのためのエントリーポイントを表わすようなノードを
+追加することは、時々まったく無意味なことです。その場合はルーティングを
+使用すればそれで済みます。ルーティングが一致すれば、関連付けられたビューが
+呼ばれます; 一致しない場合 :app:`Pyramid` はトラバーサルの使用に切り替え
+ます。
+
+
+.. But the point is ultimately moot.  If you use :app:`Pyramid`, and you really
+.. don't want to use URL dispatch, you needn't use it at all.  Instead, use
+.. :term:`traversal` exclusively to map URL paths to views, just like you do in
+.. :term:`Zope`.
+
+しかし、このポイントは究極的には議論の余地があります。 :app:`Pyramid`
+を使用し、あなたが本当に URL ディスパッチを使用したくなければ、使用する
+必要は全くありません。代わりに、ちょうど Zope の中で行うように、URL
+パスをビューへと写像するためにトラバーサルを排他的に使用してください。
+
 
 Pyramid Views Do Not Accept Arbitrary Keyword Arguments
 -------------------------------------------------------
