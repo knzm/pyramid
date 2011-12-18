@@ -1197,15 +1197,29 @@ callbale の本体内で request オブジェクトに問い合わせること�
 Pyramid Provides Too Few "Rails"
 --------------------------------
 
-By design, :app:`Pyramid` is not a particularly opinionated web framework.
-It has a relatively parsimonious feature set.  It contains no built in ORM
-nor any particular database bindings.  It contains no form generation
-framework.  It has no administrative web user interface.  It has no built in
-text indexing.  It does not dictate how you arrange your code.
+.. By design, :app:`Pyramid` is not a particularly opinionated web framework.
+.. It has a relatively parsimonious feature set.  It contains no built in ORM
+.. nor any particular database bindings.  It contains no form generation
+.. framework.  It has no administrative web user interface.  It has no built in
+.. text indexing.  It does not dictate how you arrange your code.
 
-Such opinionated functionality exists in applications and frameworks built
-*on top* of :app:`Pyramid`.  It's intended that higher-level systems emerge
-built using :app:`Pyramid` as a base.  See also :ref:`apps_are_extensible`.
+設計上 :app:`Pyramid` は特に主張の強いウェブフレームワークではありません。
+それは比較的倹約的な (parsimonious) 特徴セットを持っています。組み込み
+の ORM を含んでおらず、特定のデータベースバインディングも持っていません。
+フォーム生成フレームワークが含まれていません。管理用のウェブユーザインター
+フェースがありません。組み込みのテキストインデックシングを持っていません。
+:app:`Pyramid` は、どのようにコードを構成するか指図しません。
+
+
+.. Such opinionated functionality exists in applications and frameworks built
+.. *on top* of :app:`Pyramid`.  It's intended that higher-level systems emerge
+.. built using :app:`Pyramid` as a base.  See also :ref:`apps_are_extensible`.
+
+そのような主張の強い機能は、 :app:`Pyramid` *の上に* 構築された
+アプリケーションおよびフレームワークの中に存在します。基礎として
+:app:`Pyramid` を使用して構築された、より高レベルのシステムが出現すること
+が意図されます。 :ref:`apps_are_extensible` を見てください。
+
 
 Pyramid Provides Too Many "Rails"
 ---------------------------------
