@@ -1456,16 +1456,30 @@ Python 3 への移植の結果、将来はより多くの依存性を減らせ�
 Pyramid "Cheats" To Obtain Speed
 --------------------------------
 
-Complaints have been lodged by other web framework authors at various times
-that :app:`Pyramid` "cheats" to gain performance.  One claimed cheating
-mechanism is our use (transitively) of the C extensions provided by
-:mod:`zope.interface` to do fast lookups.  Another claimed cheating mechanism
-is the religious avoidance of extraneous function calls.
+.. Complaints have been lodged by other web framework authors at various times
+.. that :app:`Pyramid` "cheats" to gain performance.  One claimed cheating
+.. mechanism is our use (transitively) of the C extensions provided by
+.. :mod:`zope.interface` to do fast lookups.  Another claimed cheating mechanism
+.. is the religious avoidance of extraneous function calls.
 
-If there's such a thing as cheating to get better performance, we want to
-cheat as much as possible.  We optimize :app:`Pyramid` aggressively.  This
-comes at a cost: the core code has sections that could be expressed more
-readably.  As an amelioration, we've commented these sections liberally.
+:app:`Pyramid` はパフォーマンスを稼ぐために cheat (ずる) をしているという
+不満を他のウェブフレームワークの作者から何度も聞きました。批判された
+cheat 的なメカニズムの 1 つは、高速な検索を行うために :mod:`zope.interface`
+によって提供される C 拡張を (推移的に) 使用していることです。批判された
+別の cheat 的メカニズムは、外部 (extraneous) 関数呼び出しの宗教的な回避です。
+
+
+.. If there's such a thing as cheating to get better performance, we want to
+.. cheat as much as possible.  We optimize :app:`Pyramid` aggressively.  This
+.. comes at a cost: the core code has sections that could be expressed more
+.. readably.  As an amelioration, we've commented these sections liberally.
+
+より良いパフォーマンスを得るために cheat 的な方法がある場合、私たちは
+できるだけそれを利用しようとします。私たちは積極的に :app:`Pyramid` を
+最適化しています。これにはコストが伴います: 中核コードの中にはより可読性に
+優れた表現ができた箇所があります。改善として、私たちはこれらの箇所に大量の
+コメントを書きました。
+
 
 Pyramid Gets Its Terminology Wrong ("MVC")
 ------------------------------------------
