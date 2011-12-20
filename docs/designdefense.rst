@@ -1338,11 +1338,19 @@ Pyramid Provides Too Many "Rails"
 Pyramid Is Too Big
 ------------------
 
-"The :app:`Pyramid` compressed tarball is almost 2MB.  It must be
-enormous!"
+.. "The :app:`Pyramid` compressed tarball is almost 2MB.  It must be
+.. enormous!"
 
-No.  We just ship it with test code and helper templates.  Here's a
-breakdown of what's included in subdirectories of the package tree:
+「 `Pyramid` の圧縮した tar 玉はほぼ 2MB だ。きっと巨大に違いない!」
+
+
+.. No.  We just ship it with test code and helper templates.  Here's a
+.. breakdown of what's included in subdirectories of the package tree:
+
+いいえ。それにはテストコードとヘルパーのテンプレートが同梱されています。
+ここで、パッケージツリーのサブディレクトリに含まれている内容物の内訳を
+示します:
+
 
 docs/
 
@@ -1356,17 +1364,30 @@ pyramid/paster_templates/
 
   804KB
 
-pyramid/ (except for ``pyramd/tests and pyramid/paster_templates``)
+.. pyramid/ (except for ``pyramd/tests and pyramid/paster_templates``)
+
+pyramid/ (``pyramd/tests`` と ``pyramid/paster_templates`` を除いて)
+
 
   539K
 
-The actual :app:`Pyramid` runtime code is about 10% of the total size of the
-tarball omitting docs, helper templates used for package generation, and test
-code.  Of the approximately 19K lines of Python code in the package, the code
-that actually has a chance of executing during normal operation, excluding
-tests and paster template Python files, accounts for approximately 5K lines
-of Python code.  This is comparable to Pylons 1.X, which ships with a little
-over 2K lines of Python code, excluding tests.
+
+.. The actual :app:`Pyramid` runtime code is about 10% of the total size of the
+.. tarball omitting docs, helper templates used for package generation, and test
+.. code.  Of the approximately 19K lines of Python code in the package, the code
+.. that actually has a chance of executing during normal operation, excluding
+.. tests and paster template Python files, accounts for approximately 5K lines
+.. of Python code.  This is comparable to Pylons 1.X, which ships with a little
+.. over 2K lines of Python code, excluding tests.
+
+実際の :app:`Pyramid` ランタイムコードは、ドキュメントとパッケージ生成
+に使用されるヘルパーテンプレート、およびテストコードを除いて tar 玉の
+合計サイズの約 10% です。パッケージに含まれる約 19,000 行の Python コード
+の中で、通常の動作中に実際に実行される可能性のあるものは、テストと
+paster テンプレート Python ファイルを除いて Python コードのおよそ 5,000 行
+を占めます。これは Pylons 1.X と comparable です。それには、テストを除いて
+2,000 行を少し超える Python コードが含まれています。
+
 
 Pyramid Has Too Many Dependencies
 ---------------------------------
