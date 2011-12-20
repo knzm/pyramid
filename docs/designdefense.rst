@@ -1392,33 +1392,66 @@ paster テンプレート Python ファイルを除いて Python コードのお
 Pyramid Has Too Many Dependencies
 ---------------------------------
 
-This is true.  At the time of this writing, the total number of Python
-package distributions that :app:`Pyramid` depends upon transitively is 15 if
-you use Python 2.7, or 17 if you use Python 2.5 or 2.6.  This is a lot more
-than zero package distribution dependencies: a metric which various Python
-microframeworks and Django boast.
+.. This is true.  At the time of this writing, the total number of Python
+.. package distributions that :app:`Pyramid` depends upon transitively is 15 if
+.. you use Python 2.7, or 17 if you use Python 2.5 or 2.6.  This is a lot more
+.. than zero package distribution dependencies: a metric which various Python
+.. microframeworks and Django boast.
 
-The :mod:`zope.component`, package on which :app:`Pyramid` depends has
-transitive dependencies on several other packages (:mod:`zope.event`, and
-:mod:`zope.interface`).  :app:`Pyramid` also has its own direct dependencies,
-such as :term:`PasteDeploy`, :term:`Chameleon`, :term:`Mako` :term:`WebOb`,
-:mod:`zope.deprecation` and some of these in turn have their own transitive
-dependencies.
+それは真実です。これを書いている時点で、 :app:`Pyramid` が推移的に依存
+する Python パッケージ配布物の総数は、 Python 2.7 を使用していれば 15
+で、 Python 2.5 あるいは 2.6 を使用すれば 17 になります。これは 0 より
+はるかに多いパッケージ依存性です: 様々な Python のマイクロフレームワーク
+や Django が誇るメトリック。
 
-We try not to reinvent too many wheels (at least the ones that don't need
-reinventing), and this comes at the cost of some number of dependencies.
-However, "number of package distributions" is just not a terribly great
-metric to measure complexity.  For example, the :mod:`zope.event`
-distribution on which :app:`Pyramid` depends has a grand total of four lines
-of runtime code.
 
-In the meantime, :app:`Pyramid` has a number of package distribution
-dependencies comparable to similarly-targeted frameworks such as Pylons 1.X.
-It may be in the future that we shed more dependencies as the result of a
-port to Python 3 (the less code we need to port, the better).  In the future,
-we may also move templating system dependencies out of the core and place
-them in add-on packages, to be included by developers instead of by the
-framework.  This would reduce the number of core dependencies by about five.
+.. The :mod:`zope.component`, package on which :app:`Pyramid` depends has
+.. transitive dependencies on several other packages (:mod:`zope.event`, and
+.. :mod:`zope.interface`).  :app:`Pyramid` also has its own direct dependencies,
+.. such as :term:`PasteDeploy`, :term:`Chameleon`, :term:`Mako` :term:`WebOb`,
+.. :mod:`zope.deprecation` and some of these in turn have their own transitive
+.. dependencies.
+
+:app:`Pyramid` が依存するパッケージである :mod:`zope.component` は、
+他のいくつかのパッケージに対して推移的な依存性を持っています
+(:mod:`zope.event` と :mod:`zope.interface`)。 :app:`Pyramid` は
+さらに :term:`PasteDeploy`, :term:`Chameleon`, :term:`Mako`,
+:term:`WebOb`, :mod:`zope.deprecation` といった直接の依存性を持ち、
+これらのうちのいくつかはさらにそれ自身の推移的な依存性を持っています。
+
+
+.. We try not to reinvent too many wheels (at least the ones that don't need
+.. reinventing), and this comes at the cost of some number of dependencies.
+.. However, "number of package distributions" is just not a terribly great
+.. metric to measure complexity.  For example, the :mod:`zope.event`
+.. distribution on which :app:`Pyramid` depends has a grand total of four lines
+.. of runtime code.
+
+私たちはあまり車輪の再発明をしないようにしています (少なくとも徹底的に
+再構築する必要のないものに関しては)。そしてこれは依存性に関して若干の
+犠牲を伴います。しかしながら「パッケージ配布物の数」は、複雑さを測定
+するためにはあまり優れたメトリックではありません。例えば、 :app:`Pyramid`
+が依存する :mod:`zope.event` パッケージには、合計で 4 行のランタイム
+コードしかありません。
+
+
+.. In the meantime, :app:`Pyramid` has a number of package distribution
+.. dependencies comparable to similarly-targeted frameworks such as Pylons 1.X.
+.. It may be in the future that we shed more dependencies as the result of a
+.. port to Python 3 (the less code we need to port, the better).  In the future,
+.. we may also move templating system dependencies out of the core and place
+.. them in add-on packages, to be included by developers instead of by the
+.. framework.  This would reduce the number of core dependencies by about five.
+
+当面の間、 :app:`Pyramid` は Pylons 1.X のような同様のターゲットを持った
+フレームワークと comparable に多くのパッケージ依存性を持ちます。
+Python 3 への移植の結果、将来はより多くの依存性を減らせるかもしれません
+(なぜなら移植する必要のあるコードがより少ない方が良いからです)。今後私たちは、
+さらにテンプレートシステムへの依存性を中核コードから移動させて、アドオン
+パッケージに置くことを検討しています。それらはフレームワークによってではなく、
+開発者によって含められるようになります。これにより、中核コードの依存性の数は
+約 5 減るでしょう。
+
 
 Pyramid "Cheats" To Obtain Speed
 --------------------------------
