@@ -1484,78 +1484,164 @@ cheat 的なメカニズムの 1 つは、高速な検索を行うために :mod
 Pyramid Gets Its Terminology Wrong ("MVC")
 ------------------------------------------
 
-"I'm a MVC web framework user, and I'm confused.  :app:`Pyramid` calls the
-controller a view!  And it doesn't have any controllers."
+.. "I'm a MVC web framework user, and I'm confused.  :app:`Pyramid` calls the
+.. controller a view!  And it doesn't have any controllers."
 
-If you are in this camp, you might have come to expect things about how your
-existing "MVC" framework uses its terminology.  For example, you probably
-expect that models are ORM models, controllers are classes that have methods
-that map to URLs, and views are templates.  :app:`Pyramid` indeed has each of
-these concepts, and each probably *works* almost exactly like your existing
-"MVC" web framework. We just don't use the MVC terminology, as we can't
-square its usage in the web framework space with historical reality.
+「私は MVC ウェブフレームワークのユーザですが、混乱しています。
+:app:`Pyramid` はコントローラーをビューと呼んでいます! そして
+コントローラーがありません。」
 
-People very much want to give web applications the same properties as common
-desktop GUI platforms by using similar terminology, and to provide some frame
-of reference for how various components in the common web framework might
-hang together.  But in the opinion of the author, "MVC" doesn't match the web
-very well in general. Quoting from the `Model-View-Controller Wikipedia entry
-<http://en.wikipedia.org/wiki/Model–view–controller>`_:
+
+.. If you are in this camp, you might have come to expect things about how your
+.. existing "MVC" framework uses its terminology.  For example, you probably
+.. expect that models are ORM models, controllers are classes that have methods
+.. that map to URLs, and views are templates.  :app:`Pyramid` indeed has each of
+.. these concepts, and each probably *works* almost exactly like your existing
+.. "MVC" web framework. We just don't use the MVC terminology, as we can't
+.. square its usage in the web framework space with historical reality.
+
+このキャンプにいる人は、既存の「MVC」フレームワークがどのようにその用語
+を使用するかに関する話を期待して来たのかもしれません。例えば、モデルとは
+ORM モデルのこと、コントローラーは URL へのマッピングを持つクラスのこと、
+ビューはテンプレートのこと、と恐らく期待します。 :app:`Pyramid` は確かに
+これらの概念の各々を持っています。また、各々は恐らくあなたの既存の
+「MVC」ウェブフレームワークとほとんど同じように *動きます* 。私たちは
+単純に MVC 用語を使用しません。なぜなら、ウェブフレームワーク空間に
+おける使用法を歴史上の現実性と調和させることができないからです。
+
+
+.. People very much want to give web applications the same properties as common
+.. desktop GUI platforms by using similar terminology, and to provide some frame
+.. of reference for how various components in the common web framework might
+.. hang together.  But in the opinion of the author, "MVC" doesn't match the web
+.. very well in general. Quoting from the `Model-View-Controller Wikipedia entry
+.. <http://en.wikipedia.org/wiki/Model–view–controller>`_:
+
+人々は、ウェブアプリケーションに一般的なデスクトップ GUI プラットフォームと
+同じ用語を使用することで同じ属性を与えて、一般的なウェブフレームワーク中で
+様々なコンポーネントがどのように結合するかに関してある種の評価基準を提供する
+ことを強く望みます。しかし、著者の見解では「MVC」は一般にウェブとあまり
+適合しません。 `ウィキペディアの Model-View-Controller に観する記事
+<http://en.wikipedia.org/wiki/Model–view–controller>`_ から引用すると:
+
+
+.. .. code-block:: text
+.. 
+..   Though MVC comes in different flavors, control flow is generally as
+..   follows:
+.. 
+..     The user interacts with the user interface in some way (for
+..     example, presses a mouse button).
+.. 
+..     The controller handles the input event from the user interface,
+..     often via a registered handler or callback and converts the event
+..     into appropriate user action, understandable for the model.
+.. 
+..     The controller notifies the model of the user action, possibly  
+..     resulting in a change in the model's state. (For example, the
+..     controller updates the user's shopping cart.)[5]
+.. 
+..     A view queries the model in order to generate an appropriate
+..     user interface (for example, the view lists the shopping cart's     
+..     contents). Note that the view gets its own data from the model.
+.. 
+..     The controller may (in some implementations) issue a general
+..     instruction to the view to render itself. In others, the view is
+..     automatically notified by the model of changes in state
+..     (Observer) which require a screen update.
+.. 
+..     The user interface waits for further user interactions, which
+..     restarts the cycle.
+
 
 .. code-block:: text
 
-  Though MVC comes in different flavors, control flow is generally as
-  follows:
+  MVC には様々に異なる派生形がありますが、制御フローは一般に以下の通りです:
 
-    The user interacts with the user interface in some way (for
-    example, presses a mouse button).
+    ユーザは、何らかの方法 (例えばマウスボタンを押す) でユーザインタ
+    フェースと対話します。
 
-    The controller handles the input event from the user interface,
-    often via a registered handler or callback and converts the event
-    into appropriate user action, understandable for the model.
+    コントローラーは、ユーザインタフェースからの入力イベントを扱います。
+    しばしば登録済のハンドラやコールバックによってイベントを受け取り、
+    そのイベントを適切な (モデルに理解できる) ユーザアクションに変換します。
 
-    The controller notifies the model of the user action, possibly  
-    resulting in a change in the model's state. (For example, the
-    controller updates the user's shopping cart.)[5]
+    コントローラーは、ユーザアクションをモデルに通知し、それは恐らく
+    モデルの状態の変化を引き起こすでしょう。 (例えば、コントローラーは
+    ユーザのショッピングカートを更新します) [5]
 
-    A view queries the model in order to generate an appropriate
-    user interface (for example, the view lists the shopping cart's     
-    contents). Note that the view gets its own data from the model.
+    ビューは適切なユーザインタフェースを生成するためにモデルにクエリを
+    行います (例えば、ビューはショッピングカートの内容をリストします)。
+    ビューがモデルからそれ自身のデータを得ることに注意してください。
 
-    The controller may (in some implementations) issue a general
-    instruction to the view to render itself. In others, the view is
-    automatically notified by the model of changes in state
-    (Observer) which require a screen update.
+    コントローラーは、 (いくつかの実装で) ビューに対してそれ自体を描画
+    させるためにより一般的な指示を出すことがあります。他の実装では、
+    ビューは画面更新を要求するモデルの状態変化 (オブザーバー) によって
+    自動的に通知されます。
 
-    The user interface waits for further user interactions, which
-    restarts the cycle.
+    ユーザインタフェースはさらにユーザとのインタラクションを待ち、
+    サイクルを再開します。
 
-To the author, it seems as if someone edited this Wikipedia definition,
-tortuously couching concepts in the most generic terms possible in order to
-account for the use of the term "MVC" by current web frameworks.  I doubt
-such a broad definition would ever be agreed to by the original authors of
-the MVC pattern.  But *even so*, it seems most MVC web frameworks fail to
-meet even this falsely generic definition.
 
-For example, do your templates (views) always query models directly as is
-claimed in "note that the view gets its own data from the model"?  Probably
-not.  My "controllers" tend to do this, massaging the data for easier use by
-the "view" (template). What do you do when your "controller" returns JSON? Do
-your controllers use a template to generate JSON? If not, what's the "view"
-then?  Most MVC-style GUI web frameworks have some sort of event system
-hooked up that lets the view detect when the model changes.  The web just has
-no such facility in its current form: it's effectively pull-only.
+.. To the author, it seems as if someone edited this Wikipedia definition,
+.. tortuously couching concepts in the most generic terms possible in order to
+.. account for the use of the term "MVC" by current web frameworks.  I doubt
+.. such a broad definition would ever be agreed to by the original authors of
+.. the MVC pattern.  But *even so*, it seems most MVC web frameworks fail to
+.. meet even this falsely generic definition.
 
-So, in the interest of not mistaking desire with reality, and instead of
-trying to jam the square peg that is the web into the round hole of "MVC", we
-just punt and say there are two things: resources and views. The resource
-tree represents a site structure, the view presents a resource.  The
-templates are really just an implementation detail of any given view: a view
-doesn't need a template to return a response.  There's no "controller": it
-just doesn't exist.  The "model" is either represented by the resource tree
-or by a "domain model" (like a SQLAlchemy model) that is separate from the
-framework entirely.  This seems to us like more reasonable terminology, given
-the current constraints of the web.
+著者からすると、このウィキペディアの定義は、まるで誰かが現在のウェブ
+フレームワークにおける用語「MVC」の使用を説明するために編集したかのようで、
+可能な最も一般的な用語を使った回りくどい表現による概念のように見えます。
+私は、そのような広い定義が MVC パターンのオリジナルの著者によって常に
+同意されるかどうか疑わしく思います。しかし *そうであっても* 、ほとんどの
+MVC ウェブフレームワークはこの疑わしい一般的な定義さえ満たさないように
+見えます。
+
+
+.. For example, do your templates (views) always query models directly as is
+.. claimed in "note that the view gets its own data from the model"?  Probably
+.. not.  My "controllers" tend to do this, massaging the data for easier use by
+.. the "view" (template). What do you do when your "controller" returns JSON? Do
+.. your controllers use a template to generate JSON? If not, what's the "view"
+.. then?  Most MVC-style GUI web frameworks have some sort of event system
+.. hooked up that lets the view detect when the model changes.  The web just has
+.. no such facility in its current form: it's effectively pull-only.
+
+例えば、「ビューがモデルからそれ自身のデータを得ることに注意してください」
+と主張されるように、テンプレート (ビュー) は常にモデルに対して直接クエリー
+を行うでしょうか？  恐らく、そうではありません。どちらかといえば「コントロー
+ラー」がこれを行います。それは「ビュー」 (テンプレート) がより簡単に扱える
+ようにデータを加工 (massaging) します。「コントローラー」が JSON を返す
+場合、何をしますか？ コントローラーは JSON を生成するためにテンプレートを
+使用しますか？ そうでなければ、そのとき「ビュー」は何でしょうか？ 多くの
+MVC スタイルの GUI ウェブフレームワークは、ビューがモデルの変更を検知する
+ために hook up されたなんらかのイベントシステムを持っています。現在の形式
+のウェブには、そのような機能はまったくありません:それは事実上 pull-only
+です。
+
+
+.. So, in the interest of not mistaking desire with reality, and instead of
+.. trying to jam the square peg that is the web into the round hole of "MVC", we
+.. just punt and say there are two things: resources and views. The resource
+.. tree represents a site structure, the view presents a resource.  The
+.. templates are really just an implementation detail of any given view: a view
+.. doesn't need a template to return a response.  There's no "controller": it
+.. just doesn't exist.  The "model" is either represented by the resource tree
+.. or by a "domain model" (like a SQLAlchemy model) that is separate from the
+.. framework entirely.  This seems to us like more reasonable terminology, given
+.. the current constraints of the web.
+
+したがって、現実性を踏まえて誤りを犯さないことへの関心から、そして四角
+い杭であるウェブを丸い穴である「MVC」の中へ押し込もうとする代わりに、
+私たちはちょうど 2 つのものがあると言いましょう (punt and say):
+リソースとビューです。リソースツリーはサイト構造を表わします。ビューは
+リソースを示します。テンプレートは実際には単に任意のビューの実装詳細です:
+ビューは、レスポンスを返すためにテンプレートを必要としません。「コント
+ローラー」は、ありません: それはまったく存在していません。「モデル」は、
+リソースツリー、またはフレームワークと完全に分離した「ドメインモデル」
+(SQLAlchemy モデルのような) によって表わされます。現在のウェブの制約の
+もとでは、これはより合理的な用語のように見えます。
+
 
 .. _apps_are_extensible:
 
