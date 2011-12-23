@@ -1648,122 +1648,257 @@ MVC スタイルの GUI ウェブフレームワークは、ビューがモデ�
 Pyramid Applications are Extensible; I Don't Believe In Application Extensibility
 ---------------------------------------------------------------------------------
 
-Any :app:`Pyramid` application written obeying certain constraints is
-*extensible*. This feature is discussed in the :app:`Pyramid` documentation
-chapters named :ref:`extending_chapter` and :ref:`advconfig_narr`.  It is
-made possible by the use of the :term:`Zope Component Architecture` and
-within :app:`Pyramid`.
+.. Any :app:`Pyramid` application written obeying certain constraints is
+.. *extensible*. This feature is discussed in the :app:`Pyramid` documentation
+.. chapters named :ref:`extending_chapter` and :ref:`advconfig_narr`.  It is
+.. made possible by the use of the :term:`Zope Component Architecture` and
+.. within :app:`Pyramid`.
 
-"Extensible", in this context, means:
+ある制約に従って書かれた :app:`Pyramid` アプリケーションはすべて *拡張
+可能* です。この特徴は :app:`Pyramid` ドキュメンテーションの
+:ref:`extending_chapter` と :ref:`advconfig_narr` の章で議論されています。
+それは :app:`Pyramid` 内部を含めて :term:`Zope Component Architecture` を
+使用することにより可能になります。
 
-- The behavior of an application can be overridden or extended in a
-  particular *deployment* of the application without requiring that
-  the deployer modify the source of the original application.
 
-- The original developer is not required to anticipate any
-  extensibility plugpoints at application creation time to allow
-  fundamental application behavior to be overriden or extended.
+.. "Extensible", in this context, means:
 
-- The original developer may optionally choose to anticipate an
-  application-specific set of plugpoints, which may be hooked by
-  a deployer.  If he chooses to use the facilities provided by the
-  ZCA, the original developer does not need to think terribly hard
-  about the mechanics of introducing such a plugpoint.
+この文脈における「拡張可能」の意味とは:
 
-Many developers seem to believe that creating extensible applications is not
-worth it.  They instead suggest that modifying the source of a given
-application for each deployment to override behavior is more reasonable.
-Much discussion about version control branching and merging typically ensues.
 
-It's clear that making every application extensible isn't required.  The
-majority of web applications only have a single deployment, and thus needn't
-be extensible at all.  However, some web applications have multiple
-deployments, and some have *many* deployments.  For example, a generic
-content management system (CMS) may have basic functionality that needs to be
-extended for a particular deployment.  That CMS system may be deployed for
-many organizations at many places.  Some number of deployments of this CMS
-may be deployed centrally by a third party and managed as a group.  It's
-useful to be able to extend such a system for each deployment via preordained
-plugpoints than it is to continually keep each software branch of the system
-in sync with some upstream source: the upstream developers may change code in
-such a way that your changes to the same codebase conflict with theirs in
-fiddly, trivial ways.  Merging such changes repeatedly over the lifetime of a
-deployment can be difficult and time consuming, and it's often useful to be
-able to modify an application for a particular deployment in a less invasive
-way.
+.. - The behavior of an application can be overridden or extended in a
+..   particular *deployment* of the application without requiring that
+..   the deployer modify the source of the original application.
 
-If you don't want to think about :app:`Pyramid` application extensibility at
-all, you needn't.  You can ignore extensibility entirely.  However, if you
-follow the set of rules defined in :ref:`extending_chapter`, you don't need
-to *make* your application extensible: any application you write in the
-framework just *is* automatically extensible at a basic level.  The
-mechanisms that deployers use to extend it will be necessarily coarse:
-typically, views, routes, and resources will be capable of being
-overridden. But for most minor (and even some major) customizations, these
-are often the only override plugpoints necessary: if the application doesn't
-do exactly what the deployment requires, it's often possible for a deployer
-to override a view, route, or resource and quickly make it do what he or she
-wants it to do in ways *not necessarily anticipated by the original
-developer*.  Here are some example scenarios demonstrating the benefits of
-such a feature.
+- アプリケーションの振る舞いを、アプリケーションの特定の *デプロイ* の
+  中で、オリジナルのアプリケーションのソースを修正せずにオーバーライド
+  または拡張できます。
 
-- If a deployment needs a different styling, the deployer may override the
-  main template and the CSS in a separate Python package which defines
-  overrides.
 
-- If a deployment needs an application page to do something differently needs
-  it to expose more or different information, the deployer may override the
-  view that renders the page within a separate Python package.
+.. - The original developer is not required to anticipate any
+..   extensibility plugpoints at application creation time to allow
+..   fundamental application behavior to be overriden or extended.
 
-- If a deployment needs an additional feature, the deployer may add a view to
-  the override package.
+- 基礎的なアプリケーションの振る舞いがオーバーライドまたは拡張可能に
+  なるように、アプリケーション作成時にオリジナルの開発者が拡張のための
+  プラグポイントを用意する必要がありません。
 
-As long as the fundamental design of the upstream package doesn't change,
-these types of modifications often survive across many releases of the
-upstream package without needing to be revisited.
 
-Extending an application externally is not a panacea, and carries a set of
-risks similar to branching and merging: sometimes major changes upstream will
-cause you to need to revisit and update some of your modifications.  But you
-won't regularly need to deal wth meaningless textual merge conflicts that
-trivial changes to upstream packages often entail when it comes time to
-update the upstream package, because if you extend an application externally,
-there just is no textual merge done.  Your modifications will also, for
-whatever its worth, be contained in one, canonical, well-defined place.
+.. - The original developer may optionally choose to anticipate an
+..   application-specific set of plugpoints, which may be hooked by
+..   a deployer.  If he chooses to use the facilities provided by the
+..   ZCA, the original developer does not need to think terribly hard
+..   about the mechanics of introducing such a plugpoint.
 
-Branching an application and continually merging in order to get new features
-and bugfixes is clearly useful.  You can do that with a :app:`Pyramid`
-application just as usefully as you can do it with any application.  But
-deployment of an application written in :app:`Pyramid` makes it possible to
-avoid the need for this even if the application doesn't define any plugpoints
-ahead of time.  It's possible that promoters of competing web frameworks
-dismiss this feature in favor of branching and merging because applications
-written in their framework of choice aren't extensible out of the box in a
-comparably fundamental way.
+- オリジナルの開発者は、オプションでアプリケーション特有のプラグポイント
+  のセットを用意することを選ぶかもしれません。それはデプロイ担当者によって
+  フックされるかもしれません。デプロイ担当者が ZCA によって提供される機
+  能を使用することに決めれば、オリジナルの開発者はそのようなプラグポイントを
+  導入するメカニズムに関してあまり深く考える必要はありません。
 
-While :app:`Pyramid` application are fundamentally extensible even if you
-don't write them with specific extensibility in mind, if you're moderately
-adventurous, you can also take it a step further.  If you learn more about
-the :term:`Zope Component Architecture`, you can optionally use it to expose
-other more domain-specific configuration plugpoints while developing an
-application.  The plugpoints you expose needn't be as coarse as the ones
-provided automatically by :app:`Pyramid` itself.  For example, you might
-compose your own directive that configures a set of views for a prebaked
-purpose (e.g. ``restview`` or somesuch) , allowing other people to refer to
-that directive when they make declarations in the ``includeme`` of their
-customization package.  There is a cost for this: the developer of an
-application that defines custom plugpoints for its deployers will need to
-understand the ZCA or he will need to develop his own similar extensibility
-system.
 
-Ultimately, any argument about whether the extensibility features lent to
-applications by :app:`Pyramid` are good or bad is mostly pointless. You
-needn't take advantage of the extensibility features provided by a particular
-:app:`Pyramid` application in order to affect a modification for a particular
-set of its deployments.  You can ignore the application's extensibility
-plugpoints entirely, and instead use version control branching and merging to
-manage application deployment modifications instead, as if you were deploying
-an application written using any other web framework.
+.. Many developers seem to believe that creating extensible applications is not
+.. worth it.  They instead suggest that modifying the source of a given
+.. application for each deployment to override behavior is more reasonable.
+.. Much discussion about version control branching and merging typically ensues.
+
+多くの開発者が、拡張可能なアプリケーションの作成に価値がないと信じてい
+るようです。彼らは、その代わりに、各デプロイに対して振る舞いをオーバー
+ライドするために与えられたアプリケーションのソースを修正することがより
+合理的であると提言します。その後で、バージョン管理におけるブランチや
+マージに関する多くの議論が典型的に続きます。
+
+
+.. It's clear that making every application extensible isn't required.  The
+.. majority of web applications only have a single deployment, and thus needn't
+.. be extensible at all.  However, some web applications have multiple
+.. deployments, and some have *many* deployments.  For example, a generic
+.. content management system (CMS) may have basic functionality that needs to be
+.. extended for a particular deployment.  That CMS system may be deployed for
+.. many organizations at many places.  Some number of deployments of this CMS
+.. may be deployed centrally by a third party and managed as a group.  It's
+.. useful to be able to extend such a system for each deployment via preordained
+.. plugpoints than it is to continually keep each software branch of the system
+.. in sync with some upstream source: the upstream developers may change code in
+.. such a way that your changes to the same codebase conflict with theirs in
+.. fiddly, trivial ways.  Merging such changes repeatedly over the lifetime of a
+.. deployment can be difficult and time consuming, and it's often useful to be
+.. able to modify an application for a particular deployment in a less invasive
+.. way.
+
+すべてのアプリケーションを拡張可能にする必要がないことは明らかです。大
+多数のウェブアプリケーションは単一のデプロイだけを持っており、したがっ
+て拡張可能である必要はまったくありません。しかしながら、いくつかのウェ
+ブアプリケーションには多数のデプロイがあります。また、いくつかには *多
+くの* デプロイがあります。例えば、汎用的なコンテンツ管理システム(CMS)
+は、特定のデプロイのために拡張される必要のある基本機能を持っているかも
+しれません。その CMS システムは多くの場所に多くの組織のために展開するか
+もしれません。この CMS の若干のデプロイは、第三者によって中心的に展開し、
+グループとして管理されるかもしれません。上流のソースと同期してシステム
+の各ソフトウェアブランチを絶えず維持することに比べて、事前に用意された
+プラグポイントによってそのようなシステムをデプロイ毎に拡張できることは
+有用です: 上流の開発者は、同じコードベースに対するあなたの変更と矛盾す
+るような厄介で些細な変更をコードに加えるかもしれません。デプロイの一生
+の間そのような変更を繰り返しマージすることは困難で、時間を浪費します。
+また、それほど侵略的でない方法で特定のデプロイのためにアプリケーション
+を修正できることは、多くの場合に有用です。
+
+
+.. If you don't want to think about :app:`Pyramid` application extensibility at
+.. all, you needn't.  You can ignore extensibility entirely.  However, if you
+.. follow the set of rules defined in :ref:`extending_chapter`, you don't need
+.. to *make* your application extensible: any application you write in the
+.. framework just *is* automatically extensible at a basic level.  The
+.. mechanisms that deployers use to extend it will be necessarily coarse:
+.. typically, views, routes, and resources will be capable of being
+.. overridden. But for most minor (and even some major) customizations, these
+.. are often the only override plugpoints necessary: if the application doesn't
+.. do exactly what the deployment requires, it's often possible for a deployer
+.. to override a view, route, or resource and quickly make it do what he or she
+.. wants it to do in ways *not necessarily anticipated by the original
+.. developer*.  Here are some example scenarios demonstrating the benefits of
+.. such a feature.
+
+:app:`Pyramid` アプリケーションの拡張性に関して一切考えたくなければ、
+その必要はありません。拡張性を完全に無視することができます。しかしながら、
+:ref:`extending_chapter` に定義された規則のセットに従えば、アプリケーション
+を拡張可能に *作る* 必要はありません: フレームワークの中で書くどんな
+アプリケーションも、基礎的なレベルで自動的に拡張可能に *なります* 。
+アプリケーションを拡張するためにデプロイ担当者が使用するメカニズムは
+必然的に粗く (coarse) なります: 典型的には、ビュー、ルートおよびリソース
+はオーバーライドできるでしょう。ほとんどの小さな (そしていくつかの主要な)
+カスタマイズに関して、多くの場合にこれらは必要な唯一のオーバーライド用
+のプラグポイントです: デプロイが要求する動作を完全にはアプリケーション
+が行わない場合、デプロイ担当者は多くの場合ビュー、ルートあるいはリソース
+をオーバーライドし、それに行ってほしいことを *オリジナルの開発者によって
+必ずしも予想されない方法で* 素早く行うことができます。ここで、そのような
+特徴の利点を示すいくつかの例シナリオを挙げます:
+
+
+.. - If a deployment needs a different styling, the deployer may override the
+..   main template and the CSS in a separate Python package which defines
+..   overrides.
+
+- あるデプロイが異なるスタイルを必要とする場合、 主要なテンプレートと
+  CSS を、個別の Python パッケージの中でオーバーライドすることができます。
+
+
+.. - If a deployment needs an application page to do something differently needs
+..   it to expose more or different information, the deployer may override the
+..   view that renders the page within a separate Python package.
+
+- あるデプロイが、より多くのあるいは異なる情報を露出するために異なる
+  アプリケーションページを必要とする場合、そのページをレンダリングする
+  ビューを個別の Python パッケージの中でオーバーライドできます。
+
+
+.. - If a deployment needs an additional feature, the deployer may add a view to
+..   the override package.
+
+- デプロイが追加機能を必要とする場合、オーバーライドパッケージにビュー
+  を加えることができます。
+
+
+.. As long as the fundamental design of the upstream package doesn't change,
+.. these types of modifications often survive across many releases of the
+.. upstream package without needing to be revisited.
+
+このようなタイプの修正は、上流パッケージの基本デザインが変わらない限り、
+改訂の必要なしに上流パッケージの多くのリリースを越えてしばしば残り
+続けます。
+
+
+.. Extending an application externally is not a panacea, and carries a set of
+.. risks similar to branching and merging: sometimes major changes upstream will
+.. cause you to need to revisit and update some of your modifications.  But you
+.. won't regularly need to deal wth meaningless textual merge conflicts that
+.. trivial changes to upstream packages often entail when it comes time to
+.. update the upstream package, because if you extend an application externally,
+.. there just is no textual merge done.  Your modifications will also, for
+.. whatever its worth, be contained in one, canonical, well-defined place.
+
+アプリケーションを外部から拡張することは万能薬でなく、ブランチとマージ
+に似たいくつかの危険をもたらします: 時々、上流での大きな変化によって
+あなたの修正のいくつかを見直し更新する必要があります。しかし、通常は
+無意味な textual なマージコンフリクトに対処する必要がないでしょう。
+そのような上流パッケージに対する重要でない変更は、上流パッケージが
+更新される時にはしばしば起こりますが、アプリケーションを外部から拡張
+する場合、 textual なマージは決して発生しないからです。あなたの修正も、
+for whatever its worth 、一箇所の、正統で、十分に定義された場所に
+含まれるでしょう。
+
+
+.. Branching an application and continually merging in order to get new features
+.. and bugfixes is clearly useful.  You can do that with a :app:`Pyramid`
+.. application just as usefully as you can do it with any application.  But
+.. deployment of an application written in :app:`Pyramid` makes it possible to
+.. avoid the need for this even if the application doesn't define any plugpoints
+.. ahead of time.  It's possible that promoters of competing web frameworks
+.. dismiss this feature in favor of branching and merging because applications
+.. written in their framework of choice aren't extensible out of the box in a
+.. comparably fundamental way.
+
+新しい機能やバグフィックスを得るためにアプリケーションをブランチさせて
+絶えずマージすることは、明らかに有用です。 :app:`Pyramid` アプリケーショ
+ンでも、他のアプリケーションの場合と同じやり方ができて、同じくらい有用
+です。しかし、 :app:`Pyramid` で書かれたアプリケーションのデプロイの
+場合は、アプリケーションが事前にプラグポイントを定義していなくても、
+この必要を回避することが可能です。競合するウェブフレームワークの推進者
+がブランチとマージを支持して、この特徴を見過ごすことはありえます。
+なぜなら、彼らの選択したフレームワークで書かれたアプリケーションが
+箱から出した状態では同じような基本的な方法で拡張可能ではないからです。
+
+
+.. While :app:`Pyramid` application are fundamentally extensible even if you
+.. don't write them with specific extensibility in mind, if you're moderately
+.. adventurous, you can also take it a step further.  If you learn more about
+.. the :term:`Zope Component Architecture`, you can optionally use it to expose
+.. other more domain-specific configuration plugpoints while developing an
+.. application.  The plugpoints you expose needn't be as coarse as the ones
+.. provided automatically by :app:`Pyramid` itself.  For example, you might
+.. compose your own directive that configures a set of views for a prebaked
+.. purpose (e.g. ``restview`` or somesuch) , allowing other people to refer to
+.. that directive when they make declarations in the ``includeme`` of their
+.. customization package.  There is a cost for this: the developer of an
+.. application that defines custom plugpoints for its deployers will need to
+.. understand the ZCA or he will need to develop his own similar extensibility
+.. system.
+
+特定の拡張性を気にしながらアプリケーションを書かなくても :app:`Pyramid`
+アプリケーションは基本的に拡張可能ですが、あなたが適度に冒険的ならば、
+さらに、それを1ステップ進めることができます。 :term:`Zope Component
+Architecture` に関してもっと学習すれば、アプリケーションを開発する際に、
+よりドメインに特化した設定プラグポイントを露出するために任意にそれを
+使用することができます。露出されるプラグポイントは、 :app:`Pyramid`
+自体によって自動的に提供されるものよりは粒度が粗い (corse) 必要がありません。
+例えば、あらかじめ決まった目的のために一揃いのビューを形成するための
+独自ディレクティブを構成して (例えば ``restview`` やその類)、他の人々が
+カスタマイズパッケージの ``includeme`` の中で宣言をする際にこの
+ディレクティブを参照することを許すことができます。このためのコストがあります:
+デプロイ担当者のためのカスタムプラグポイントを定義するアプリケーション
+開発者は、 ZCA を理解する必要があるでしょう。さもなくば、自分自身で同様
+の拡張性システムを開発する必要があるでしょう。
+
+
+.. Ultimately, any argument about whether the extensibility features lent to
+.. applications by :app:`Pyramid` are good or bad is mostly pointless. You
+.. needn't take advantage of the extensibility features provided by a particular
+.. :app:`Pyramid` application in order to affect a modification for a particular
+.. set of its deployments.  You can ignore the application's extensibility
+.. plugpoints entirely, and instead use version control branching and merging to
+.. manage application deployment modifications instead, as if you were deploying
+.. an application written using any other web framework.
+
+究極的には、 :app:`Pyramid` によってアプリケーションに与えられた拡張性
+の特徴がよいか悪いかに関するどんな議論もほとんど無意味です。特定の
+:app:`Pyramid` アプリケーションによって提供される拡張性の特徴を、
+そのデプロイの特定のセットのための修正に影響を与えるために利用する必要は
+ありません。アプリケーションの拡張性プラグポイントを完全に無視し、
+代わりに、あたかも他のウェブフレームワークも使用して書かれた
+アプリケーションをデプロイしているように、アプリケーションのデプロイ用
+の修正を管理するためにバージョン管理のブランチとマージを使用することが
+できます。
+
 
 Zope 3 Enforces "TTW" Authorization Checks By Default; Pyramid Does Not
 -----------------------------------------------------------------------
