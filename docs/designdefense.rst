@@ -1906,54 +1906,109 @@ Zope 3 Enforces "TTW" Authorization Checks By Default; Pyramid Does Not
 Challenge
 +++++++++
 
-:app:`Pyramid` performs automatic authorization checks only at :term:`view`
-execution time.  Zope 3 wraps context objects with a `security proxy
-<http://wiki.zope.org/zope3/WhatAreSecurityProxies>`_, which causes Zope 3 to
-do also security checks during attribute access.  I like this, because it
-means:
+.. :app:`Pyramid` performs automatic authorization checks only at :term:`view`
+.. execution time.  Zope 3 wraps context objects with a `security proxy
+.. <http://wiki.zope.org/zope3/WhatAreSecurityProxies>`_, which causes Zope 3 to
+.. do also security checks during attribute access.  I like this, because it
+.. means:
 
-#) When I use the security proxy machinery, I can have a view that
-   conditionally displays certain HTML elements (like form fields) or
-   prevents certain attributes from being modified depending on the the
-   permissions that the accessing user possesses with respect to a context
-   object.
+:app:`Pyramid` は :term:`view` の実行時にのみ自動的な認可チェックを行ないます。
+Zope 3 はコンテキストオブジェクトを `security proxy
+<http://wiki.zope.org/zope3/WhatAreSecurityProxies>`_ でラップして、
+属性アクセス中にさらにセキュリティ検査を行います。
+私はこれが好きです。なぜなら:
 
-#) I want to also expose my resources via a REST API using Twisted Web. If
-   Pyramid performed authorization based on attribute access via Zope3's
-   security proxies, I could enforce my authorization policy in both
-   :app:`Pyramid` and in the Twisted-based system the same way.
+
+.. #) When I use the security proxy machinery, I can have a view that
+..    conditionally displays certain HTML elements (like form fields) or
+..    prevents certain attributes from being modified depending on the the
+..    permissions that the accessing user possesses with respect to a context
+..    object.
+
+1) セキュリティプロキシメカニズムを使用する場合、特定の HTML 要素
+   (form フィールドのような) を条件付きで表示したり、コンテキスト
+   オブジェクトに関してアクセスしたユーザが所有する許可に依存して
+   ある属性が修正されるのを防ぐビューを持つことができます。
+
+
+.. #) I want to also expose my resources via a REST API using Twisted Web. If
+..    Pyramid performed authorization based on attribute access via Zope3's
+..    security proxies, I could enforce my authorization policy in both
+..    :app:`Pyramid` and in the Twisted-based system the same way.
+
+2) さらに、私は Twisted Web を使用して、REST API によってリソースを露出
+   したい。もし Pyramid が Zope3 のセキュリティプロキシによって属性アク
+   セスに基づいた認可を行なえば、 :app:`Pyramid` と Twisted ベースのシ
+   ステムの両方で認可ポリシーを同じ方法で実施することができます。
+
 
 Defense
 +++++++
 
-:app:`Pyramid` was developed by folks familiar with Zope 2, which has a
-"through the web" security model.  This TTW security model was the precursor
-to Zope 3's security proxies.  Over time, as the :app:`Pyramid` developers
-(working in Zope 2) created such sites, we found authorization checks during
-code interpretation extremely useful in a minority of projects.  But much of
-the time, TTW authorization checks usually slowed down the development
-velocity of projects that had no delegation requirements.  In particular, if
-we weren't allowing untrusted users to write arbitrary Python code to be
-executed by our application, the burden of through the web security checks
-proved too costly to justify.  We (collectively) haven't written an
-application on top of which untrusted developers are allowed to write code in
-many years, so it seemed to make sense to drop this model by default in a new
-web framework.
+.. :app:`Pyramid` was developed by folks familiar with Zope 2, which has a
+.. "through the web" security model.  This TTW security model was the precursor
+.. to Zope 3's security proxies.  Over time, as the :app:`Pyramid` developers
+.. (working in Zope 2) created such sites, we found authorization checks during
+.. code interpretation extremely useful in a minority of projects.  But much of
+.. the time, TTW authorization checks usually slowed down the development
+.. velocity of projects that had no delegation requirements.  In particular, if
+.. we weren't allowing untrusted users to write arbitrary Python code to be
+.. executed by our application, the burden of through the web security checks
+.. proved too costly to justify.  We (collectively) haven't written an
+.. application on top of which untrusted developers are allowed to write code in
+.. many years, so it seemed to make sense to drop this model by default in a new
+.. web framework.
 
-And since we tend to use the same toolkit for all web applications, it's just
-never been a concern to be able to use the same set of restricted-execution
-code under two web different frameworks.
+:app:`Pyramid` は Zope 2 に精通している人々によって開発されました。
+Zope 2 には「through the web」セキュリティモデルがあります。この TTW
+セキュリティモデルは Zope 3 のセキュリティプロキシの前身でした。
+時間が経つにつれて、 :app:`Pyramid` 開発者 (Zope 2で働いている) がその
+ようなサイトを作るうちに、私たちは少数のプロジェクトでコード解釈の間の
+認可チェックが非常に有用だと分かりました。しかし大抵の場合、元々 delegation
+の必要がなかったプロジェクトでは TTW 認可チェックによって開発速度が通常
+遅くなりました。特に、信頼されていないユーザが私たちのアプリケーション
+によって実行される任意の Python コードを書くことを認めていなかったなら、
+ウェブセキュリティ検査を通じた負担が、正当化するにはあまりにもコストが
+かかりすぎるということが証明されました。私たちは (集団的に) ここ何年も
+の間 untrusted な開発者がその上でコードを書くことを認められているアプリ
+ケーションを書いていません。したがって、新しいウェブフレームワーク中で、
+デフォルトでこのモデルを落とすことは筋が通っているように思えました。
 
-Justifications for disabling security proxies by default notwithstanding,
-given that Zope 3 security proxies are viral by nature, the only requirement
-to use one is to make sure you wrap a single object in a security proxy and
-make sure to access that object normally when you want proxy security checks
-to happen.  It is possible to override the :app:`Pyramid` traverser for a
-given application (see :ref:`changing_the_traverser`).  To get Zope3-like
-behavior, it is possible to plug in a different traverser which returns
-Zope3-security-proxy-wrapped objects for each traversed object (including the
-:term:`context` and the :term:`root`).  This would have the effect of
-creating a more Zope3-like environment without much effort.
+
+.. And since we tend to use the same toolkit for all web applications, it's just
+.. never been a concern to be able to use the same set of restricted-execution
+.. code under two web different frameworks.
+
+また、私たちはすべてのウェブアプリケーションに同じツールキットを使用す
+る傾向があるので、2つの異なるウェブフレームワークの下で同じ制限実行コード
+が使用できることは、実際の関心事にはなりません (it's just never been
+a concern)。
+
+
+.. Justifications for disabling security proxies by default notwithstanding,
+.. given that Zope 3 security proxies are viral by nature, the only requirement
+.. to use one is to make sure you wrap a single object in a security proxy and
+.. make sure to access that object normally when you want proxy security checks
+.. to happen.  It is possible to override the :app:`Pyramid` traverser for a
+.. given application (see :ref:`changing_the_traverser`).  To get Zope3-like
+.. behavior, it is possible to plug in a different traverser which returns
+.. Zope3-security-proxy-wrapped objects for each traversed object (including the
+.. :term:`context` and the :term:`root`).  This would have the effect of
+.. creating a more Zope3-like environment without much effort.
+
+デフォルトでセキュリティプロキシを無効にすることの正当性にもかかわらず、
+Zope 3 セキュリティプロキシが生来ウイルス的であることを踏まえて、
+それを使用する唯一の要件は、単一のオブジェクトをセキュリティプロキシで
+ラップして、プロキシセキュリティ検査が起こることを望む時に通常そのオブ
+ジェクトにアクセスが起こるのが確実であることです。既存のアプリケーション
+用の :app:`Pyramid` トラバーサーをオーバーライドすることは可能です
+(:ref:`changing_the_traverser` を参照)。 Zope 3 のような振る舞いを得る
+ために、トラバースされたそれぞれのオブジェクト (:term:`context` と
+:term:`root` を含む) に対して Zope 3 セキュリティプロキシのラップ
+オブジェクトを返す異なるトラバーサーをプラグインすることは可能です。
+これは、多くの努力なしで、より Zope 3 に類似した環境を作成する効果が
+あるでしょう。
+
 
 .. _http_exception_hierarchy:
 
