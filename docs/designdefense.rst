@@ -2292,7 +2292,10 @@ world" 単一ファイルプログラムが、彼らの好きなマイクロフ�
 Application Programmers Don't Control The Module-Scope Codepath (Import-Time Side-Effects Are Evil)
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Please imagine a directory structure with a set of Python files in it:
+.. Please imagine a directory structure with a set of Python files in it:
+
+以下のような Python ファイルを含むディレクトリ構造を想像してください:
+
 
 .. code-block:: text
 
@@ -2301,7 +2304,11 @@ Please imagine a directory structure with a set of Python files in it:
     |-- app2.py
     `-- config.py
 
-The contents of ``app.py``:
+
+.. The contents of ``app.py``:
+
+``app.py`` の内容:
+
 
 .. code-block:: python
     :linenos:
@@ -2318,7 +2325,11 @@ The contents of ``app.py``:
         import app2
         pprint.pprint(L)
 
-The contents of ``app2.py``:
+
+.. The contents of ``app2.py``:
+
+``app2.py`` の内容:
+
 
 .. code-block:: python
     :linenos:
@@ -2329,7 +2340,11 @@ The contents of ``app2.py``:
     def bar():
         pass
 
-The contents of ``config.py``:
+
+.. The contents of ``config.py``:
+
+``config.py`` の内容:
+
 
 .. code-block:: python
   :linenos:
@@ -2340,13 +2355,24 @@ The contents of ``config.py``:
         L.append(func)
         return func
 
-If we cd to the directory that holds these files and we run ``python app.py``
-given the directory structure and code above, what happens?  Presumably, our
-``decorator`` decorator will be used twice, once by the decorated function
-``foo`` in ``app.py`` and once by the decorated function ``bar`` in
-``app2.py``.  Since each time the decorator is used, the list ``L`` in
-``config.py`` is appended to, we'd expect a list with two elements to be
-printed, right?  Sadly, no:
+
+.. If we cd to the directory that holds these files and we run ``python app.py``
+.. given the directory structure and code above, what happens?  Presumably, our
+.. ``decorator`` decorator will be used twice, once by the decorated function
+.. ``foo`` in ``app.py`` and once by the decorated function ``bar`` in
+.. ``app2.py``.  Since each time the decorator is used, the list ``L`` in
+.. ``config.py`` is appended to, we'd expect a list with two elements to be
+.. printed, right?  Sadly, no:
+
+これらのファイルを保持するディレクトリに cd して、上記のディレクトリ構造
+およびコードを前提として ``python app.py`` を実行すると何が起こるでしょうか？
+``decorator`` デコレータは 2 回使用されると推測されます。
+``app.py`` の中でデコレートされた関数 ``foo`` で 1回、
+``app2.py`` の中でデコレートされた関数 ``bar`` で 1回です。
+デコレータが使用される都度 ``config.py`` の中のリスト ``L`` は append
+されるので、2要素を含むリストが表示されることを期待しますよね。
+悲しいことに違います:
+
 
 .. code-block:: text
 
@@ -2355,26 +2381,51 @@ printed, right?  Sadly, no:
      <function foo at 0x7f4ea41ab230>,
      <function bar at 0x7f4ea41ab2a8>]
 
-By visual inspection, that outcome (three different functions in the list)
-seems impossible.  We only defined two functions and we decorated each of
-those functions only once, so we believe that the ``decorator`` decorator
-will only run twice.  However, what we believe is wrong because the code at
-module scope in our ``app.py`` module was *executed twice*.  The code is
-executed once when the script is run as ``__main__`` (via ``python app.py``),
-and then it is executed again when ``app2.py`` imports the same file as
-``app``.
 
-What does this have to do with our comparison to microframeworks?  Many
-microframeworks in the current crop (e.g. Bottle, Flask) encourage you to
-attach configuration decorators to objects defined at module scope.  These
-decorators execute arbitrarily complex registration code which populates a
-singleton registry that is a global defined in external Python module.  This
-is analogous to the above example: the "global registry" in the above example
-is the list ``L``.
+.. By visual inspection, that outcome (three different functions in the list)
+.. seems impossible.  We only defined two functions and we decorated each of
+.. those functions only once, so we believe that the ``decorator`` decorator
+.. will only run twice.  However, what we believe is wrong because the code at
+.. module scope in our ``app.py`` module was *executed twice*.  The code is
+.. executed once when the script is run as ``__main__`` (via ``python app.py``),
+.. and then it is executed again when ``app2.py`` imports the same file as
+.. ``app``.
 
-Let's see what happens when we use the same pattern with the `Groundhog
-<https://github.com/Pylons/groundhog>`_ microframework.  Replace the contents
-of ``app.py`` above with this:
+目視による検査では、その結果 (リスト中の3つの異なる関数) はありえない
+ように思えます。定義した関数は 2つだけで、それぞれの関数を一度ずつ
+デコレートしました。したがって、私たちは ``decorator`` デコレータが
+2回しか走らないと確信します。しかしながら、その確信は間違っています。
+``app.py`` モジュール中でモジュールスコープのコードが *2度実行されている*
+からです。コードは、スクリプトが起動されるとき (``Python app.py`` による)
+に ``__main__`` として一度実行され、次に ``app2.py`` がその同じファイル
+をインポートする時に ``app`` として再び実行されます。
+
+
+.. What does this have to do with our comparison to microframeworks?  Many
+.. microframeworks in the current crop (e.g. Bottle, Flask) encourage you to
+.. attach configuration decorators to objects defined at module scope.  These
+.. decorators execute arbitrarily complex registration code which populates a
+.. singleton registry that is a global defined in external Python module.  This
+.. is analogous to the above example: the "global registry" in the above example
+.. is the list ``L``.
+
+これはマイクロフレームワークとの比較とどんな関係があるのでしょうか。
+現在の多くのマイクロフレームワーク (例えば Bottle や Flask) は、
+モジュールスコープで定義されたオブジェクトに設定デコレータを取り付ける
+ことを奨励しています。これらのデコレータは、外部の Python モジュールに
+定義されたグローバル変数であるシングルトンレジストリを populate する
+任意の複雑な登録コードを実行します。これは上記の例と類似しています:
+上記の例における「グローバルレジストリ」はリスト ``L`` です。
+
+
+.. Let's see what happens when we use the same pattern with the `Groundhog
+.. <https://github.com/Pylons/groundhog>`_ microframework.  Replace the contents
+.. of ``app.py`` above with this:
+
+`Groundhog <https://github.com/Pylons/groundhog>`_ マイクロフレームワーク
+で同じパターンを使用する場合に何が起こるか確かめましょう。上記 ``app.py``
+の内容をこれに置き替えてください:
+
 
 .. code-block:: python
     :linenos:
@@ -2389,7 +2440,11 @@ of ``app.py`` above with this:
         import app2
         pprint.pprint(L)
 
-Replace the contents of ``app2.py`` above with this:
+
+.. Replace the contents of ``app2.py`` above with this:
+
+上記 ``app2.py`` の内容をこれに置き替えてください:
+
 
 .. code-block:: python
     :linenos:
@@ -2400,7 +2455,11 @@ Replace the contents of ``app2.py`` above with this:
     def bar():
         'return bar'
 
-Replace the contents of ``config.py`` above with this:
+
+.. Replace the contents of ``config.py`` above with this:
+
+上記 ``config.py`` の内容をこれに置き替えてください:
+
 
 .. code-block:: python
     :linenos:
@@ -2408,87 +2467,176 @@ Replace the contents of ``config.py`` above with this:
     from groundhog import Groundhog
     gh = Groundhog('myapp', 'seekrit')
 
-How many routes will be registered within the routing table of the "gh"
-Groundhog application?  If you answered three, you are correct.  How many
-would a casual reader (and any sane developer) expect to be registered?  If
-you answered two, you are correct.  Will the double registration be a
-problem?  With our Groundhog framework's ``route`` method backing this
-application, not really.  It will slow the application down a little bit,
-because it will need to miss twice for a route when it does not match.  Will
-it be a problem with another framework, another application, or another
-decorator?  Who knows.  You need to understand the application in its
-totality, the framework in its totality, and the chronology of execution to
-be able to predict what the impact of unintentional code double-execution
-will be.
 
-The encouragement to use decorators which perform population of an external
-registry has an unintended consequence: the application developer now must
-assert ownership of every codepath that executes Python module scope
-code. Module-scope code is presumed by the current crop of decorator-based
-microframeworks to execute once and only once; if it executes more than once,
-weird things will start to happen.  It is up to the application developer to
-maintain this invariant.  Unfortunately, however, in reality, this is an
-impossible task, because, Python programmers *do not own the module scope
-codepath, and never will*.  Anyone who tries to sell you on the idea that
-they do is simply mistaken.  Test runners that you may want to use to run
-your code's tests often perform imports of arbitrary code in strange orders
-that manifest bugs like the one demonstrated above.  API documentation
-generation tools do the same.  Some people even think it's safe to use the
-Python ``reload`` command or delete objects from ``sys.modules``, each of
-which has hilarious effects when used against code that has import-time side
-effects.
+.. How many routes will be registered within the routing table of the "gh"
+.. Groundhog application?  If you answered three, you are correct.  How many
+.. would a casual reader (and any sane developer) expect to be registered?  If
+.. you answered two, you are correct.  Will the double registration be a
+.. problem?  With our Groundhog framework's ``route`` method backing this
+.. application, not really.  It will slow the application down a little bit,
+.. because it will need to miss twice for a route when it does not match.  Will
+.. it be a problem with another framework, another application, or another
+.. decorator?  Who knows.  You need to understand the application in its
+.. totality, the framework in its totality, and the chronology of execution to
+.. be able to predict what the impact of unintentional code double-execution
+.. will be.
 
-Global-registry-mutating microframework programmers therefore will at some
-point need to start reading the tea leaves about what *might* happen if
-module scope code gets executed more than once like we do in the previous
-paragraph.  When Python programmers assume they can use the module-scope
-codepath to run arbitrary code (especially code which populates an external
-registry), and this assumption is challenged by reality, the application
-developer is often required to undergo a painful, meticulous debugging
-process to find the root cause of an inevitably obscure symptom.  The
-solution is often to rearrange application import ordering or move an import
-statement from module-scope into a function body.  The rationale for doing so
-can never be expressed adequately in the checkin message which accompanies
-the fix and can't be documented succinctly enough for the benefit of the rest
-of the development team so that the problem never happens again.  It will
-happen again, especially if you are working on a project with other people
-who haven't yet internalized the lessons you learned while you stepped
-through module-scope code using ``pdb``.  This is a really pretty poor
-situation to find yourself in as an application developer: you probably
-didn't even know your or your team signed up for the job, because the
-documentation offered by decorator-based microframeworks don't warn you about
-it.
+"gh" Groundhog アプリケーションのルーティングテーブル内にいくつのルーティング
+設定が登録されるでしょうか? 3と答えたら正解です。カジュアルコードリーダー
+(また任意の分別ある開発者) は、いくつ登録されていることを期待するでしょうか?
+2と答えたら正解です。二重登録は問題になるでしょうか。このアプリケーションを
+裏で支える私たちの Groundhog フレームワークの ``route`` メソッドでは、あまり
+問題になりません。ルーティングが一致しない場合に1つのルーティングに対して2度
+失敗する必要があるので、それはほんの少しアプリケーションを遅くするでしょう。
+では、他のフレームワーク、他のアプリケーションあるいは別のデコレータに
+関して問題になるでしょうか。誰にも分かりません。不慮のコード二重実行の
+インパクトが何かを予測できるようになるためには、そのアプリケーション全体、
+そのフレームワーク全体、および実行の時間的な順序関係 (chronology) を理解
+する必要があります。
 
-Folks who have a large investment in eager decorator-based configuration that
-populates an external data structure (such as microframework authors) may
-argue that the set of circumstances I outlined above is anomalous and
-contrived.  They will argue that it just will never happen.  If you never
-intend your application to grow beyond one or two or three modules, that's
-probably true.  However, as your codebase grows, and becomes spread across a
-greater number of modules, the circumstances in which module-scope code will
-be executed multiple times will become more and more likely to occur and less
-and less predictable.  It's not responsible to claim that double-execution of
-module-scope code will never happen.  It will; it's just a matter of luck,
-time, and application complexity.
 
-If microframework authors do admit that the circumstance isn't contrived,
-they might then argue that real damage will never happen as the result of the
-double-execution (or triple-execution, etc) of module scope code.  You would
-be wise to disbelieve this assertion.  The potential outcomes of multiple
-execution are too numerous to predict because they involve delicate
-relationships between application and framework code as well as chronology of
-code execution.  It's literally impossible for a framework author to know
-what will happen in all circumstances.  But even if given the gift of
-omniscience for some limited set of circumstances, the framework author
-almost certainly does not have the double-execution anomaly in mind when
-coding new features.  He's thinking of adding a feature, not protecting
-against problems that might be caused by the 1% multiple execution case.
-However, any 1% case may cause 50% of your pain on a project, so it'd be nice
-if it never occured.
+.. The encouragement to use decorators which perform population of an external
+.. registry has an unintended consequence: the application developer now must
+.. assert ownership of every codepath that executes Python module scope
+.. code. Module-scope code is presumed by the current crop of decorator-based
+.. microframeworks to execute once and only once; if it executes more than once,
+.. weird things will start to happen.  It is up to the application developer to
+.. maintain this invariant.  Unfortunately, however, in reality, this is an
+.. impossible task, because, Python programmers *do not own the module scope
+.. codepath, and never will*.  Anyone who tries to sell you on the idea that
+.. they do is simply mistaken.  Test runners that you may want to use to run
+.. your code's tests often perform imports of arbitrary code in strange orders
+.. that manifest bugs like the one demonstrated above.  API documentation
+.. generation tools do the same.  Some people even think it's safe to use the
+.. Python ``reload`` command or delete objects from ``sys.modules``, each of
+.. which has hilarious effects when used against code that has import-time side
+.. effects.
 
-Responsible microframeworks actually offer a back-door way around the
-problem.  They allow you to disuse decorator based configuration entirely.
-Instead of requiring you to do the following:
+外部レジストリの populate を行なうデコレータの使用を推奨することには、
+意図しない結果があります: アプリケーション開発者は、今や Python モジュール
+スコープのコードを実行するすべてのコードパスの所有権を主張しなければ
+なりません。モジュールスコープのコードは、現在のデコレータに基づく
+マイクロフレームワークでは必ずただ一度だけ実行されると仮定されます;
+それが二度以上実行されれば、不思議なことが起こり始めるでしょう。この
+不変式を維持することはアプリケーション開発者の責任です。しかしながら、
+あいにくこれは実際には不可能なタスクです。なぜなら、 Python プログラマは
+*モジュールスコープのコードパスを所有しておらず、また将来も決してそう
+ならない* からです。それができるという考えをあなたに納得させようとする
+人は誰も、単に誤解しています。あなたがコードのテストを実行するために
+使おうとしたテストランナーは、しばしば奇妙な順番で任意のコードのインポート
+を行ない、上記で実証されたようなバグを見つけ出します。
+API ドキュメンテーション生成ツールも同じことをします。さらに Python の
+``reload`` コマンドを使用したり ``sys.modules`` からオブジェクトを削除
+したりすることが安全だと考えている人さえいます。どちらも、インポート時の
+副作用があるコードに対して使用された場合にとてもおかしな効果があります。
+
+
+.. Global-registry-mutating microframework programmers therefore will at some
+.. point need to start reading the tea leaves about what *might* happen if
+.. module scope code gets executed more than once like we do in the previous
+.. paragraph.  When Python programmers assume they can use the module-scope
+.. codepath to run arbitrary code (especially code which populates an external
+.. registry), and this assumption is challenged by reality, the application
+.. developer is often required to undergo a painful, meticulous debugging
+.. process to find the root cause of an inevitably obscure symptom.  The
+.. solution is often to rearrange application import ordering or move an import
+.. statement from module-scope into a function body.  The rationale for doing so
+.. can never be expressed adequately in the checkin message which accompanies
+.. the fix and can't be documented succinctly enough for the benefit of the rest
+.. of the development team so that the problem never happens again.  It will
+.. happen again, especially if you are working on a project with other people
+.. who haven't yet internalized the lessons you learned while you stepped
+.. through module-scope code using ``pdb``.  This is a really pretty poor
+.. situation to find yourself in as an application developer: you probably
+.. didn't even know your or your team signed up for the job, because the
+.. documentation offered by decorator-based microframeworks don't warn you about
+.. it.
+
+グローバルレジストリ書き換え型のマイクロフレームワークのプログラマは、
+したがって、前節の中で行ったようにモジュールスコープコードが二度以上
+実行された場合に何が起こる *かもしれない* のかに関して、ある時点で茶
+柱占いを始める (start reading the tea leaves) 必要があるでしょう。
+Python プログラマがモジュールスコープのコードパスを任意のコード
+(特に外部レジストリに populate するコード) を実行するために使用できる
+と考えて、この仮定が現実によって挑戦された場合、アプリケーション開発者
+は必然的に不明瞭な徴候の根本的原因を見つけるために、しばしば苦痛に満ちた
+綿密なデバッグプロセスを経験する必要があります。その解決策は、多くの場合
+アプリケーションのインポート順を再整理するか、インポート文をモジュール
+スコープから関数本体に移動させることです。そうすることの論理的根拠は、
+修正を達成したチェックインメッセージの中で十分に表現することができず、
+その問題が再び起こらないように開発チームの他のメンバーのために十分簡潔に
+文書化することもできません。それは再び起こるでしょう。特に、あなたが
+``pdb`` を使用してモジュールスコープコードをステップ実行する間に学習した
+レッスンをまだ内面化していない他の人々とプロジェクトに取り組んでいるならば。
+これは、アプリケーション開発者としては実際かなりひどい状況になっている
+ことに気がつきます: デコレータに基づくマイクロフレームワークによって
+提示されるドキュメンテーションではそれに関して警告がないので、あなたもしくは
+その仕事のために契約したあなたのチームは、恐らく考えもしなかったでしょう。
+
+
+.. Folks who have a large investment in eager decorator-based configuration that
+.. populates an external data structure (such as microframework authors) may
+.. argue that the set of circumstances I outlined above is anomalous and
+.. contrived.  They will argue that it just will never happen.  If you never
+.. intend your application to grow beyond one or two or three modules, that's
+.. probably true.  However, as your codebase grows, and becomes spread across a
+.. greater number of modules, the circumstances in which module-scope code will
+.. be executed multiple times will become more and more likely to occur and less
+.. and less predictable.  It's not responsible to claim that double-execution of
+.. module-scope code will never happen.  It will; it's just a matter of luck,
+.. time, and application complexity.
+
+外部のデータ構造に populate するデコレータに基づく早期の (eager) 設定に
+多大な投資をしている人々 (マイクロフレームワークの作者のような) は、私が
+上記で概説した状況は変則的で不自然だと主張するかもしれません。
+彼らは、それがまったく起こらないと主張するでしょう。アプリケーションを
+2〜3 個のモジュールを越えて成長させるつもりでなければ、それは恐らく真実
+です。しかしながら、コードベースが成長し、多数のモジュールに拡大していく
+うちに、モジュールスコープのコードが複数回実行される状況はますます生じ
+やすくなり、ますます予測しにくくなるでしょう。モジュールスコープのコード
+の二重実行が起こらないと責任を持って主張することはできません。それは
+いずれ起こります; 単に運や時間、アプリケーションの複雑さの問題です。
+
+
+.. If microframework authors do admit that the circumstance isn't contrived,
+.. they might then argue that real damage will never happen as the result of the
+.. double-execution (or triple-execution, etc) of module scope code.  You would
+.. be wise to disbelieve this assertion.  The potential outcomes of multiple
+.. execution are too numerous to predict because they involve delicate
+.. relationships between application and framework code as well as chronology of
+.. code execution.  It's literally impossible for a framework author to know
+.. what will happen in all circumstances.  But even if given the gift of
+.. omniscience for some limited set of circumstances, the framework author
+.. almost certainly does not have the double-execution anomaly in mind when
+.. coding new features.  He's thinking of adding a feature, not protecting
+.. against problems that might be caused by the 1% multiple execution case.
+.. However, any 1% case may cause 50% of your pain on a project, so it'd be nice
+.. if it never occured.
+
+こうした状況が不自然でないことをマイクロフレームワークの作者が認めれば、
+彼らはモジュールスコープのコードの二重実行 (あるいは三重実行など) の
+結果として実際の損害が起こらないと主張するかもしれません。この主張は
+信じない方が賢明です。複数回実行の潜在的な結果は、アプリケーションと
+フレームワークコードの微妙な関係に加えてコード実行の時間的な順序関係を
+含んでいるので、あまりにも数が多く予測することができません。フレーム
+ワーク作者がすべての状況で何が起こるかを知ることは文字通り不可能です。
+しかし、状況のある制限されたセットに対して特別に全知の能力を与えられた
+としても、フレームワーク作者は新しい機能をコーディングする時にほとんど
+確実に二重実行の異常性のことを気にしないでしょう。彼は機能を加えようと
+思っていて、 1% の複数実行のケースによって引き起こされるかもしれない問題
+に対して保護を忘れます。しかしながら、どんな 1% のケースも、プロジェクト
+上のあなたの苦痛の 50% を引き起こす可能性があります。そのため、それが
+起きなければ良いのですが (so it'd be nice if it never occured)。
+
+
+.. Responsible microframeworks actually offer a back-door way around the
+.. problem.  They allow you to disuse decorator based configuration entirely.
+.. Instead of requiring you to do the following:
+
+信頼できるマイクロフレームワークは、実際のところこの問題を回避するバックドア
+を提供します。そのようなマイクロフレームワークでは、デコレータに基づく
+設定を完全に廃止することができます。以下のようにすることを要求する代わりに:
+
 
 .. code-block:: python
     :linenos:
@@ -2502,7 +2650,11 @@ Instead of requiring you to do the following:
     if __name__ == '__main__':
         gh.run()
 
-They allow you to disuse the decorator syntax and go almost-all-imperative:
+
+.. They allow you to disuse the decorator syntax and go almost-all-imperative:
+
+デコレータシンタックスを廃止して、「ほとんど完全に命令的」にできるようにします:
+
 
 .. code-block:: python
     :linenos:
@@ -2516,28 +2668,53 @@ They allow you to disuse the decorator syntax and go almost-all-imperative:
         gh.add_route(foo, '/foo/')
         gh.run()
 
-This is a generic mode of operation that is encouraged in the Pyramid
-documentation. Some existing microframeworks (Flask, in particular) allow for
-it as well.  None (other than Pyramid) *encourage* it.  If you never expect
-your application to grow beyond two or three or four or ten modules, it
-probably doesn't matter very much which mode you use.  If your application
-grows large, however, imperative configuration can provide better
-predictability.
+
+.. This is a generic mode of operation that is encouraged in the Pyramid
+.. documentation. Some existing microframeworks (Flask, in particular) allow for
+.. it as well.  None (other than Pyramid) *encourage* it.  If you never expect
+.. your application to grow beyond two or three or four or ten modules, it
+.. probably doesn't matter very much which mode you use.  If your application
+.. grows large, however, imperative configuration can provide better
+.. predictability.
+
+これは Pyramid ドキュメンテーションの中で推奨される一般的な稼働モードです。
+いくつかの既存のマイクロフレームワーク (特に Flask) は同様にそれを可能
+にします。 (Pyramid 以外の) どのフレームワークもそれを推奨しません。
+アプリケーションが 2つや3つ、4あるいは10のモジュールを越えて成長するこ
+とを予想しなければ、どのモードを使用するかは恐らくあまり重要ではありま
+せん。しかしながら、あなたのアプリケーションが大きくなる場合、命令的な
+設定はより良い予測を提供することができます。
+
 
 .. note::
 
-  Astute readers may notice that Pyramid has configuration decorators too.
-  Aha!  Don't these decorators have the same problems?  No.  These decorators
-  do not populate an external Python module when they are executed.  They
-  only mutate the functions (and classes and methods) they're attached to.
-  These mutations must later be found during a scan process that has a
-  predictable and structured import phase.  Module-localized mutation is
-  actually the best-case circumstance for double-imports; if a module only
-  mutates itself and its contents at import time, if it is imported twice,
-  that's OK, because each decorator invocation will always be mutating an
-  independent copy of the object its attached to, not a shared resource like
-  a registry in another module.  This has the effect that
-  double-registrations will never be performed.
+  .. Astute readers may notice that Pyramid has configuration decorators too.
+  .. Aha!  Don't these decorators have the same problems?  No.  These decorators
+  .. do not populate an external Python module when they are executed.  They
+  .. only mutate the functions (and classes and methods) they're attached to.
+  .. These mutations must later be found during a scan process that has a
+  .. predictable and structured import phase.  Module-localized mutation is
+  .. actually the best-case circumstance for double-imports; if a module only
+  .. mutates itself and its contents at import time, if it is imported twice,
+  .. that's OK, because each decorator invocation will always be mutating an
+  .. independent copy of the object its attached to, not a shared resource like
+  .. a registry in another module.  This has the effect that
+  .. double-registrations will never be performed.
+
+  賢明な読者は Pyramid が設定デコレータも含んでいることに気づいたでしょう。
+  おや! これらのデコレータは同じ問題を持っていませんか? いいえ。これら
+  のデコレータは、実行された時に外部 Python モジュールに populate しま
+  せん。それらは、単に取り付けられている関数 (およびクラスやメソッド)
+  を書き換えます。これらの書き換えは、後で実行される予測可能で構造的な
+  インポート過程を持った走査プロセスの間に見つけられます。モジュールに
+  局所的な書き換えは、実際に二重インポートに対する最良の状況です; もし
+  モジュールがインポート時に単にそれ自体とその内容を書き換えるなら、
+  モジュールが 2度インポートされても、それは OK です。なぜなら、それぞれの
+  デコレータの発動が、他のモジュールの中のレジストリのような共有資源
+  ではなく、常にそのデコレータが取り付けられたオブジェクトの独立した
+  コピーを書き換えるからです。これは二重登録が行なわれないという効果が
+  あります。
+
 
 Routes Need Relative Ordering
 +++++++++++++++++++++++++++++
