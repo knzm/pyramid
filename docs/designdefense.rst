@@ -2017,41 +2017,87 @@ Pyramid Uses its Own HTTP Exception Class Hierarchy Rather Than ``webob.exc``
 
 .. note:: This defense is new as of Pyramid 1.1.
 
-The HTTP exception classes defined in :mod:`pyramid.httpexceptions` are very
-much like the ones defined in ``webob.exc``
-(e.g. :class:`~pyramid.httpexceptions.HTTPNotFound`,
-:class:`~pyramid.httpexceptions.HTTPForbidden`, etc).  They have the same
-names and largely the same behavior and all have a very similar
-implementation, but not the same identity.  Here's why they have a separate
-identity:
+.. The HTTP exception classes defined in :mod:`pyramid.httpexceptions` are very
+.. much like the ones defined in ``webob.exc``
+.. (e.g. :class:`~pyramid.httpexceptions.HTTPNotFound`,
+.. :class:`~pyramid.httpexceptions.HTTPForbidden`, etc).  They have the same
+.. names and largely the same behavior and all have a very similar
+.. implementation, but not the same identity.  Here's why they have a separate
+.. identity:
 
-- Making them separate allows the HTTP exception classes to subclass
-  :class:`pyramid.response.Response`.  This speeds up response generation
-  slightly due to the way the Pyramid router works.  The same speedup could
-  be gained by monkeypatching ``webob.response.Response`` but it's usually
-  the case that monkeypatching turns out to be evil and wrong.
+:mod:`pyramid.httpexceptions` に定義された HTTP 例外クラスは、
+``webob.exc`` に定義されたものに非常に似ています (例えば
+:class:`~pyramid.httpexceptions.HTTPNotFound~,
+:class:`~pyramid.httpexceptions.HTTPForbidden` など)。それらは同じ名前
+を持ち、大部分は同じ振る舞いをします。そして実装も非常に類似しています。
+しかし、まったく同一ではありません。ここに、それらが webob から独立して
+いる理由を示します:
 
-- Making them separate allows them to provide alternate ``__call__`` logic
-  which also speeds up response generation.
 
-- Making them separate allows the exception classes to provide for the proper
-  value of ``RequestClass`` (:class:`pyramid.request.Request`).
+.. - Making them separate allows the HTTP exception classes to subclass
+..   :class:`pyramid.response.Response`.  This speeds up response generation
+..   slightly due to the way the Pyramid router works.  The same speedup could
+..   be gained by monkeypatching ``webob.response.Response`` but it's usually
+..   the case that monkeypatching turns out to be evil and wrong.
 
-- Making them separate allows us freedom from having to think about backwards
-  compatibility code present in ``webob.exc`` having to do with Python 2.4,
-  which we no longer support in Pyramid 1.1+.
+- それらを独立にすることで、 HTTP 例外クラスが
+  :class:`pyramid.response.Response` をサブクラス化することを可能にします。
+  Pyramid におけるルーティングの動作方法により、これによってわずかに
+  レスポンス生成の速度が向上します。 ``webob.response.Response`` をモンキー
+  パッチすることにより同じ速度向上が得られるかもしれませんが、通常それは
+  モンキーパッチが有害で間違っているということが判明するケースです。
 
-- We change the behavior of two classes
-  (:class:`~pyramid.httpexceptions.HTTPNotFound` and
-  :class:`~pyramid.httpexceptions.HTTPForbidden`) in the module so that they
-  can be used by Pyramid internally for notfound and forbidden exceptions.
 
-- Making them separate allows us to influence the docstrings of the exception
-  classes to provide Pyramid-specific documentation.
+.. - Making them separate allows them to provide alternate ``__call__`` logic
+..   which also speeds up response generation.
 
-- Making them separate allows us to silence a stupid deprecation warning
-  under Python 2.6 when the response objects are used as exceptions (related
-  to ``self.message``).
+- それらを独立にすることで、さらにレスポンス生成を高速化する
+  ``__call__`` の代替ロジックを提供することを可能にします。
+
+
+.. - Making them separate allows the exception classes to provide for the proper
+..   value of ``RequestClass`` (:class:`pyramid.request.Request`).
+
+- それらを独立にすることで、例外クラスが ``RequestClass``
+  (:class:`pyramid.request.Request`) の適切な値を提供することを可能にします。
+
+
+.. - Making them separate allows us freedom from having to think about backwards
+..   compatibility code present in ``webob.exc`` having to do with Python 2.4,
+..   which we no longer support in Pyramid 1.1+.
+
+- それらを独立にすることで、 ``webob.exc`` に含まれる Python 2.4 で動作
+  させるための後方互換性コードについて考えることから解放されます。
+  Pyramid 1.1+ で Python 2.4 はすでにサポート対象外です。
+
+
+.. - We change the behavior of two classes
+..   (:class:`~pyramid.httpexceptions.HTTPNotFound` and
+..   :class:`~pyramid.httpexceptions.HTTPForbidden`) in the module so that they
+..   can be used by Pyramid internally for notfound and forbidden exceptions.
+
+- 私たちは、モジュールの中で 2 つのクラス
+  (:class:`~pyramid.httpexceptions.HTTPNotFound` と
+  :class:`~pyramid.httpexceptions.HTTPForbidden`) の振る舞いを変更して、
+  Pyramid 内部でそれらを notfound および forbidden 例外に使用できるよう
+  にします。
+
+
+.. - Making them separate allows us to influence the docstrings of the exception
+..   classes to provide Pyramid-specific documentation.
+
+- それらを独立にすることで、例外クラスの docstring に対して Pyramid
+  特有のドキュメンテーションを提供するように影響を及ぼすことを可能にします。
+
+
+.. - Making them separate allows us to silence a stupid deprecation warning
+..   under Python 2.6 when the response objects are used as exceptions (related
+..   to ``self.message``).
+
+- それらを独立にすることで、レスポンスオブジェクトが例外として使用され
+  た場合に Python 2.6 で無意味な deprecation 警告が出るのを沈黙させる
+  ことができます (``self.message`` に関連)
+
 
 .. _simpler_traversal_model:
 
