@@ -2233,28 +2233,59 @@ adaptation を試みます。それが失敗する場合、リソース上のい
 Microframeworks Have Smaller Hello World Programs
 -------------------------------------------------
 
-Self-described "microframeworks" exist: `Bottle <http://bottle.paws.de>`_ and
-`Flask <http://flask.pocoo.org/>`_ are two that are becoming popular.  `Bobo
-<http://bobo.digicool.com/>`_ doesn't describe itself as a microframework,
-but its intended userbase is much the same.  Many others exist.  We've
-actually even (only as a teaching tool, not as any sort of official project)
-`created one using Pyramid <http://bfg.repoze.org/videos#groundhog1>`_ (the
-videos use BFG, a precursor to Pyramid, but the resulting code is `available
-for Pyramid too <http://github.com/Pylons/groundhog>`_). Microframeworks are
-small frameworks with one common feature: each allows its users to create a
-fully functional application that lives in a single Python file.
+.. Self-described "microframeworks" exist: `Bottle <http://bottle.paws.de>`_ and
+.. `Flask <http://flask.pocoo.org/>`_ are two that are becoming popular.  `Bobo
+.. <http://bobo.digicool.com/>`_ doesn't describe itself as a microframework,
+.. but its intended userbase is much the same.  Many others exist.  We've
+.. actually even (only as a teaching tool, not as any sort of official project)
+.. `created one using Pyramid <http://bfg.repoze.org/videos#groundhog1>`_ (the
+.. videos use BFG, a precursor to Pyramid, but the resulting code is `available
+.. for Pyramid too <http://github.com/Pylons/groundhog>`_). Microframeworks are
+.. small frameworks with one common feature: each allows its users to create a
+.. fully functional application that lives in a single Python file.
 
-Some developers and microframework authors point out that Pyramid's "hello
-world" single-file program is longer (by about five lines) than the
-equivalent program in their favorite microframework.  Guilty as charged.
+「マイクロフレームワーク」を自称しているフレームワークは存在します:
+`Bottle <http://bottle.paws.de>`_ と `Flask
+<http://flask.pocoo.org/>`_ の 2 つはポピュラーになっています。
+`Bobo <http://bobo.digicool.com/>`_ はマイクロフレームワークを自称して
+いませんが、その意図するユーザーベースはほとんど同じです。他にも多くの
+ものが存在します。実際、私たちはすでに (何らかの公式プロジェクトとしてで
+はなく、単に教育ツールとしてですが) `Pyramid を使用してマイクロフレーム
+ワークを作成しています <http://bfg.repoze.org/videos#groundhog1>`_
+(ビデオでは Pyramid の前身である BFG を使用していますが、生じるコードは
+`ピラミッドでも利用可能です <http://github.com/Pylons/groundhog>`_)
+マイクロフレームワークとは、ある共通の特徴を備えた小さなフレームワーク
+のことです: それぞれのマイクロフレームワークは、ユーザが単一の Python
+ファイル内で完全に機能するアプリケーションを作成することを可能にします。
 
-This loss isn't for lack of trying. Pyramid is useful in the same
-circumstance in which microframeworks claim dominance: single-file
-applications.  But Pyramid doesn't sacrifice its ability to credibly support
-larger applications in order to achieve hello-world LoC parity with the
-current crop of microframeworks.  Pyramid's design instead tries to avoid
-some common pitfalls associated with naive declarative configuration schemes.
-The subsections which follow explain the rationale.
+
+.. Some developers and microframework authors point out that Pyramid's "hello
+.. world" single-file program is longer (by about five lines) than the
+.. equivalent program in their favorite microframework.  Guilty as charged.
+
+何人かの開発者やマイクロフレームワークの作者は、 Pyramid の "hello
+world" 単一ファイルプログラムが、彼らの好きなマイクロフレームワークで
+書かれた等価なプログラムより (約5行以上) 長いと指摘します。
+確かにその通りです (Guilty as charged)。
+
+
+.. This loss isn't for lack of trying. Pyramid is useful in the same
+.. circumstance in which microframeworks claim dominance: single-file
+.. applications.  But Pyramid doesn't sacrifice its ability to credibly support
+.. larger applications in order to achieve hello-world LoC parity with the
+.. current crop of microframeworks.  Pyramid's design instead tries to avoid
+.. some common pitfalls associated with naive declarative configuration schemes.
+.. The subsections which follow explain the rationale.
+
+このロスは、努力が足りなかったからではありません。 Pyramid はマイクロ
+フレームワークが優勢と主張するのと同じ状況で役に立ちます: 単一ファイル
+アプリケーション。しかし Pyramid は、現在のマイクロフレームワークに匹敵
+する hello-world LoC (Line of Code = 行数) を達成するために、より大きな
+アプリケーションを確実にサポートする能力を犠牲にしません。 Pyramid の
+設計は、代わりに、素朴な宣言的な設定スキームに関連した、いくつかの共通
+の落とし穴を回避しようとします。続くサブセクションでは、論理的根拠に
+ついて説明します。
+
 
 .. _you_dont_own_modulescope:
 
