@@ -2104,61 +2104,129 @@ Pyramid Uses its Own HTTP Exception Class Hierarchy Rather Than ``webob.exc``
 Pyramid has Simpler Traversal Machinery than Does Zope
 ------------------------------------------------------
 
-Zope's default traverser:
+.. Zope's default traverser:
 
-- Allows developers to mutate the traversal name stack while traversing (they
-  can add and remove path elements).
+Zop のデフォルトトラバーサーは:
 
-- Attempts to use an adaptation to obtain the next element in the path from
-  the currently traversed object, falling back to ``__bobo_traverse__``,
-  ``__getitem__`` and eventually ``__getattr__``.
 
-Zope's default traverser allows developers to mutate the traversal name stack
-during traversal by mutating ``REQUEST['TraversalNameStack']``.  Pyramid's
-default traverser (``pyramid.traversal.ResourceTreeTraverser``) does not
-offer a way to do this; it does not maintain a stack as a request attribute
-and, even if it did, it does not pass the request to resource objects while
-it's traversing.  While it was handy at times, this feature was abused in
-frameworks built atop Zope (like CMF and Plone), often making it difficult to
-tell exactly what was happening when a traversal didn't match a view.  I felt
-it was better to make folks that wanted the feature replace the traverser
-rather than build that particular honey pot in to the default traverser.
+.. - Allows developers to mutate the traversal name stack while traversing (they
+..   can add and remove path elements).
 
-Zope uses multiple mechanisms to attempt to obtain the next element in the
-resource tree based on a name.  It first tries an adaptation of the current
-resource to ``ITraversable``, and if that fails, it falls back to attempting
-number of magic methods on the resource (``__bobo_traverse__``,
-``__getitem__``, and ``__getattr__``).  My experience while both using Zope
-and attempting to reimplement its publisher in ``repoze.zope2`` led me to
-believe the following:
+- トラバースの間に、開発者がトラバース名前スタックを変化させることが
+  できます (パス要素を加えたり削除したりすることができます)。
 
-- The *default* traverser should be as simple as possible.  Zope's publisher
-  is somewhat difficult to follow and replicate due to the fallbacks it tried
-  when one traversal method failed.  It is also slow.
 
-- The *entire traverser* should be replaceable, not just elements of the
-  traversal machinery.  Pyramid has a few big components rather than a
-  plethora of small ones.  If the entire traverser is replaceable, it's an
-  antipattern to make portions of the default traverser replaceable.  Doing
-  so is a "knobs on knobs" pattern, which is unfortunately somewhat endemic
-  in Zope.  In a "knobs on knobs" pattern, a replaceable subcomponent of a
-  larger component is made configurable using the same configuration
-  mechanism that can be used to replace the larger component.  For example,
-  in Zope, you can replace the default traverser by registering an adapter.
-  But you can also (or alternately) control how the default traverser
-  traverses by registering one or more adapters.  As a result of being able
-  to either replace the larger component entirely or turn knobs on the
-  default implementation of the larger component, no one understands when (or
-  whether) they should ever override the larger component entrirely.  This
-  results, over time, in a rusting together of the larger "replaceable"
-  component and the framework itself, because people come to depend on the
-  availability of the default component in order just to turn its knobs. The
-  default component effectively becomes part of the framework, which entirely
-  subverts the goal of making it replaceable.  In Pyramid, typically if a
-  component is replaceable, it will itself have no knobs (it will be solid
-  state).  If you want to influence behavior controlled by that component,
-  you will replace the component instead of turning knobs attached to the
-  component.
+.. - Attempts to use an adaptation to obtain the next element in the path from
+..   the currently traversed object, falling back to ``__bobo_traverse__``,
+..   ``__getitem__`` and eventually ``__getattr__``.
+
+- 現在トラバースされているオブジェクトからパス中の次の要素を得るために
+  adaptation を使用して、さらに ``__bobo_traverse__``, ``__getitem__``,
+  そして最終的に ``__getattr__`` にフォールバックします。
+
+
+.. Zope's default traverser allows developers to mutate the traversal name stack
+.. during traversal by mutating ``REQUEST['TraversalNameStack']``.  Pyramid's
+.. default traverser (``pyramid.traversal.ResourceTreeTraverser``) does not
+.. offer a way to do this; it does not maintain a stack as a request attribute
+.. and, even if it did, it does not pass the request to resource objects while
+.. it's traversing.  While it was handy at times, this feature was abused in
+.. frameworks built atop Zope (like CMF and Plone), often making it difficult to
+.. tell exactly what was happening when a traversal didn't match a view.  I felt
+.. it was better to make folks that wanted the feature replace the traverser
+.. rather than build that particular honey pot in to the default traverser.
+
+Zope のデフォルトトラバーサーは、 ``REQUEST['TraversalNameStack']`` を
+変化させることによりトラバーサル中に開発者がトラバーサル名前スタックを
+変化させることを可能にします。 Pyramid のデフォルトトラバーサー
+(``pyramid.traversal.ResourceTreeTraverser``)は、これを行う方法を提供し
+ません; それはリクエスト属性としてスタックを維持しません。また、仮にそ
+うだったとしても、それはトラバースしている間リソースオブジェクトにリク
+エストを渡しません。この特徴は、時々手軽である一方で、 Zope の上に構築
+されたフレームワーク (CMF や Ploneのような) の中で乱用され、トラバーサル
+がビューと一致しなかった時に何が起こっていたか正確に伝えることをしばしば
+困難にしました。私は、デフォルトトラバーサーに特別のハニーポットを構築
+するのではなく、この特徴を望む人々にトラバーサーを交換させる方が良いと
+感じました。
+
+
+.. Zope uses multiple mechanisms to attempt to obtain the next element in the
+.. resource tree based on a name.  It first tries an adaptation of the current
+.. resource to ``ITraversable``, and if that fails, it falls back to attempting
+.. number of magic methods on the resource (``__bobo_traverse__``,
+.. ``__getitem__``, and ``__getattr__``).  My experience while both using Zope
+.. and attempting to reimplement its publisher in ``repoze.zope2`` led me to
+.. believe the following:
+
+Zope は、名前に基づいてリソースツリーの次の要素を得るために多数のメカニズム
+を使用します。それは、最初に ``ITraversable`` に対して現在のリソースの
+adaptation を試みます。それが失敗する場合、リソース上のいくつかのマジック
+メソッド (``__bobo_traverse__``, ``__getitem__``, ``__getattr__``) の
+試行にフォールバックします。 Zope を使い ``repoze.zope2`` の publisher
+を再実装している間に得た経験によって、私は下記のことを信じるように
+なりました:
+
+
+.. - The *default* traverser should be as simple as possible.  Zope's publisher
+..   is somewhat difficult to follow and replicate due to the fallbacks it tried
+..   when one traversal method failed.  It is also slow.
+
+- *デフォルト* トラバーサーは、できるだけ単純であるべきです。 Zope の
+  publisher は、1つのトラバース方法が失敗した時に別の方法にフォールバッ
+  クするので、追いかけたり再現したりするのがやや困難です。さらに、それ
+  は遅いです。
+
+
+.. - The *entire traverser* should be replaceable, not just elements of the
+..   traversal machinery.  Pyramid has a few big components rather than a
+..   plethora of small ones.  If the entire traverser is replaceable, it's an
+..   antipattern to make portions of the default traverser replaceable.  Doing
+..   so is a "knobs on knobs" pattern, which is unfortunately somewhat endemic
+..   in Zope.  In a "knobs on knobs" pattern, a replaceable subcomponent of a
+..   larger component is made configurable using the same configuration
+..   mechanism that can be used to replace the larger component.  For example,
+..   in Zope, you can replace the default traverser by registering an adapter.
+..   But you can also (or alternately) control how the default traverser
+..   traverses by registering one or more adapters.  As a result of being able
+..   to either replace the larger component entirely or turn knobs on the
+..   default implementation of the larger component, no one understands when (or
+..   whether) they should ever override the larger component entrirely.  This
+..   results, over time, in a rusting together of the larger "replaceable"
+..   component and the framework itself, because people come to depend on the
+..   availability of the default component in order just to turn its knobs. The
+..   default component effectively becomes part of the framework, which entirely
+..   subverts the goal of making it replaceable.  In Pyramid, typically if a
+..   component is replaceable, it will itself have no knobs (it will be solid
+..   state).  If you want to influence behavior controlled by that component,
+..   you will replace the component instead of turning knobs attached to the
+..   component.
+
+- トラバーサル機構の単なる要素ではなく、 *トラバーサー全体* が代替可能で
+  あるべきです。 Pyramid には、大量の小さなコンポーネントではなく、少数の
+  大きなコンポーネントがあります。トラバーサー全体が代替可能な場合、それ
+  はデフォルトトラバーサーの一部を代替可能にすることのアンチパターンです。
+  そのようにすることは「取っ手の上に取っ手」パターンです。それは不運にも
+  Zope において少々固有の症状です。「取っ手の上に取っ手」パターンでは、
+  大きなコンポーネントを切り替えるために使用されるのと同じメカニズムを
+  用いて、大きなコンポーネントの代替可能なサブコンポーネントが設定可能に
+  なります。例えば Zopeでは adapter を登録してデフォルトトラバーサーを切り
+  替えることができます。しかし、さらに (あるいは別の方法として) 複数の
+  adapter を登録することで、デフォルトトラバーサーがどのようにトラバース
+  するかをコントロールすることもできます。大きなコンポーネントを完全に交
+  換することも、大きなコンポーネントのデフォルト実装の取っ手を回す (=機能
+  を調整する) ことも、どちらもできる結果として、いつ (あるいはどんな時に)
+  大きなコンポーネントを完全にオーバーライドしなければならないかを誰も
+  理解できませんでした。これにより、人々が単に機能を調整するために
+  デフォルトコンポーネントを利用することに依存するようになってくるため、
+  時間とともに大きな「代替可能な」コンポーネントとフレームワークそれ自身
+  は共に錆びていきました。デフォルトコンポーネントは事実上フレームワーク
+  の一部になります。それは、デフォルトコンポーネントを代替可能にするという
+  ゴールを完全に破壊します。 Pyramid の中では、典型的に、コンポーネントが
+  代替可能ならば、そのコンポーネントは調整部分を持たない (solid state) で
+  しょう。そのコンポーネントによってコントロールされる振る舞いに影響を
+  及ぼしたければ、コンポーネントに用意された機能調整用の取っ手を回す代わり
+  に、コンポーネントを交換することになるでしょう。
+
 
 .. _microframeworks_smaller_hello_world:
 
