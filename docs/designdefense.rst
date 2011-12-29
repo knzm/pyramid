@@ -2937,8 +2937,12 @@ Pyramid では、デコレータインポート時の順番を使用しません
 "Stacked Object Proxies" Are Too Clever / Thread Locals Are A Nuisance
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Some microframeworks use the ``import`` statement to get a handle to an
-object which *is not logically global*:
+.. Some microframeworks use the ``import`` statement to get a handle to an
+.. object which *is not logically global*:
+
+いくつかのマイクロフレームワークでは、 *論理的にはグローバルでない*
+オブジェクトに対するハンドルを得るために ``import`` 文を使用します:
+
 
 .. code-block:: python
     :linenos:
@@ -2957,18 +2961,34 @@ object which *is not logically global*:
         # this is executed if the request method was GET or the
         # credentials were invalid    
 
-The `Pylons 1.X <http://pylonsproject.org>`_ web framework uses a similar
-strategy.  It calls these things "Stacked Object Proxies", so, for purposes
-of this discussion, I'll do so as well.
 
-Import statements in Python (``import foo``, ``from bar import baz``) are
-most frequently performed to obtain a reference to an object defined globally
-within an external Python module.  However, in normal programs, they are
-never used to obtain a reference to an object that has a lifetime measured by
-the scope of the body of a function.  It would be absurd to try to import,
-for example, a variable named ``i`` representing a loop counter defined in
-the body of a function.  For example, we'd never try to import ``i`` from the
-code below:
+.. The `Pylons 1.X <http://pylonsproject.org>`_ web framework uses a similar
+.. strategy.  It calls these things "Stacked Object Proxies", so, for purposes
+.. of this discussion, I'll do so as well.
+
+`Pylons 1.X <http://pylonsproject.org>`_ ウェブフレームワークは同様の
+戦略を使用しています。 Pylons ではこれを "Stacked Object Proxies" と
+呼んでいるので、この議論の目的のために私もそれに倣います。
+
+
+.. Import statements in Python (``import foo``, ``from bar import baz``) are
+.. most frequently performed to obtain a reference to an object defined globally
+.. within an external Python module.  However, in normal programs, they are
+.. never used to obtain a reference to an object that has a lifetime measured by
+.. the scope of the body of a function.  It would be absurd to try to import,
+.. for example, a variable named ``i`` representing a loop counter defined in
+.. the body of a function.  For example, we'd never try to import ``i`` from the
+.. code below:
+
+Python において、インポート文 (``import foo``, ``from bar import baz``)
+は外部の Python モジュール内でグローバルに定義されたオブジェクトへの
+参照を得るために最も頻繁に実行されます。しかしながら、正常なプログラム
+では、関数本体のスコープに従う寿命を持ったオブジェクトへの参照を得るために
+インポート文は使用されません。例えば、関数の本体部で定義されたループ
+カウンタを表わす ``i`` という名前の変数をインポートしようとすることは
+不条理でしょう。例えば、私たちは以下のコードから ``i`` をインポート
+しようとは決してしません:
+
 
 .. code-block::  python
    :linenos:
@@ -2977,32 +2997,66 @@ code below:
        for i in range(10):
            print i
 
-By its nature, the *request* object created as the result of a WSGI server's
-call into a long-lived web framework cannot be global, because the lifetime
-of a single request will be much shorter than the lifetime of the process
-running the framework.  A request object created by a web framework actually
-has more similarity to the ``i`` loop counter in our example above than it
-has to any comparable importable object defined in the Python standard
-library or in normal library code.
 
-However, systems which use stacked object proxies promote locally scoped
-objects such as ``request`` out to module scope, for the purpose of being
-able to offer users a nice spelling involving ``import``.  They, for what I
-consider dubious reasons, would rather present to their users the canonical
-way of getting at a ``request`` as ``from framework import request`` instead
-of a saner ``from myframework.threadlocals import get_request; request =
-get_request()`` even though the latter is more explicit.
+.. By its nature, the *request* object created as the result of a WSGI server's
+.. call into a long-lived web framework cannot be global, because the lifetime
+.. of a single request will be much shorter than the lifetime of the process
+.. running the framework.  A request object created by a web framework actually
+.. has more similarity to the ``i`` loop counter in our example above than it
+.. has to any comparable importable object defined in the Python standard
+.. library or in normal library code.
 
-It would be *most* explicit if the microframeworks did not use thread local
-variables at all.  Pyramid view functions are passed a request object; many
-of Pyramid's APIs require that an explicit request object be passed to them.
-It is *possible* to retrieve the current Pyramid request as a threadlocal
-variable but it is a "in case of emergency, break glass" type of activity.
-This explicitness makes Pyramid view functions more easily unit testable, as
-you don't need to rely on the framework to manufacture suitable "dummy"
-request (and other similarly-scoped) objects during test setup.  It also
-makes them more likely to work on arbitrary systems, such as async servers
-that do no monkeypatching.
+その性質上、 WSGI サーバーが長寿命のウェブフレームワークを呼び出した結果
+生成された *request* オブジェクトはグローバルにはなりえません。なぜなら
+単一のリクエストの寿命はフレームワークを実行するプロセスの寿命よりも
+はるかに短くなるからです。ウェブフレームワークによって生成された request
+オブジェクトは、実際 Python 標準ライブラリや通常のライブラリコードの中で
+定義されるインポート可能なオブジェクトに対する類似性よりも、上記例における
+``i`` ループカウンタとの類似点をより多く持っています。
+
+
+.. However, systems which use stacked object proxies promote locally scoped
+.. objects such as ``request`` out to module scope, for the purpose of being
+.. able to offer users a nice spelling involving ``import``.  They, for what I
+.. consider dubious reasons, would rather present to their users the canonical
+.. way of getting at a ``request`` as ``from framework import request`` instead
+.. of a saner ``from myframework.threadlocals import get_request; request =
+.. get_request()`` even though the latter is more explicit.
+
+しかしながら、 stacked object proxies を使用するシステムでは、
+``import`` を使ってユーザが簡単にコードを書く方法を提供 (offer users a
+nice spelling involving ``import``) できるようにする目的で、モジュール
+スコープを外れて (out to) *request* のようなローカルスコープの
+オブジェクトが推奨されています。それらのシステムでは、私が疑わしい理由
+と考えるもののために、 ``from framework import request`` が、より健全な
+``from myframework.threadlocals import get_request; request =
+get_request()`` の代わりに (後者がより明示的であっても) ``request`` を
+得る正統な方法としてユーザに提示されます。
+
+
+.. It would be *most* explicit if the microframeworks did not use thread local
+.. variables at all.  Pyramid view functions are passed a request object; many
+.. of Pyramid's APIs require that an explicit request object be passed to them.
+.. It is *possible* to retrieve the current Pyramid request as a threadlocal
+.. variable but it is a "in case of emergency, break glass" type of activity.
+.. This explicitness makes Pyramid view functions more easily unit testable, as
+.. you don't need to rely on the framework to manufacture suitable "dummy"
+.. request (and other similarly-scoped) objects during test setup.  It also
+.. makes them more likely to work on arbitrary systems, such as async servers
+.. that do no monkeypatching.
+
+マイクロフレームワークがスレッドローカル変数をまったく使用しなければ、
+それは *最も* 明示的でしょう。 Pyramid ビュー関数には request オブジェ
+クトが渡されます; Pyramid の多くの API は、request オブジェクトが明示的
+に渡されることを要求します。スレッドローカル変数として現在の
+Pyramid request を検索することは *可能* です。しかしそれは「緊急時には
+ガラスを割ってください」タイプの活動です。この明瞭さは Pyramid ビュー
+関数をより容易にユニットテスト可能にします。というのも、テストのセット
+アップ中に適切な「ダミーの」 request (または同様のスコープを持つ他の)
+オブジェクトを生成するために、フレームワークに依存する必要がないからです。
+さらに、これによって任意のシステム (例えばモンキーパッチを行わない
+async サーバー) で動作する可能性が高くなります。
+
 
 Explicitly WSGI
 +++++++++++++++
