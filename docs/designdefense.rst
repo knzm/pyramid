@@ -2719,8 +2719,12 @@ Python プログラマがモジュールスコープのコードパスを任意�
 Routes Need Relative Ordering
 +++++++++++++++++++++++++++++
 
-Consider the following simple `Groundhog
-<https://github.com/Pylons/groundhog>`_ application:
+.. Consider the following simple `Groundhog
+.. <https://github.com/Pylons/groundhog>`_ application:
+
+次の単純な `Groundhog <https://github.com/Pylons/groundhog>`_
+アプリケーションを考えてみてください:
+
 
 .. code-block:: python
     :linenos:
@@ -2743,9 +2747,15 @@ Consider the following simple `Groundhog
     if __name__ == '__main__':
         app.run()
 
-If you run this application and visit the URL ``/admin``, you will see the
-"admin" page.  This is the intended result.  However, what if you rearrange
-the order of the function definitions in the file?
+
+.. If you run this application and visit the URL ``/admin``, you will see the
+.. "admin" page.  This is the intended result.  However, what if you rearrange
+.. the order of the function definitions in the file?
+
+このアプリケーションを起動して URL ``/admin`` を訪れると "admin" ページが
+見えるでしょう。これは意図した結果です。しかしながら、もしファイル中の
+関数定義の順序を再配置したら、どうなるでしょうか。
+
 
 .. code-block:: python
     :linenos:
@@ -2768,75 +2778,161 @@ the order of the function definitions in the file?
     if __name__ == '__main__':
         app.run()
 
-If you run this application and visit the URL ``/admin``, you will now be
-returned a 404 error.  This is probably not what you intended.  The reason
-you see a 404 error when you rearrange function definition ordering is that
-routing declarations expressed via our microframework's routing decorators
-have an *ordering*, and that ordering matters.
 
-In the first case, where we achieved the expected result, we first added a
-route with the pattern ``/admin``, then we added a route with the pattern
-``/:action`` by virtue of adding routing patterns via decorators at module
-scope.  When a request with a ``PATH_INFO`` of ``/admin`` enters our
-application, the web framework loops over each of our application's route
-patterns in the order in which they were defined in our module.  As a result,
-the view associated with the ``/admin`` routing pattern will be invoked: it
-matches first.  All is right with the world.
+.. If you run this application and visit the URL ``/admin``, you will now be
+.. returned a 404 error.  This is probably not what you intended.  The reason
+.. you see a 404 error when you rearrange function definition ordering is that
+.. routing declarations expressed via our microframework's routing decorators
+.. have an *ordering*, and that ordering matters.
 
-In the second case, where we did not achieve the expected result, we first
-added a route with the pattern ``/:action``, then we added a route with the
-pattern ``/admin``.  When a request with a ``PATH_INFO`` of ``/admin`` enters
-our application, the web framework loops over each of our application's route
-patterns in the order in which they were defined in our module.  As a result,
-the view associated with the ``/:action`` routing pattern will be invoked: it
-matches first.  A 404 error is raised.  This is not what we wanted; it just
-happened due to the order in which we defined our view functions.
+このアプリケーションを起動して URL ``/admin`` を訪れると、今度は 404
+エラーが返されるでしょう。これは恐らくあなたが意図したものではありません。
+関数定義順を再配置した場合に 404 エラーが表示される理由は、このマイクロ
+フレームワークのルーティングデコレータによって表現されたルーティング
+宣言が *順番* を持ち、その順番が問題になるからです。
 
-This is because Groundhog routes are added to the routing map in import
-order, and matched in the same order when a request comes in.  Bottle, like
-Groundhog, as of this writing, matches routes in the order in which they're
-defined at Python execution time.  Flask, on the other hand, does not order
-route matching based on import order; it reorders the routes you add to your
-application based on their "complexity".  Other microframeworks have varying
-strategies to do route ordering.
 
-Your application may be small enough where route ordering will never cause an
-issue.  If your application becomes large enough, however, being able to
-specify or predict that ordering as your application grows larger will be
-difficult.  At some point, you will likely need to more explicitly start
-controlling route ordering, especially in applications that require
-extensibility.
+.. In the first case, where we achieved the expected result, we first added a
+.. route with the pattern ``/admin``, then we added a route with the pattern
+.. ``/:action`` by virtue of adding routing patterns via decorators at module
+.. scope.  When a request with a ``PATH_INFO`` of ``/admin`` enters our
+.. application, the web framework loops over each of our application's route
+.. patterns in the order in which they were defined in our module.  As a result,
+.. the view associated with the ``/admin`` routing pattern will be invoked: it
+.. matches first.  All is right with the world.
 
-If your microframework orders route matching based on complexity, you'll need
-to understand what is meant by "complexity", and you'll need to attempt to
-inject a "less complex" route to have it get matched before any "more
-complex" one to ensure that it's tried first.
+予想された結果を達成した最初のケースでは、モジュールスコープでデコレータ
+によってルーティングパターンを加えることにより、最初にパターン ``/admin``
+を持つルーティングを加え、次にパターン ``/:action`` を持つルーティング
+を加えました。 ``PATH_INFO`` が ``/admin`` であるリクエストがこの
+アプリケーションに入力された場合、ウェブフレームワークは
+アプリケーションのルーティングパターン各々に対してそれらがモジュールに
+定義された順でループします。その結果、ルーティングパターン ``/admin``
+に関連付けられたビューが起動されます: それは最初に一致します。
+すべて世はこともなし、です。
 
-If your microframework orders its route matching based on relative
-import/execution of function decorator definitions, you will need to ensure
-you execute all of these statements in the "right" order, and you'll need to
-be cognizant of this import/execution ordering as you grow your application
-or try to extend it.  This is a difficult invariant to maintain for all but
-the smallest applications.
 
-In either case, your application must import the non-``__main__`` modules
-which contain configuration decorations somehow for their configuration to be
-executed.  Does that make you a little uncomfortable?  It should, because
-:ref:`you_dont_own_modulescope`.
+.. In the second case, where we did not achieve the expected result, we first
+.. added a route with the pattern ``/:action``, then we added a route with the
+.. pattern ``/admin``.  When a request with a ``PATH_INFO`` of ``/admin`` enters
+.. our application, the web framework loops over each of our application's route
+.. patterns in the order in which they were defined in our module.  As a result,
+.. the view associated with the ``/:action`` routing pattern will be invoked: it
+.. matches first.  A 404 error is raised.  This is not what we wanted; it just
+.. happened due to the order in which we defined our view functions.
 
-Pyramid uses neither decorator import time ordering nor does it attempt to
-divine the relative complexity of one route to another in order to define a
-route match ordering.  In Pyramid, you have to maintain relative route
-ordering imperatively via the chronology of multiple executions of the
-:meth:`pyramid.config.Configurator.add_route` method.  The order in which you
-repeatedly call ``add_route`` becomes the order of route matching.
+予想された結果を達成しなかった２番目のケースでは、最初にパターン
+``/:action`` を持つルーティングを加えました。次に、パターン ``/admin``
+を持つルーティングを加えました。 ``PATH_INFO`` が ``/admin`` である
+リクエストがこのアプリケーションに入力された場合、ウェブフレームワークは
+アプリケーションのルーティングパターン各々に対してそれらがモジュールに
+定義された順でループします。その結果、ルーティングパターン ``/:action``
+に関連付けられたビューが起動されます: それは最初に一致します。
+404 エラーが送出されます。これは望んだ結果ではありません;
+単にビュー関数を定義した順番によってそれは起こりました。
 
-If needing to maintain this imperative ordering truly bugs you, you can use
-:term:`traversal` instead of route matching, which is a completely
-declarative (and completely predictable) mechanism to map code to URLs.
-While URL dispatch is easier to understand for small non-extensible
-applications, traversal is a great fit for very large applications and
-applications that need to be arbitrarily extensible.
+
+.. This is because Groundhog routes are added to the routing map in import
+.. order, and matched in the same order when a request comes in.  Bottle, like
+.. Groundhog, as of this writing, matches routes in the order in which they're
+.. defined at Python execution time.  Flask, on the other hand, does not order
+.. route matching based on import order; it reorders the routes you add to your
+.. application based on their "complexity".  Other microframeworks have varying
+.. strategies to do route ordering.
+
+これは、 Groundhog のルーティングがインポートされた順番でルーティング
+マップに加えられ、リクエストが入ってきたときにも同じ順でマッチされる
+からです。 Bottle は、この記述の時点では Groundhog と同様Python 実行時
+に定義された順にルーティングマッチを行います。それに対し Flask は、
+ルーティングマッチをインポート順に基づいて順序付けません; Flask は
+ルーティングの「複雑さ」に基づいてアプリケーションに追加される
+ルーティングを並び替えます。他のマイクロフレームワークは、様々な
+ルーティング順の戦略を持っています。
+
+
+.. Your application may be small enough where route ordering will never cause an
+.. issue.  If your application becomes large enough, however, being able to
+.. specify or predict that ordering as your application grows larger will be
+.. difficult.  At some point, you will likely need to more explicitly start
+.. controlling route ordering, especially in applications that require
+.. extensibility.
+
+あなたのアプリケーションは十分に小さいのでルーティング順に関する問題は
+起こらないかもしれません。しかしながら、アプリケーションが大きくなれば、
+ルーティング順を指定したり予想したりすることが、アプリケーションが
+大きくなるにしたがって一層困難になるでしょう。ある時点で、恐らくより明
+示的にルーティング順をコントロールし始める必要があるでしょう。特に拡張
+性を要求するアプリケーションでは。
+
+
+.. If your microframework orders route matching based on complexity, you'll need
+.. to understand what is meant by "complexity", and you'll need to attempt to
+.. inject a "less complex" route to have it get matched before any "more
+.. complex" one to ensure that it's tried first.
+
+あなたのマイクロフレームワークが複雑さに基づいてルーティングマッチの
+順序を決めるなら、「複雑さ」が何を意味しているのかを理解する必要があるでしょう。
+また、任意の「より複雑な」ルーティングより前に「より複雑でない」
+ルーティングをマッチさせるために、そのルーティングが確実に最初になるように
+試行錯誤して注入する必要があるでしょう。
+
+
+.. If your microframework orders its route matching based on relative
+.. import/execution of function decorator definitions, you will need to ensure
+.. you execute all of these statements in the "right" order, and you'll need to
+.. be cognizant of this import/execution ordering as you grow your application
+.. or try to extend it.  This is a difficult invariant to maintain for all but
+.. the smallest applications.
+
+あなたのマイクロフレームワークが関数デコレータ定義の相対的なインポート /
+実行に基づいてルーティングマッチの順番を決めるなら、それらのすべての
+文が「正しい」順で実行されることを保証する必要があるでしょう。また、
+アプリケーションを大きくしたり、拡張しようとするときはいつも、
+このインポート / 実行順を意識する必要があるでしょう。これは最小の
+アプリケーション以外では維持するのが困難な不変式です。
+
+
+.. In either case, your application must import the non-``__main__`` modules
+.. which contain configuration decorations somehow for their configuration to be
+.. executed.  Does that make you a little uncomfortable?  It should, because
+.. :ref:`you_dont_own_modulescope`.
+
+いずれの場合も、あなたのアプリケーションはその設定が実行されるように
+設定デコレータを含む非 ``__main__`` モジュールを何らかの形でインポート
+しなければなりません。これはあなたを少し不快にしますか? するはずです。
+なぜなら :ref:`you_dont_own_modulescope` なので。
+
+
+.. Pyramid uses neither decorator import time ordering nor does it attempt to
+.. divine the relative complexity of one route to another in order to define a
+.. route match ordering.  In Pyramid, you have to maintain relative route
+.. ordering imperatively via the chronology of multiple executions of the
+.. :meth:`pyramid.config.Configurator.add_route` method.  The order in which you
+.. repeatedly call ``add_route`` becomes the order of route matching.
+
+Pyramid では、デコレータインポート時の順番を使用しません。また、
+ルーティングマッチ順を定義するために、あるルーティングと別のルーティングの
+相対的な複雑さを推測することも試みません。Pyramid では、相対的なルーティング
+順を :meth:`pyramid.config.Configurator.add_route` メソッドの複数の実行
+の時間的な順序関係によって命令的に維持しなければなりません。繰り返し
+``add_route`` を呼び出した順番は、ルーティングマッチの順番になります。
+
+
+.. If needing to maintain this imperative ordering truly bugs you, you can use
+.. :term:`traversal` instead of route matching, which is a completely
+.. declarative (and completely predictable) mechanism to map code to URLs.
+.. While URL dispatch is easier to understand for small non-extensible
+.. applications, traversal is a great fit for very large applications and
+.. applications that need to be arbitrarily extensible.
+
+この命令的な順序付けを維持する必要性が本当にあなたを困らせる場合、
+ルーティングマッチの代わりに :term:`traversal` を使用することができます。
+それはコードを URL にマップするための完全に宣言的な (かつ完全に予測可能な)
+メカニズムです。URL ディスパッチは、小さな、拡張可能でないアプリケーション
+に対してはより理解しやすい方法なのに対して、トラバーサルは、大規模な
+アプリケーションや任意に拡張可能である必要があるアプリケーションに
+大変適しています。
+
 
 "Stacked Object Proxies" Are Too Clever / Thread Locals Are A Nuisance
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
