@@ -3061,38 +3061,81 @@ async サーバー) で動作する可能性が高くなります。
 Explicitly WSGI
 +++++++++++++++
 
-Some microframeworks offer a ``run()`` method of an application object that
-executes a default server configuration for easy execution.
+.. Some microframeworks offer a ``run()`` method of an application object that
+.. executes a default server configuration for easy execution.
 
-Pyramid doesn't currently try to hide the fact that its router is a WSGI
-application behind a convenience ``run()`` API.  It just tells people to
-import a WSGI server and use it to serve up their Pyramid application as per
-the documentation of that WSGI server.
+一部のマイクロフレームワークはアプリケーションオブジェクトの ``run()``
+メソッドを提供していて、このメソッドは簡単に実行するために標準サーバー
+設定を行います。
 
-The extra lines saved by abstracting away the serving step behind ``run()``
-seem to have driven dubious second-order decisions related to API in some
-microframeworks.  For example, Bottle contains a ``ServerAdapter`` subclass
-for each type of WSGI server it supports via its ``app.run()`` mechanism.
-This means that there exists code in ``bottle.py`` that depends on the
-following modules: ``wsgiref``, ``flup``, ``paste``, ``cherrypy``, ``fapws``,
-``tornado``, ``google.appengine``, ``twisted.web``, ``diesel``, ``gevent``,
-``gunicorn``, ``eventlet``, and ``rocket``.  You choose the kind of server
-you want to run by passing its name into the ``run`` method.  In theory, this
-sounds great: I can try Bottle out on ``gunicorn`` just by passing in a name!
-However, to fully test Bottle, all of these third-party systems must be
-installed and functional; the Bottle developers must monitor changes to each
-of these packages and make sure their code still interfaces properly with
-them.  This expands the packages required for testing greatly; this is a
-*lot* of requirements.  It is likely difficult to fully automate these tests
-due to requirements conflicts and build issues.
 
-As a result, for single-file apps, we currently don't bother to offer a
-``run()`` shortcut; we tell folks to import their WSGI server of choice and
-run it by hand.  For the people who want a server abstraction layer, we
-suggest that they use PasteDeploy.  In PasteDeploy-based systems, the onus
-for making sure that the server can interface with a WSGI application is
-placed on the server developer, not the web framework developer, making it
-more likely to be timely and correct.
+.. Pyramid doesn't currently try to hide the fact that its router is a WSGI
+.. application behind a convenience ``run()`` API.  It just tells people to
+.. import a WSGI server and use it to serve up their Pyramid application as per
+.. the documentation of that WSGI server.
+
+Pyramid は、現在のところルーターが簡便な ``run()`` API の背後にある
+WSGI アプリケーションであるという事実を隠そうとしていません。それは、
+Pyramid アプリケーションを起動するために WSGI サーバーをインポートし、
+その WSGI サーバーのドキュメンテーションに従ってそれを使用するように
+人々に単に伝えます。
+
+
+.. The extra lines saved by abstracting away the serving step behind ``run()``
+.. seem to have driven dubious second-order decisions related to API in some
+.. microframeworks.  For example, Bottle contains a ``ServerAdapter`` subclass
+.. for each type of WSGI server it supports via its ``app.run()`` mechanism.
+.. This means that there exists code in ``bottle.py`` that depends on the
+.. following modules: ``wsgiref``, ``flup``, ``paste``, ``cherrypy``, ``fapws``,
+.. ``tornado``, ``google.appengine``, ``twisted.web``, ``diesel``, ``gevent``,
+.. ``gunicorn``, ``eventlet``, and ``rocket``.  You choose the kind of server
+.. you want to run by passing its name into the ``run`` method.  In theory, this
+.. sounds great: I can try Bottle out on ``gunicorn`` just by passing in a name!
+.. However, to fully test Bottle, all of these third-party systems must be
+.. installed and functional; the Bottle developers must monitor changes to each
+.. of these packages and make sure their code still interfaces properly with
+.. them.  This expands the packages required for testing greatly; this is a
+.. *lot* of requirements.  It is likely difficult to fully automate these tests
+.. due to requirements conflicts and build issues.
+
+``run()`` の背後のサーバ実行ステップを抽象の彼方に置くことによって削減
+される追加の行は、一部のマイクロフレームワークにおいて API と関係する
+dubious な二次の意思決定を drive したように見えます。例えば Bottle は
+``app.run()`` メカニズムによってサポートする WSGIサーバーのそれぞれに対
+して ``ServerAdapter`` のサブクラスを含んでいます。これは
+``bottle.py`` の中に次のモジュールに依存するコードが存在することを意味
+します: ``wsgiref``, ``flup``, ``paste``, ``cherrypy``, ``fapws``,
+``tornado``, ``google.appengine``, ``twisted.web``, ``diesel``,
+``gevent``, ``gunicorn``, ``eventlet``, ``rocket`` 。 ``run`` メソッド
+にその名前を渡すことで、実行したいサーバーの種類を選択します。理論的に
+は、これは素晴らしく思えます: 名前を渡すだけで ``gunicorn`` 上で
+Bottle を試してみることができます! しかしながら、 Bottle を完全にテスト
+するためには、これらのサードパーティシステムをすべてインストールして、
+そのすべてが機能しなければなりません; Bottle の開発者は、これらのパッケー
+ジの各々に対する変更を監視し、彼らのコードが依然としてそれらと適切に
+インタフェースを持つことを確かめなければなりません。これは、テストに
+要求されるパッケージを大幅に拡大します; これは *多数の* 要求です。要求
+(されるパッケージ) の衝突やビルド時の問題によって、これらのテストを完全
+に自動化することは恐らく難しいでしょう。
+
+
+.. As a result, for single-file apps, we currently don't bother to offer a
+.. ``run()`` shortcut; we tell folks to import their WSGI server of choice and
+.. run it by hand.  For the people who want a server abstraction layer, we
+.. suggest that they use PasteDeploy.  In PasteDeploy-based systems, the onus
+.. for making sure that the server can interface with a WSGI application is
+.. placed on the server developer, not the web framework developer, making it
+.. more likely to be timely and correct.
+
+その結果、1ファイルアプリケーションに対しては、私たちは現在わざわざ
+``run()`` ショートカットを提示していません; 人々には、選択した WSGI
+サーバーをインポートし、かつ手動でそれを実行するようにと伝えています。
+サーバー抽象レイヤーを望む人々に対しては、 PasteDeploy を使用することを
+提案します。 PasteDeploy に基づいたシステムでは、サーバーが WSGI アプリ
+ケーションとインタフェースを持つことができることを保証する負担は、
+ウェブフレームワークの開発者ではなくサーバー開発者に課せられます。
+そのためよりタイムリーで、正しいことが期待されます。
+
 
 Wrapping Up
 +++++++++++
