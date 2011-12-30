@@ -3140,9 +3140,14 @@ Bottle を試してみることができます! しかしながら、 Bottle を
 Wrapping Up
 +++++++++++
 
-Here's a diagrammed version of the simplest pyramid application, where
-comments take into account what we've discussed in the
-:ref:`microframeworks_smaller_hello_world` section.
+.. Here's a diagrammed version of the simplest pyramid application, where
+.. comments take into account what we've discussed in the
+.. :ref:`microframeworks_smaller_hello_world` section.
+
+これは最も単純な Pyramid アプリケーションの図解されたバージョンで、
+コメントは私たちが :ref:`microframeworks_smaller_hello_world` 節で
+議論したことを考慮に入れています。
+
 
 .. code-block:: python
    :linenos:
@@ -3160,6 +3165,7 @@ comments take into account what we've discussed in the
        config.add_view(hello_world)  # explicit non-decorator registration
        app = config.make_wsgi_app()  # explicitly WSGI
        serve(app, host='0.0.0.0')    # explicitly WSGI
+
 
 Pyramid Doesn't Offer Pluggable Apps
 ------------------------------------
