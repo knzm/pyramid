@@ -3316,24 +3316,46 @@ Pyramid が提供する rails が 「プラグ可能なアプリケーション�
 Pyramid Has Zope Things In It, So It's Too Complex
 --------------------------------------------------
 
-On occasion, someone will feel compelled to post a mailing list message that
-reads something like this:
+.. On occasion, someone will feel compelled to post a mailing list message that
+.. reads something like this:
 
+時々、メーリングリストにこのようなメッセージを投稿せざるをえないという
+気持ちになる人がいるようです:
+
+
+.. .. code-block:: text
+..
+..    had a quick look at pyramid ... too complex to me and not really
+..    understand for which benefits.. I feel should consider whether it's time
+..    for me to step back to django .. I always hated zope (useless ?)
+..    complexity and I love simple way of thinking
+   
 .. code-block:: text
 
-   had a quick look at pyramid ... too complex to me and not really
-   understand for which benefits.. I feel should consider whether it's time
-   for me to step back to django .. I always hated zope (useless ?)
-   complexity and I love simple way of thinking
+   Pyramid をちょっと見たんだけど ... 僕には複雑すぎてどんなメリットが
+   あるのかよく分からないよ.. そろそろ django に step back するかどうか
+   考えるべきじゃないかという気がしてるんだ .. 僕はずっと zope の
+   (役に立たない?) 複雑さを嫌っていて、単純な考え方が好きなんだ。
 
-(Paraphrased from a real email, actually.)
 
-Let's take this criticism point-by point.
+.. (Paraphrased from a real email, actually.)
+
+(実際には、本物の電子メールから意訳されたものです)
+
+
+.. Let's take this criticism point-by point.
+
+この批判について順番に見ていきましょう。
+
 
 Too Complex
 +++++++++++
 
-If you can understand this hello world program, you can use Pyramid:
+.. If you can understand this hello world program, you can use Pyramid:
+
+もしこの hello world プログラムを理解することができるなら、あなたは
+Pyramid を使うことができます:
+
 
 .. code-block:: python
    :linenos:
@@ -3351,52 +3373,105 @@ If you can understand this hello world program, you can use Pyramid:
        app = config.make_wsgi_app()
        serve(app)
 
-Pyramid has ~ 650 pages of documentation (printed), covering topics from the
-very basic to the most advanced.  *Nothing* is left undocumented, quite
-literally.  It also has an *awesome*, very helpful community.  Visit the
-#pyramid IRC channel on freenode.net (irc://freenode.net#pyramid) and see.
+
+.. Pyramid has ~ 650 pages of documentation (printed), covering topics from the
+.. very basic to the most advanced.  *Nothing* is left undocumented, quite
+.. literally.  It also has an *awesome*, very helpful community.  Visit the
+.. #pyramid IRC channel on freenode.net (irc://freenode.net#pyramid) and see.
+
+Pyramid には (印刷すると) 650 ページにも及ぶドキュメンテーションがあり、
+非常に基礎的なトピックから最も進んだトピックまでカバーしています。
+ドキュメント化されていないものは文字通り *何もありません* 。さらに、
+*最高の* とても頼りになるコミュニティーがあります。freenode.net の
+#pyramid IRC チャンネル (irc://freenode.net#pyramid) を訪れてみてください。
+
 
 Hate Zope
 +++++++++
 
-I'm sorry you feel that way.  The Zope brand has certainly taken its share of
-lumps over the years, and has a reputation for being insular and mysterious.
-But the word "Zope" is literally quite meaningless without qualification.
-What *part* of Zope do you hate?  "Zope" is a brand, not a technology.
+.. I'm sorry you feel that way.  The Zope brand has certainly taken its share of
+.. lumps over the years, and has a reputation for being insular and mysterious.
+.. But the word "Zope" is literally quite meaningless without qualification.
+.. What *part* of Zope do you hate?  "Zope" is a brand, not a technology.
 
-If it's Zope2-the-web-framework, Pyramid is not that.  The primary designers
-and developers of Pyramid, if anyone, should know.  We wrote Pyramid's
-predecessor (:mod:`repoze.bfg`), in part, because *we* knew that Zope 2 had
-usability issues and limitations.  :mod:`repoze.bfg` (and now :app:`Pyramid`)
-was written to address these issues.
+あなたがそのように感じたとしたら残念です。 Zope ブランドは、この数年に
+わたり間違いなく一定のシェアを取っており、その insular (島国的) で不可解
+な点に関して評判があります。しかし、単語 "Zope" は、修飾子がなければ文字
+通り全く意味を持ちません。 Zope のどの *部分* が嫌いですか? "Zope" は技術
+ではなくブランドです。
 
-If it's Zope3-the-web-framework, Pyramid is *definitely* not that.  Making
-use of lots of Zope 3 technologies is territory already staked out by the
-:term:`Grok` project.  Save for the obvious fact that they're both web
-frameworks, :mod:`Pyramid` is very, very different than Grok.  Grok exposes
-lots of Zope technologies to end users.  On the other hand, if you need to
-understand a Zope-only concept while using Pyramid, then we've failed on some
-very basic axis.
 
-If it's just the word Zope: this can only be guilt by association.  Because a
-piece of software internally uses some package named ``zope.foo``, it doesn't
-turn the piece of software that uses it into "Zope".  There is a lot of
-*great* software written that has the word Zope in its name.  Zope is not
-some sort of monolithic thing, and a lot of its software is usable
-externally.  And while it's not really the job of this document to defend it,
-Zope has been around for over 10 years and has an incredibly large, active
-community.  If you don't believe this,
-http://taichino.appspot.com/pypi_ranking/authors is an eye-opening reality
-check.
+.. If it's Zope2-the-web-framework, Pyramid is not that.  The primary designers
+.. and developers of Pyramid, if anyone, should know.  We wrote Pyramid's
+.. predecessor (:mod:`repoze.bfg`), in part, because *we* knew that Zope 2 had
+.. usability issues and limitations.  :mod:`repoze.bfg` (and now :app:`Pyramid`)
+.. was written to address these issues.
+
+それが Zope 2 ウェブフレームワークのことなら、 Pyramid はそれとは違います。
+Pyramid の主要な設計者や開発者なら誰でも知っていることです。 *私たち* は
+Zope 2 がユーザビリティの問題や制限を持っていることを知っていたので、
+Pyramid の部分的な前身 (:mod:`repoze.bfg`) を書きました。 repoze.bfg
+(そして今の :app:`Pyramid`) は、これらの問題を扱うために書かれました。
+
+
+.. If it's Zope3-the-web-framework, Pyramid is *definitely* not that.  Making
+.. use of lots of Zope 3 technologies is territory already staked out by the
+.. :term:`Grok` project.  Save for the obvious fact that they're both web
+.. frameworks, :mod:`Pyramid` is very, very different than Grok.  Grok exposes
+.. lots of Zope technologies to end users.  On the other hand, if you need to
+.. understand a Zope-only concept while using Pyramid, then we've failed on some
+.. very basic axis.
+
+それが Zope 3 ウェブフレームワークのことなら、 Pyramid は *はっきりと*
+それとは違います。 Zope 3 の多数の技術を利用することはすでに
+:term:`Grok` プロジェクトの縄張りとされている領域です。それらが両方とも
+ウェブフレームワークであるという自明な事実を除けば、 :mod:`Pyramid` は
+Grok とはとても、とても異なっています。 Grok はエンドユーザに多くの
+Zope 技術を露出します。それに対して、あなたが Pyramid を使用する際に
+Zope 特有の概念を理解する必要があれば、私たちはある非常に基礎的な評価軸
+で失敗しています。
+
+
+.. If it's just the word Zope: this can only be guilt by association.  Because a
+.. piece of software internally uses some package named ``zope.foo``, it doesn't
+.. turn the piece of software that uses it into "Zope".  There is a lot of
+.. *great* software written that has the word Zope in its name.  Zope is not
+.. some sort of monolithic thing, and a lot of its software is usable
+.. externally.  And while it's not really the job of this document to defend it,
+.. Zope has been around for over 10 years and has an incredibly large, active
+.. community.  If you don't believe this,
+.. http://taichino.appspot.com/pypi_ranking/authors is an eye-opening reality
+.. check.
+
+それが単に単語 Zope のことなら: これは単に guilt by association (連座制)
+です。ソフトウェアの一部が内部で ``zope.foo`` という名前のパッケージを
+使用していますが、だからといってそれを使用するソフトウェアが "Zope" に
+はなりません。その名前に単語 Zope を持った多くの *素晴らしい* ソフトウェア
+が書かれています。 Zope はある種のモノリシックなソフトウェアではありません。
+また、そのソフトウェアの多くは外部的に使用可能です。そして、本当はこれを
+defence することはこのドキュメントの仕事ではないのですが、
+Zope は10年以上の間存在してきて、信じられないほど大きく活動的な
+コミュニティーがあります。もしこれが信じられない場合、
+http://taichino.appspot.com/pypi_ranking/authors を見れば、目を見張る
+ような現実に気がつくでしょう (eye-opening reality check)。
+
 
 Love Simplicity
 +++++++++++++++
 
-Years of effort have gone into honing this package and its documentation to
-make it as simple as humanly possible for developers to use.  Everything is a
-tradeoff, of course, and people have their own ideas about what "simple" is.
-You may have a style difference if you believe Pyramid is complex.  Its
-developers obviously disagree.
+.. Years of effort have gone into honing this package and its documentation to
+.. make it as simple as humanly possible for developers to use.  Everything is a
+.. tradeoff, of course, and people have their own ideas about what "simple" is.
+.. You may have a style difference if you believe Pyramid is complex.  Its
+.. developers obviously disagree.
+
+数年間の努力が、このパッケージとそのドキュメンテーションの仕上げに注がれ、
+開発者が使用できるくらい可能な限り単純になるように人事が尽くされました。
+もちろんすべてはトレードオフです。また、「単純」ということに関して人々は
+自分の考えを持っています。 Pyramid が複雑であると考えているなら、
+スタイルの違いがあるのかもしれません。そのような開発者は当然意見が一致
+しないでしょう。
+
 
 Other Challenges
 ----------------
