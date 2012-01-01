@@ -3170,71 +3170,148 @@ Wrapping Up
 Pyramid Doesn't Offer Pluggable Apps
 ------------------------------------
 
-It is "Pyramidic" to compose multiple external sources into the same
-configuration using :meth:`~pyramid.config.Configuration.include`.  Any
-number of includes can be done to compose an application; includes can even
-be done from within other includes.  Any directive can be used within an
-include that can be used outside of one (such as
-:meth:`~pyramid.config.Configurator.add_view`, etc).
+.. It is "Pyramidic" to compose multiple external sources into the same
+.. configuration using :meth:`~pyramid.config.Configuration.include`.  Any
+.. number of includes can be done to compose an application; includes can even
+.. be done from within other includes.  Any directive can be used within an
+.. include that can be used outside of one (such as
+.. :meth:`~pyramid.config.Configurator.add_view`, etc).
 
-Pyramid has a conflict detection system that will throw an error if two
-included externals try to add the same configuration in a conflicting way
-(such as both externals trying to add a route using the same name, or both
-externals trying to add a view with the same set of predicates).  It's awful
-tempting to call this set of features something that can be used to compose a
-system out of "pluggable applications".  But in reality, there are a number
-of problems with claiming this:
+:meth:`~pyramid.config.Configuration.include` を使用して一つの同じ設定に
+多数の外部ソースを結合するのが「Pyramid 流」です。アプリケーションを構成
+するために任意の数の include が行えます; include はさらに他の include の
+内部からも行えます。 include の内部では、その外部で使用できる任意の
+ディレクティブ (:meth:`~pyramid.config.Configurator.add_view` などのような)
+も使用することができます。
 
-- The terminology is strained. Pyramid really has no notion of a 
-  plurality of "applications", just a way to compose configuration 
-  from multiple sources to create a single WSGI application.  That 
-  WSGI application may gain behavior by including or disincluding 
-  configuration, but once it's all composed together, Pyramid 
-  doesn't really provide any machinery which can be used to demarcate 
-  the boundaries of one "application" (in the sense of configuration 
-  from an external that adds routes, views, etc) from another. 
 
-- Pyramid doesn't provide enough "rails" to make it possible to integrate
-  truly honest-to-god, download-an-app-from-a-random-place
-  and-plug-it-in-to-create-a-system "pluggable" applications.  Because
-  Pyramid itself isn't opinionated (it doesn't mandate a particular kind of
-  database, it offers multiple ways to map URLs to code, etc), it's unlikely
-  that someone who creates something application-like will be able to
-  casually redistribute it to J. Random Pyramid User and have it just work by
-  asking him to config.include a function from the package.  This is
-  particularly true of very high level components such as blogs, wikis,
-  twitter clones, commenting systems, etc.  The integrator (the Pyramid
-  developer who has downloaded a package advertised as a "pluggable app")
-  will almost certainly have made different choices about e.g. what type of
-  persistence system he's using, and for the integrator to appease the
-  requirements of the "pluggable application", he may be required to set up a
-  different database, make changes to his own code to prevent his application
-  from shadowing the pluggable app (or vice versa), and any other number of
-  arbitrary changes.
+.. Pyramid has a conflict detection system that will throw an error if two
+.. included externals try to add the same configuration in a conflicting way
+.. (such as both externals trying to add a route using the same name, or both
+.. externals trying to add a view with the same set of predicates).  It's awful
+.. tempting to call this set of features something that can be used to compose a
+.. system out of "pluggable applications".  But in reality, there are a number
+.. of problems with claiming this:
 
-For this reason, we claim that Pyramid has "extensible" applications, 
-not pluggable applications.  Any Pyramid application can be extended 
-without forking it as long as its configuration statements have been 
-composed into things that can be pulled in via ``config.include``. 
+Pyramid には衝突探知システムがあり、 2つの include された外部コンポーネント
+が同じ設定を衝突する方法で加えようとした場合 (例えば、両方の外部コンポーネント
+が同じ名前を使用してルーティングを加えようとした場合や、両方の外部コンポーネント
+が同じ predicate のセットを持ったビューを加えようとした場合) にエラー
+を投げます。これらの特徴のことを「プラグ可能なアプリケーション」から
+システムを構成するために使用できるものと呼ぶことは大変魅力的です。
+しかし、実際にはこの主張には多くの問題があります:
 
-It's also perfectly reasonable for a single developer or team to create a set
-of interoperating components which can be enabled or disabled by using
-config.include.  That developer or team will be able to provide the "rails"
-(by way of making high-level choices about the technology used to create the
-project, so there won't be any issues with plugging all of the components
-together.  The problem only rears its head when the components need to be
-distributed to *arbitrary* users.  Note that Django has a similar problem
-with "pluggable applications" that need to work for arbitrary third parties,
-even though they provide many, many more rails than does Pyramid.  Even the
-rails they provide are not enough to make the "pluggable application" story
-really work without local modification.
 
-Truly pluggable applications need to be created at a much higher level than a
-web framework, as no web framework can offer enough constraints to really
-make them work out of the box.  They really need to plug into an application,
-instead.  It would be a noble goal to build an application with Pyramid that
-provides these constraints and which truly does offer a way to plug in
-applications (Joomla, Plone, Drupal come to mind).
+.. - The terminology is strained. Pyramid really has no notion of a 
+..   plurality of "applications", just a way to compose configuration 
+..   from multiple sources to create a single WSGI application.  That 
+..   WSGI application may gain behavior by including or disincluding 
+..   configuration, but once it's all composed together, Pyramid 
+..   doesn't really provide any machinery which can be used to demarcate 
+..   the boundaries of one "application" (in the sense of configuration 
+..   from an external that adds routes, views, etc) from another. 
+
+- 用語の混乱があります。 Pyramid には、実際には複数形の "applications" に
+  対応する概念はありません。単に複数のソースから単一の WSGI アプリケー
+  ションを生成するために設定を構成する方法があるだけです。設定を
+  include するか disinclude することにより WSGI アプリケーションが振る
+  舞いを獲得できたとしても、一旦それらすべてが一緒に設定されると、
+  実際のところ1つの「アプリケーション」 (外部コンポーネントから追加された
+  ルーティングやビューなどの設定の意味で) と別のアプリケーションの境界
+  を区別するために使用することができる機構を Pyramid は提供しません。
+
+
+.. - Pyramid doesn't provide enough "rails" to make it possible to integrate
+..   truly honest-to-god, download-an-app-from-a-random-place
+..   and-plug-it-in-to-create-a-system "pluggable" applications.  Because
+..   Pyramid itself isn't opinionated (it doesn't mandate a particular kind of
+..   database, it offers multiple ways to map URLs to code, etc), it's unlikely
+..   that someone who creates something application-like will be able to
+..   casually redistribute it to J. Random Pyramid User and have it just work by
+..   asking him to config.include a function from the package.  This is
+..   particularly true of very high level components such as blogs, wikis,
+..   twitter clones, commenting systems, etc.  The integrator (the Pyramid
+..   developer who has downloaded a package advertised as a "pluggable app")
+..   will almost certainly have made different choices about e.g. what type of
+..   persistence system he's using, and for the integrator to appease the
+..   requirements of the "pluggable application", he may be required to set up a
+..   different database, make changes to his own code to prevent his application
+..   from shadowing the pluggable app (or vice versa), and any other number of
+..   arbitrary changes.
+
+- Pyramid は、本当に、神に誓って「適当な場所からアプリをダウンロードして、
+  プラグインしてシステムを作成する」という「プラグ可能な」アプリケーション
+  を統合することを可能にするために十分な "rails" を提供しません。
+  Pyramid それ自体は主張の強いフレームワークではないので (特別の種類の
+  データベースを要求せず、 URL をコードにマップする方法を多数提供し
+  ている、等々)、誰かがアプリケーションの半完成品を作成して、カジュアルに
+  再配布したものをどこかの Pyramid ユーザが受け取って、パッケージから機能を
+  config.include するだけで動く、ということは起こりそうもありません。
+  これは特に、ブログ、Wiki、 Twitter クローン、コメントシステムなどのよう
+  な高レベルのコンポーネントにまさに該当します。インテグレータ (「プラグ
+  可能アプリ」として宣伝されたパッケージをダウンロードした Pyramid 開発者)
+  は、例えばどんなタイプの永続化システムを使用しているかということに関して
+  ほとんど確実に異なる選択を行なっているでしょう。また、インテグレータは
+  「プラグ可能アプリケーション」の要求を満たす (appease the requirements)
+  ため、異なるデータベースをセットアップしたり、彼のアプリケーションが
+  プラグ可能なアプリを隠すこと (あるいはその逆) を防ぐために彼自身のコード
+  に変更を加えたり、その他任意の数の変更を要求されるかもしれません。
+
+
+.. For this reason, we claim that Pyramid has "extensible" applications, 
+.. not pluggable applications.  Any Pyramid application can be extended 
+.. without forking it as long as its configuration statements have been 
+.. composed into things that can be pulled in via ``config.include``. 
+
+この理由で、 Pyramid はプラグ可能なアプリケーションではなく「拡張可能な」
+アプリケーションを持つと主張します。どんな Pyramid アプリケーションも、
+その設定文が ``config.include`` によって取り入れることができるものに
+構成されている限り、フォークせずに拡張することができます。
+
+
+.. It's also perfectly reasonable for a single developer or team to create a set
+.. of interoperating components which can be enabled or disabled by using
+.. config.include.  That developer or team will be able to provide the "rails"
+.. (by way of making high-level choices about the technology used to create the
+.. project, so there won't be any issues with plugging all of the components
+.. together.  The problem only rears its head when the components need to be
+.. distributed to *arbitrary* users.  Note that Django has a similar problem
+.. with "pluggable applications" that need to work for arbitrary third parties,
+.. even though they provide many, many more rails than does Pyramid.  Even the
+.. rails they provide are not enough to make the "pluggable application" story
+.. really work without local modification.
+
+さらに、一人の開発者あるいはチームが config.include を使用して有効にしたり
+無効にしたりできる、1セットの相互運用 (interoperating) コンポーネントを
+作成することは完全に筋が通っています。開発者またはチームは "rails" を
+提供できるでしょう (プロジェクトを作成するために使われる技術に関する
+高レベルの選択を行なうことによって)。したがって、すべてのコンポーネントを
+まとめてプラグインすることに問題はないでしょう。 *任意の* ユーザに
+コンポーネントを配布する必要がある場合のみ、その問題は姿を現します。
+任意のサードパーティーのために動く必要のある「プラグ可能なアプリケーション」
+に関して Django が同様の問題を持っていることに注目してください。
+たとえそれが Pyramid よりさらに多数の rails を提供していたとしてもです。
+Pyramid が提供する rails が 「プラグ可能なアプリケーション」を作るために
+十分でなかったとしても、ローカルの修正なしでストーリーは現実に働きます
+(story really work)。
+
+
+.. Truly pluggable applications need to be created at a much higher level than a
+.. web framework, as no web framework can offer enough constraints to really
+.. make them work out of the box.  They really need to plug into an application,
+.. instead.  It would be a noble goal to build an application with Pyramid that
+.. provides these constraints and which truly does offer a way to plug in
+.. applications (Joomla, Plone, Drupal come to mind).
+
+本当にプラグ可能なアプリケーションは、ウェブフレームワークよりはるかに
+高いレベルで作成される必要があります。なぜなら、ウェブフレームワークは
+そのようなアプリケーションを箱から出した状態で動かすのに十分な制約を
+実際には提供することができないからです。実際には、その代わりにそれら
+(=プラグ可能なアプリケーション) をアプリケーションにプラグインする必要が
+あります。これらの制約を提供し、本当にアプリケーションをプラグインする
+方法を提供できるアプリケーションを Pyramid で構築することは壮大なゴールと
+なるでしょう (Joomla, Plone, Drupal が心に浮かびます)。
+
 
 Pyramid Has Zope Things In It, So It's Too Complex
 --------------------------------------------------
