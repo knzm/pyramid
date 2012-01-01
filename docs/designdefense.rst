@@ -3476,6 +3476,11 @@ Love Simplicity
 Other Challenges
 ----------------
 
-Other challenges are encouraged to be sent to the `Pylons-devel
-<http://groups.google.com/group/pylons-devel>`_ maillist.  We'll try to address
-them by considering a design change, or at very least via exposition here.
+.. Other challenges are encouraged to be sent to the `Pylons-devel
+.. <http://groups.google.com/group/pylons-devel>`_ maillist.  We'll try to address
+.. them by considering a design change, or at very least via exposition here.
+
+他の challenge があればぜひ `Pylons-devel
+<http://groups.google.com/group/pylons-devel>`_ メーリングリストに
+送ってください。私たちは、設計変更を検討することでそれに取り組むか、
+少なくともここにそれを記そうと思います。
