@@ -4,13 +4,6 @@
 The Pyramid Web Application Development Framework
 =================================================
 
-.. note::
-
-   このドキュメントは `公式ドキュメント <http://docs.pylonsproject.org/projects/pyramid/en/latest/>`_ の翻訳です。
-
-   ソースコードは `Github <https://github.com/knzm/pyramid>`_ にあります。
-
-
 :app:`Pyramid` is a small, fast, down-to-earth Python web application
 development framework.  It is developed as part of the `Pylons Project
 <http://docs.pylonsproject.org/>`_.  It is licensed under a `BSD-like license
