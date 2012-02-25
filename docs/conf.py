@@ -47,7 +47,7 @@ book = os.environ.get('BOOK')
 extensions = [
     'sphinx.ext.autodoc',
 #    'sphinx.ext.doctest',
-    'repoze.sphinx.autointerface',
+#    'repoze.sphinx.autointerface',
 #    'sphinx.ext.intersphinx'
     ]
 
