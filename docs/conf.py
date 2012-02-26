@@ -47,7 +47,7 @@ book = os.environ.get('BOOK')
 extensions = [
     'sphinx.ext.autodoc',
 #    'sphinx.ext.doctest',
-#    'repoze.sphinx.autointerface',
+    'repoze.sphinx.autointerface',
 #    'sphinx.ext.intersphinx'
     ]
 
@@ -160,10 +160,10 @@ if 'sphinx-build' in ' '.join(sys.argv): # protect against dumb importers
 
 html_theme_path = ['_themes', 'customtheme']
 html_theme = 'doc-ja'
-html_theme_options = dict(
-    github_url='https://github.com/Pylons/pyramid',
-    in_progress='false'
-    )
+# html_theme_options = dict(
+#     github_url='https://github.com/Pylons/pyramid',
+#     in_progress='true'
+#     )
 # The style sheet to use for HTML and HTML Help pages. A file of that name
 # must exist either in Sphinx' static/ path, or in one of the custom paths
 # given in html_static_path.
