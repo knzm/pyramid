@@ -19,6 +19,30 @@ import warnings
 
 warnings.simplefilter('ignore', DeprecationWarning)
 
+# RTD support
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
+
+class Mock(object):
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        return Mock()
+
+    @classmethod
+    def __getattr__(self, name):
+        if name in ('__file__', '__path__'):
+            return '/dev/null'
+        elif name[0] == name[0].upper():
+            return type(name, (), {})
+        else:
+            return Mock()
+
+if on_rt:
+    MOCK_MODULES = ['repoze.sphinx.autointerface']
+    for mod_name in MOCK_MODULES:
+        sys.modules[mod_name] = Mock()
+
 # skip raw nodes
 from sphinx.writers.text import TextTranslator
 from sphinx.writers.latex import LaTeXTranslator
@@ -46,9 +70,9 @@ book = os.environ.get('BOOK')
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
     'sphinx.ext.autodoc',
-#    'sphinx.ext.doctest',
+    'sphinx.ext.doctest',
     'repoze.sphinx.autointerface',
-#    'sphinx.ext.intersphinx'
+    'sphinx.ext.intersphinx'
     ]
 
 # Looks for objects in other Pyramid projects
