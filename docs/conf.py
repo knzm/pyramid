@@ -38,7 +38,7 @@ class Mock(object):
         else:
             return Mock()
 
-if on_rt:
+if on_rtd:
     MOCK_MODULES = ['repoze.sphinx.autointerface']
     for mod_name in MOCK_MODULES:
         sys.modules[mod_name] = Mock()
