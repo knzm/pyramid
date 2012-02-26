@@ -502,6 +502,12 @@ def resig(app, what, name, obj, options, signature, return_annotation):
 
 ## PygmentsBridge.latex_formatter = NoLinenosLatexFormatter
 
+if on_rtd:
+    # We don't want to build pdf on RTD.
+    for __name in list(globals().keys()):
+        if __name.startswith("latex_"):
+            del globals()[__name]
+
 # -- Options for Epub output ---------------------------------------------------
 
 # Bibliographic Dublin Core info.
