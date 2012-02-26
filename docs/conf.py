@@ -68,12 +68,17 @@ book = os.environ.get('BOOK')
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.doctest',
-    'repoze.sphinx.autointerface',
-    'sphinx.ext.intersphinx'
-    ]
+if on_rtd:
+    extensions = [
+        'sphinx.ext.autodoc',
+        ]
+else:
+    extensions = [
+        'sphinx.ext.autodoc',
+        'sphinx.ext.doctest',
+        'repoze.sphinx.autointerface',
+        'sphinx.ext.intersphinx'
+        ]
 
 # Looks for objects in other Pyramid projects
 ## intersphinx_mapping = {
