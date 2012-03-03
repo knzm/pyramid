@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
-import mimetypes
 import os
 
 from os.path import (
     normcase,
     normpath,
     join,
-    getmtime,
-    getsize,
     isdir,
     exists,
     )
@@ -30,68 +27,10 @@ from pyramid.httpexceptions import (
     )
 
 from pyramid.path import caller_package
-from pyramid.response import Response
+from pyramid.response import FileResponse
 from pyramid.traversal import traversal_path_info
 
 slash = text_('/')
-
-def init_mimetypes(mimetypes):
-    # this is a function so it can be unittested
-    if hasattr(mimetypes, 'init'):
-        mimetypes.init()
-        return True
-    return False
-
-# See http://bugs.python.org/issue5853 which is a recursion bug
-# that seems to effect Python 2.6, Python 2.6.1, and 2.6.2 (a fix
-# has been applied on the Python 2 trunk).
-init_mimetypes(mimetypes)
-
-class _FileResponse(Response):
-    """
-    Serves a static filelike object.
-    """
-    def __init__(self, path, cache_max_age):
-        super(_FileResponse, self).__init__(conditional_response=True)
-        self.last_modified = getmtime(path)
-        content_type, content_encoding = mimetypes.guess_type(path,
-                                                              strict=False)
-        if content_type is None:
-            content_type = 'application/octet-stream'
-        self.content_type = content_type
-        self.content_encoding = content_encoding
-        content_length = getsize(path)
-        self.app_iter = _FileIter(open(path, 'rb'), content_length)
-        # assignment of content_length must come after assignment of app_iter
-        self.content_length = content_length
-        if cache_max_age is not None:
-            self.cache_expires = cache_max_age
-
-class _FileIter(object):
-    block_size = 4096 * 64 # (256K)
-
-    def __init__(self, file, size=None):
-        self.file = file
-        self.size = size
-
-    def __iter__(self):
-        return self
-
-    def next(self):
-        chunk_size = self.block_size
-        if self.size is not None:
-            if chunk_size > self.size:
-                chunk_size = self.size
-            self.size -= chunk_size
-        data = self.file.read(chunk_size)
-        if not data:
-            raise StopIteration
-        return data
-
-    __next__ = next # py3
-
-    def close(self):
-        self.file.close()
 
 class static_view(object):
     """ An instance of this class is a callable which can act as a
@@ -186,7 +125,7 @@ class static_view(object):
             if not exists(filepath):
                 return HTTPNotFound(request.url)
 
-        return _FileResponse(filepath ,self.cache_max_age)
+        return FileResponse(filepath, request, self.cache_max_age)
 
     def add_slash_redirect(self, request):
         url = request.path_url + '/'

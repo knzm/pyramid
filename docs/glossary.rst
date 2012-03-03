@@ -876,12 +876,11 @@ Glossary
      on the Jinja2 templating system.
 
    Akhet
-     Akhet is a Pyramid-based development environment which provides a
-     Pylons-esque scaffold which sports support for :term:`view handler`
-     application development, :term:`SQLAlchemy` support, :term:`Mako`
-     templating by default, and other Pylons-like features.  See
-     http://docs.pylonsproject.org/projects/akhet/dev/index.html for more
-     information.
+     `Akhet <http://docs.pylonsproject.org/projects/akhet/en/latest/>`_ is a 
+     Pyramid library and demo application with a Pylons-like feel.
+     It's most known for its former application scaffold, which helped 
+     users transition from Pylons and those prefering a more Pylons-like API.
+     The scaffold has been retired but the demo plays a similar role. 
 
    Pyramid Cookbook
      An additional documentation resource for Pyramid which presents topical,
@@ -983,3 +982,15 @@ Glossary
       :meth:`pyramid.path.AssetResolver.resolve` method.  It supports the
       methods and attributes documented in
       :class:`pyramid.interfaces.IAssetDescriptor`.
+
+   Waitress
+      A :term:`WSGI` server that runs on UNIX and Windows under Python 2.6+
+      and Python 3.2+.  Projects generated via Pyramid scaffolding use
+      Waitress as a WGSI server.  See
+      http://docs.pylonsproject.org/projects/waitress/en/latest/ for detailed
+      information.
+
+   Green Unicorn
+      Aka ``gunicorn``, a fast :term:`WSGI` server that runs on UNIX under
+      Python 2.5+ (although at the time of this writing does not support
+      Python 3).  See http://gunicorn.org/ for detailed information.

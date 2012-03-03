@@ -98,7 +98,7 @@ Or on Windows:
 
 .. code-block:: text
 
-   $ Scripts\pcreate alchemy MyProject
+   $ Scripts\pcreate -s alchemy MyProject
 
 Here's sample output from a run of ``pcreate`` on UNIX for a project we name
 ``MyProject``:
@@ -118,11 +118,11 @@ your application, or install your application for deployment or development.
 
 A ``.ini`` file named ``development.ini`` will be created in the project
 directory.  You will use this ``.ini`` file to configure a server, to run
-your application, and to debug your application.  It sports configuration
+your application, and to debug your application.  It contains configuration
 that enables an interactive debugger and settings optimized for development.
 
 Another ``.ini`` file named ``production.ini`` will also be created in the
-project directory.  It sports configuration that disables any interactive
+project directory.  It contains configuration that disables any interactive
 debugger (to prevent inappropriate access and disclosure), and turns off a
 number of debugging settings.  You can use this file to put your application
 into production.
@@ -283,7 +283,7 @@ For example, on UNIX:
    $ ../bin/pserve development.ini --reload
    Starting subprocess with file monitor
    Starting server in PID 16601.
-   serving on 0.0.0.0:6543 view at http://127.0.0.1:6543
+   Starting HTTP server on http://0.0.0.0:6543
 
 For more detailed information about the startup process, see
 :ref:`startup_chapter`.  For more information about environment variables and
@@ -322,35 +322,73 @@ image again.
 
 .. image:: project-debug.png
 
+If you don't see the debug toolbar image on the right hand top of the page,
+it means you're browsing from a system that does not have debugging access.
+By default, for security reasons, only a browser originating from
+``localhost`` (``127.0.0.1``) can see the debug toolbar.  To allow your
+browser on a remote system to access the server, add the a line within the
+``[app:main]`` section of the ``development.ini`` file in the form
+``debugtoolbar.hosts = X.X.X.X``.  For example, if your Pyramid application
+is running on a remote system, and you're browsing from a host with the IP
+address ``192.168.1.1``, you'd add something like this to enable the toolbar
+when your system contacts Pyramid:
+
+.. code-block:: ini
+
+   [app:main]
+   # .. other settings ...
+   debugtoolbar.hosts = 192.168.1.1
+
 For more information about what the debug toolbar allows you to do, see `the
 documentation for pyramid_debugtoolbar
-<http://docs.pylonsproject.org/projects/pyramid_debugtoolbar/dev/>`_.
+<http://docs.pylonsproject.org/projects/pyramid_debugtoolbar/en/latest/>`_.
 
 The debug toolbar will not be shown (and all debugging will be turned off)
 when you use the ``production.ini`` file instead of the ``development.ini``
 ini file to run the application.
 
 You can also turn the debug toolbar off by editing ``development.ini`` and
-commenting out the line ``pyramid.includes = pyramid_debugtoolbar``.  For
-example, instead of:
+commenting out a line.  For example, instead of:
 
 .. code-block:: ini
    :linenos:
 
    [app:main]
    ...
-   pyramid.includes = pyramid_debugtoolbar
+   pyramid.includes =
+       pyramid_debugtoolbar
 
-Put a hash mark in front of the ``pyramid.includes`` line:
+Put a hash mark at the beginning of the ``pyramid_debugtoolbar`` line:
 
 .. code-block:: ini
    :linenos:
 
    [app:main]
    ...
-   #pyramid.includes = pyramid_debugtoolbar
+   pyramid.includes =
+   #    pyramid_debugtoolbar
 
 Then restart the application to see that the toolbar has been turned off.
+
+Note that if you comment out the ``pryamid_debugtoolbar`` line, the ``#``
+*must* be in the first column.  If you put the hash mark anywhere except the
+first column instead, for example like this:
+
+.. code-block:: ini
+   :linenos:
+
+   [app:main]
+   ...
+   pyramid.includes =
+       #pyramid_debugtoolbar
+
+When you attempt to restart the application with a section like the abvoe
+you'll receive an error that ends something like this, and the application
+will not start:
+
+.. code-block:: text
+
+   ImportError: No module named #pyramid_debugtoolbar
 
 .. index::
    single: project structure
@@ -709,7 +747,7 @@ also informs Python that the directory which contains it is a *package*.
 #. Line 1 imports the :term:`Configurator` class from :mod:`pyramid.config`
    that we use later.
 
-#. Lines 3-16 define a function named ``main`` that returns a :app:`Pyramid`
+#. Lines 3-10 define a function named ``main`` that returns a :app:`Pyramid`
    WSGI application.  This function is meant to be called by the
    :term:`PasteDeploy` framework as a result of running ``pserve``.
 
@@ -881,52 +919,54 @@ configuration as would be loaded if you were running your Pyramid application
 via ``pserve``.  This can be a useful debugging tool.  See
 :ref:`interactive_shell` for more details.
 
-.. _alternate_wsgi_server:
+What Is This ``pserve`` Thing
+-----------------------------
 
-Using an Alternate WSGI Server
-------------------------------
-
-The code generated by :app:`Pyramid` scaffolding assumes that you will be
+The code generated by an :app:`Pyramid` scaffold assumes that you will be
 using the ``pserve`` command to start your application while you do
-development.  The default rendering of Pyramid scaffolding uses the *wsgiref*
-WSGI server, which is a server that is ill-suited for production usage: its
-main feature is that it works on all platforms and all systems, making it a
-good choice as a default server from the perspective of Pyramid's developers.
-
-To use a server more suitable for production, you have a number of choices.
-Replace the ``use = egg:pyramid#wsgref`` line in your ``production.ini`` with
-one of the following.
-
-``use = egg:Paste#http``
-
-  ``paste.httpserver`` is Windows, UNIX, and Python 2 compatible.  You'll
-  need to ``easy_install Paste`` into your Pyramid virtualenv for this server
-  to work.
-
-``use = egg:pyramid#cherrypy``
-
-  The ``CherryPy`` WSGI server is Windows, UNIX, Python 2, and Python 3
-  compatible.  You'll need to ``easy_install CherryPy`` into your Pyramid
-  virtualenv for this server to work.
+development.  ``pserve`` is a command that reads a :term:`PasteDeploy`
+``.ini`` file (e.g. ``development.ini``) and configures a server to serve a
+Pyramid application based on the data in the file.
 
 ``pserve`` is by no means the only way to start up and serve a :app:`Pyramid`
 application.  As we saw in :ref:`firstapp_chapter`, ``pserve`` needn't be
 invoked at all to run a :app:`Pyramid` application.  The use of ``pserve`` to
 run a :app:`Pyramid` application is purely conventional based on the output
-of its scaffold.
+of its scaffolding.  But we strongly recommend using while developing your
+application, because many other convenience introspection commands (such as
+``pviews``, ``prequest``, ``proutes`` and others) are also implemented in
+terms of configuration availaibility of this ``.ini`` file format.  It also
+configures Pyramid logging and provides the ``--reload`` switch for
+convenient restarting of the server when code changes.
 
-Any :term:`WSGI` server is capable of running a :app:`Pyramid` application.
-Some WSGI servers don't require the :term:`PasteDeploy` framework's
-``pserve`` command to do server process management at all.  Each :term:`WSGI`
-server has its own documentation about how it creates a process to run an
-application, and there are many of them, so we cannot provide the details for
-each here.  But the concepts are largely the same, whatever server you happen
-to use.
+.. _alternate_wsgi_server:
 
-One popular production alternative to a ``pserve``-invoked server is
-:term:`mod_wsgi`. You can also use :term:`mod_wsgi` to serve your
-:app:`Pyramid` application using the Apache web server rather than any
-"pure-Python" server that is started as a result of ``pserve``.  See
-:ref:`modwsgi_tutorial` for details.  However, it is usually easier to
-*develop* an application using a ``pserve`` -invoked webserver, as
-exception and debugging output will be sent to the console.
+Using an Alternate WSGI Server
+------------------------------
+
+Pyramid scaffolds generate projects which use the :term:`Waitress` WSGI
+server.  Waitress is a server that is suited for development and light
+production usage.  It's not the fastest nor the most featureful WSGI server.
+Instead, its main feature is that it works on all platforms that Pyramid
+needs to run on, making it a good choice as a default server from the
+perspective of Pyramid's developers.  
+
+Any WSGI server is capable of running a :app:`Pyramid` application.  But we
+suggest you stick with the default server for development, and that you wait
+to investigate other server options until you're ready to deploy your
+application to production.  Unless for some reason you need to develop on a
+non-local system, investigating alternate server options is usually a
+distraction until you're ready to deploy.  But we recommend developing using
+the default configuration on a local system that you have complete control
+over; it will provide the best development experience.
+
+One popular production alternative to the default Waitress server is
+:term:`mod_wsgi`. You can use mod_wsgi to serve your :app:`Pyramid`
+application using the Apache web server rather than any "pure-Python" server
+like Waitress.  It is fast and featureful.  See :ref:`modwsgi_tutorial` for
+details.
+
+Another good production alternative is :term:`Green Unicorn` (aka
+``gunicorn``).  It's faster than Waitress and slightly easier to configure
+than mod_wsgi, although it depends, in its default configuration, on having a
+buffering HTTP proxy in front of it.

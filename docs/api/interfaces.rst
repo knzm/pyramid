@@ -76,3 +76,10 @@ Other Interfaces
 
   .. autointerface:: IActionInfo
      :members:
+
+  .. autointerface:: IAssetDescriptor
+     :members:
+
+  .. autointerface:: IResourceURL
+     :members:
+

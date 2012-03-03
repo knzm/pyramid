@@ -19,10 +19,9 @@ When saved to ``helloworld.py``, the above application can be run via:
 
    $ easy_install pyramid
    $ python helloworld.py
-   serving on 0.0.0.0:8080 view at http://127.0.0.1:8080
 
-And when you visit ``http://localhost:8080/hello/world`` in a browser, you
-will see the text ``Hello, world!``.
+When you visit ``http://localhost:8080/hello/world`` in a browser, you will
+see the text ``Hello, world!``.
 
 See :ref:`firstapp_chapter` for a full explanation of how this application
 works. Read the :ref:`html_narrative_documentation` to understand how
@@ -84,6 +83,7 @@ Narrative documentation in chapter form explaining how to use
    narr/vhosting
    narr/testing
    narr/resources
+   narr/hellotraversal
    narr/muchadoabouttraversal
    narr/traversal
    narr/security
@@ -93,6 +93,7 @@ Narrative documentation in chapter form explaining how to use
    narr/extending
    narr/advconfig
    narr/extconfig
+   narr/scaffolding
    narr/threadlocals
    narr/zca
 
@@ -109,7 +110,6 @@ applications to various platforms.
    tutorials/wiki2/index.rst
    tutorials/wiki/index.rst
    tutorials/bfg/index.rst
-   tutorials/gae/index.rst
    tutorials/modwsgi/index.rst
 
 Reference Material
@@ -153,7 +153,8 @@ application.  Check this application out via:
 
 `virginia <https://github.com/Pylons/virginia>`_ is a very simple dynamic
 file rendering application.  It is willing to render structured text
-documents, HTML documents, and images from a filesystem directory.  An
+documents, HTML documents, and images from a filesystem directory.
+It's also a good example of :term:`traversal`. An
 earlier version of this application runs the `repoze.org
 <http://repoze.org>`_ website.  Check this application out via:
 

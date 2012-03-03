@@ -228,11 +228,9 @@ class ConfiguratorTests(unittest.TestCase):
                                      request_iface=IRequest)
         self.assertTrue(view.__wraps__ is exceptionresponse_view)
 
-    def test_ctor_with_introspector(self):
-        introspector = DummyIntrospector()
-        config = self._makeOne(introspector=introspector)
-        self.assertEqual(config.introspector, introspector)
-        self.assertEqual(config.registry.introspector, introspector)
+    def test_ctor_with_introspection(self):
+        config = self._makeOne(introspection=False)
+        self.assertEqual(config.introspection, False)
 
     def test_with_package_module(self):
         from pyramid.tests.test_config import test_init
@@ -648,7 +646,7 @@ pyramid.tests.test_config.dummy_include2""",
         default = inst.introspector
         self.assertTrue(hasattr(default, 'add'))
         self.assertEqual(inst.introspector, inst.registry.introspector)
-        introspector = DummyIntrospector()
+        introspector = object()
         inst.introspector = introspector
         new = inst.introspector
         self.assertTrue(new is introspector)
@@ -712,6 +710,11 @@ pyramid.tests.test_config.dummy_include2""",
         self.assertEqual(action['callable'], None)
         self.assertEqual(action['args'], test_config)
 
+    def test_include_with_module_defaults_to_includeme_missing(self):
+        from pyramid.exceptions import ConfigurationError
+        config = self._makeOne()
+        self.assertRaises(ConfigurationError, config.include, 'pyramid.tests')
+
     def test_include_with_route_prefix(self):
         root_config = self._makeOne(autocommit=True)
         def dummy_subapp(config):
@@ -734,24 +737,25 @@ pyramid.tests.test_config.dummy_include2""",
 
         root_config.include(dummy_subapp, route_prefix='nested')
 
-    def test_with_context(self):
+    def test_include_with_missing_source_file(self):
+        from pyramid.exceptions import ConfigurationError
+        import inspect
         config = self._makeOne()
-        context = DummyZCMLContext()
-        context.basepath = 'basepath'
-        context.includepath = ('spec',)
-        context.package = 'pyramid'
-        context.autocommit = True
-        context.registry = 'abc'
-        context.route_prefix = 'buz'
-        context.info = 'info'
-        newconfig = config.with_context(context)
-        self.assertEqual(newconfig.package_name, 'pyramid')
-        self.assertEqual(newconfig.autocommit, True)
-        self.assertEqual(newconfig.registry, 'abc')
-        self.assertEqual(newconfig.route_prefix, 'buz')
-        self.assertEqual(newconfig.basepath, 'basepath')
-        self.assertEqual(newconfig.includepath, ('spec',))
-        self.assertEqual(newconfig.info, 'info')
+        class DummyInspect(object):
+            def getmodule(self, c):
+                return inspect.getmodule(c)
+            def getsourcefile(self, c):
+                return None
+        config.inspect = DummyInspect()
+        try:
+            config.include('pyramid.tests.test_config.dummy_include')
+        except ConfigurationError as e:
+            self.assertEqual(
+                e.args[0], 
+                "No source file for module 'pyramid.tests.test_config' (.py "
+                "file must exist, refusing to use orphan .pyc or .pyo file).")
+        else: # pragma: no cover
+            raise AssertionError
 
     def test_action_branching_kw_is_None(self):
         config = self._makeOne(autocommit=True)
@@ -770,6 +774,13 @@ pyramid.tests.test_config.dummy_include2""",
         self.assertEqual(intr.registered[0][0], config.introspector)
         self.assertEqual(intr.registered[0][1].__class__, ActionInfo)
 
+    def test_action_autocommit_with_introspectables_introspection_off(self):
+        config = self._makeOne(autocommit=True)
+        config.introspection = False
+        intr = DummyIntrospectable()
+        config.action('discrim', introspectables=(intr,))
+        self.assertEqual(len(intr.registered), 0)
+        
     def test_action_branching_nonautocommit_with_config_info(self):
         config = self._makeOne(autocommit=False)
         config.info = 'abc'
@@ -821,6 +832,19 @@ pyramid.tests.test_config.dummy_include2""",
         self.assertEqual(
             state.actions[0][1]['introspectables'], (intr,))
 
+    def test_action_nonautocommit_with_introspectables_introspection_off(self):
+        config = self._makeOne(autocommit=False)
+        config.info = ''
+        config._ainfo = []
+        config.introspection = False
+        state = DummyActionState()
+        config.action_state = state
+        state.autocommit = False
+        intr = DummyIntrospectable()
+        config.action('discrim', introspectables=(intr,))
+        self.assertEqual(
+            state.actions[0][1]['introspectables'], ())
+        
     def test_scan_integration(self):
         from zope.interface import alsoProvides
         from pyramid.interfaces import IRequest
@@ -924,6 +948,28 @@ pyramid.tests.test_config.dummy_include2""",
         result = render_view_to_response(ctx, req, 'pod_notinit')
         self.assertEqual(result, None)
 
+    def test_scan_integration_with_ignore(self):
+        from zope.interface import alsoProvides
+        from pyramid.interfaces import IRequest
+        from pyramid.view import render_view_to_response
+        import pyramid.tests.test_config.pkgs.scannable as package
+        config = self._makeOne(autocommit=True)
+        config.scan(package, 
+                    ignore='pyramid.tests.test_config.pkgs.scannable.another')
+
+        ctx = DummyContext()
+        req = DummyRequest()
+        alsoProvides(req, IRequest)
+        req.registry = config.registry
+
+        req.method = 'GET'
+        result = render_view_to_response(ctx, req, '')
+        self.assertEqual(result, 'grokked')
+
+        # ignored
+        v = render_view_to_response(ctx, req, 'another_stacked_class2')
+        self.assertEqual(v, None)
+        
     def test_scan_integration_dottedname_package(self):
         from zope.interface import alsoProvides
         from pyramid.interfaces import IRequest
@@ -1591,7 +1637,7 @@ class TestActionState(unittest.TestCase):
              'order':0, 'includepath':(), 'info':None,
              'introspectables':(intr,)},
             ]
-        introspector = DummyIntrospector()
+        introspector = object()
         c.execute_actions(introspector=introspector)
         self.assertEqual(output,  [((1,), {})])
         self.assertEqual(intr.registered, [(introspector, None)])
@@ -1604,7 +1650,7 @@ class TestActionState(unittest.TestCase):
              'order':0, 'includepath':(), 'info':None,
              'introspectables':(intr,)},
             ]
-        introspector = DummyIntrospector()
+        introspector = object()
         c.execute_actions(introspector=introspector)
         self.assertEqual(intr.registered, [(introspector, None)])
 
@@ -1934,21 +1980,6 @@ class DummyActionState(object):
         self.actions = []
     def action(self, *arg, **kw):
         self.actions.append((arg, kw))
-
-class DummyZCMLContext(object):
-    package = None
-    registry = None
-    autocommit = False
-    route_prefix = None
-    basepath = None
-    includepath = ()
-    info = ''
-    
-class DummyIntrospector(object):
-    def __init__(self):
-        self.intrs = []
-    def add(self, intr):
-        self.intrs.append(intr)
 
 class DummyIntrospectable(object):
     def __init__(self):

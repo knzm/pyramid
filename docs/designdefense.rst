@@ -423,7 +423,7 @@ Ameliorations
 .. Using such wrappers, we strive to always hide the ZCA API from application
 .. developers.  Application developers should just never know about the ZCA API:
 .. they should call a Python function with some object germane to the domain as
-.. an argument, and it should returns a result.  A corollary that follows is
+.. an argument, and it should return a result.  A corollary that follows is
 .. that any reader of an application that has been written using :app:`Pyramid`
 .. needn't understand the ZCA API either.
 
@@ -1408,7 +1408,7 @@ Pyramid Has Too Many Dependencies
 .. The :mod:`zope.component`, package on which :app:`Pyramid` depends has
 .. transitive dependencies on several other packages (:mod:`zope.event`, and
 .. :mod:`zope.interface`).  :app:`Pyramid` also has its own direct dependencies,
-.. such as :term:`PasteDeploy`, :term:`Chameleon`, :term:`Mako` :term:`WebOb`,
+.. such as :term:`PasteDeploy`, :term:`Chameleon`, :term:`Mako`, :term:`WebOb`,
 .. :mod:`zope.deprecation` and some of these in turn have their own transitive
 .. dependencies.
 
@@ -2697,7 +2697,7 @@ Python プログラマがモジュールスコープのコードパスを任意�
   .. actually the best-case circumstance for double-imports; if a module only
   .. mutates itself and its contents at import time, if it is imported twice,
   .. that's OK, because each decorator invocation will always be mutating an
-  .. independent copy of the object its attached to, not a shared resource like
+  .. independent copy of the object it's attached to, not a shared resource like
   .. a registry in another module.  This has the effect that
   .. double-registrations will never be performed.
 
@@ -3152,8 +3152,8 @@ Wrapping Up
 .. code-block:: python
    :linenos:
 
-   from pyramid.response import Response      # explicit response objects, no TL
-   from paste.httpserver import serve         # explicitly WSGI
+   from pyramid.response import Response         # explicit response, no TL
+   from wsgiref.simple_server import make_server # explicitly WSGI
 
    def hello_world(request):  # accepts a request; no request thread local reqd
        # explicit response object means no response threadlocal
@@ -3164,7 +3164,8 @@ Wrapping Up
        config = Configurator()       # no global application object.
        config.add_view(hello_world)  # explicit non-decorator registration
        app = config.make_wsgi_app()  # explicitly WSGI
-       serve(app, host='0.0.0.0')    # explicitly WSGI
+       server = make_server('0.0.0.0', 8080, app)
+       server.serve_forever()        # explicitly WSGI
 
 
 Pyramid Doesn't Offer Pluggable Apps
@@ -3343,7 +3344,7 @@ Pyramid Has Zope Things In It, So It's Too Complex
 (実際には、本物の電子メールから意訳されたものです)
 
 
-.. Let's take this criticism point-by point.
+.. Let's take this criticism point-by-point.
 
 この批判について順番に見ていきましょう。
 
@@ -3360,7 +3361,7 @@ Pyramid を使うことができます:
 .. code-block:: python
    :linenos:
 
-   from paste.httpserver import serve
+   from wsgiref.simple_server import make_server
    from pyramid.config import Configurator
    from pyramid.response import Response
 
@@ -3371,7 +3372,8 @@ Pyramid を使うことができます:
        config = Configurator()
        config.add_view(hello_world)
        app = config.make_wsgi_app()
-       serve(app)
+       server = make_server('0.0.0.0', 8080, app)
+       server.serve_forever()
 
 
 .. Pyramid has ~ 650 pages of documentation (printed), covering topics from the

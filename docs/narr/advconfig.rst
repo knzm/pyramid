@@ -27,7 +27,7 @@ configured imperatively:
 .. code-block:: python
    :linenos:
 
-   from paste.httpserver import serve
+   from wsgiref.simple_server import make_server
    from pyramid.config import Configurator
    from pyramid.response import Response
 
@@ -38,7 +38,8 @@ configured imperatively:
        config = Configurator()
        config.add_view(hello_world)
        app = config.make_wsgi_app()
-       serve(app, host='0.0.0.0')
+       server = make_server('0.0.0.0', 8080, app)
+       server.serve_forever()
 
 When you start this application, all will be OK.  However, what happens if we
 try to add another view to the configuration with the same set of
@@ -47,7 +48,7 @@ try to add another view to the configuration with the same set of
 .. code-block:: python
    :linenos:
 
-   from paste.httpserver import serve
+   from wsgiref.simple_server import make_server
    from pyramid.config import Configurator
    from pyramid.response import Response
 
@@ -66,7 +67,8 @@ try to add another view to the configuration with the same set of
        config.add_view(goodbye_world, name='hello')
 
        app = config.make_wsgi_app()
-       serve(app, host='0.0.0.0')
+       server = make_server('0.0.0.0', 8080, app)
+       server.serve_forever()
 
 The application now has two conflicting view configuration statements.  When
 we try to start it again, it won't start.  Instead, we'll receive a traceback
@@ -120,9 +122,10 @@ configuration or configuration that results from the execution of a
 Manually Resolving Conflicts
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-There are a number of ways to manually resolve conflicts: the "right" way, by
-strategically using :meth:`pyramid.config.Configurator.commit`, or by using
-an "autocommitting" configurator.
+There are a number of ways to manually resolve conflicts: by changing
+registrations to not conflict, by strategically using
+:meth:`pyramid.config.Configurator.commit`, or by using an "autocommitting"
+configurator.
 
 The Right Thing
 +++++++++++++++
@@ -170,7 +173,7 @@ application that generates conflicts:
 .. code-block:: python
    :linenos:
 
-   from paste.httpserver import serve
+   from wsgiref.simple_server import make_server
    from pyramid.config import Configurator
    from pyramid.response import Response
 
@@ -189,7 +192,8 @@ application that generates conflicts:
        config.add_view(goodbye_world, name='hello')
 
        app = config.make_wsgi_app()
-       serve(app, host='0.0.0.0')
+       server = make_server('0.0.0.0', 8080, app)
+       server.serve_forever()
 
 We can prevent the two ``add_view`` calls from conflicting by issuing a call
 to :meth:`~pyramid.config.Configurator.commit` between them:
@@ -197,7 +201,7 @@ to :meth:`~pyramid.config.Configurator.commit` between them:
 .. code-block:: python
    :linenos:
 
-   from paste.httpserver import serve
+   from wsgiref.simple_server import make_server
    from pyramid.config import Configurator
    from pyramid.response import Response
 
@@ -218,7 +222,8 @@ to :meth:`~pyramid.config.Configurator.commit` between them:
        config.add_view(goodbye_world, name='hello')
 
        app = config.make_wsgi_app()
-       serve(app, host='0.0.0.0')
+       server = make_server('0.0.0.0', 8080, app)
+       server.serve_forever()
 
 In the above example we've issued a call to
 :meth:`~pyramid.config.Configurator.commit` between the two ``add_view``
@@ -290,9 +295,18 @@ These are the methods of the configurator which provide conflict detection:
 :meth:`~pyramid.config.Configurator.add_route`,
 :meth:`~pyramid.config.Configurator.add_renderer`,
 :meth:`~pyramid.config.Configurator.set_request_factory`,
+:meth:`~pyramid.config.Configurator.set_session_factory`,
+:meth:`~pyramid.config.Configurator.set_request_property`,
+:meth:`~pyramid.config.Configurator.set_root_factory`,
+:meth:`~pyramid.config.Configurator.set_view_mapper`,
+:meth:`~pyramid.config.Configurator.set_authentication_policy`,
+:meth:`~pyramid.config.Configurator.set_authorization_policy`,
 :meth:`~pyramid.config.Configurator.set_renderer_globals_factory`,
-:meth:`~pyramid.config.Configurator.set_locale_negotiator` and
-:meth:`~pyramid.config.Configurator.set_default_permission`.
+:meth:`~pyramid.config.Configurator.set_locale_negotiator`,
+:meth:`~pyramid.config.Configurator.set_default_permission`,
+:meth:`~pyramid.config.Configurator.add_traverser`,
+:meth:`~pyramid.config.Configurator.add_resource_url_adapter`,
+and :meth:`~pyramid.config.Configurator.add_response_adapter`.
 
 :meth:`~pyramid.config.Configurator.add_static_view` also indirectly
 provides conflict detection, because it's implemented in terms of the

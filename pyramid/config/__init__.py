@@ -239,11 +239,11 @@ class Configurator(
     :meth:`pyramid.config.Configurator.add_route` will have the specified path
     prepended to their pattern. This parameter is new in Pyramid 1.2.
 
-    If ``introspector`` is passed, it must be an instance implementing the
-    attributes and methods of :class:`pyramid.interfaces.IIntrospector`.  If
-    ``introspector`` is not passed (or is passed as ``None``), the default
-    introspector implementation will be used.  This parameter is new in
-    Pyramid 1.3.
+    If ``introspection`` is passed, it must be a boolean value.  If it's
+    ``True``, introspection values during actions will be kept for for use
+    for tools like the debug toolbar.  If it's ``False``, introspection
+    values provided by registrations will be ignored.  By default, it is
+    ``True``.  This parameter is new as of Pyramid 1.3.
     """
     manager = manager # for testing injection
     venusian = venusian # for testing injection
@@ -253,6 +253,7 @@ class Configurator(
     info = ''
     object_description = staticmethod(object_description)
     introspectable = Introspectable
+    inspect = inspect
 
     def __init__(self,
                  registry=None,
@@ -272,7 +273,7 @@ class Configurator(
                  autocommit=False,
                  exceptionresponse_view=default_exceptionresponse_view,
                  route_prefix=None,
-                 introspector=None,
+                 introspection=True,
                  ):
         if package is None:
             package = caller_package()
@@ -283,6 +284,7 @@ class Configurator(
         self.registry = registry
         self.autocommit = autocommit
         self.route_prefix = route_prefix
+        self.introspection = introspection
         if registry is None:
             registry = Registry(self.package_name)
             self.registry = registry
@@ -300,7 +302,6 @@ class Configurator(
                 session_factory=session_factory,
                 default_view_mapper=default_view_mapper,
                 exceptionresponse_view=exceptionresponse_view,
-                introspector=introspector,
                 )
 
     def setup_registry(self,
@@ -317,7 +318,7 @@ class Configurator(
                        session_factory=None,
                        default_view_mapper=None,
                        exceptionresponse_view=default_exceptionresponse_view,
-                       introspector=None):
+                       ):
         """ When you pass a non-``None`` ``registry`` argument to the
         :term:`Configurator` constructor, no initial setup is performed
         against the registry.  This is because the registry you pass in may
@@ -337,10 +338,6 @@ class Configurator(
         registry = self.registry
 
         self._fix_registry()
-
-        if introspector is not None:
-            # use nondefault introspector
-            self.introspector = introspector
 
         self._set_settings(settings)
         self._register_response_adapters()
@@ -528,24 +525,32 @@ class Configurator(
 
         ``introspectables`` is a sequence of :term:`introspectable` objects
         (or the empty sequence if no introspectable objects are associated
-        with this action).
+        with this action).  If this configurator's ``introspection``
+        attribute is ``False``, these introspectables will be ignored.
 
         ``extra`` provides a facility for inserting extra keys and values
         into an action dictionary.
         """
+        # catch nonhashable discriminators here; most unit tests use
+        # autocommit=False, which won't catch unhashable discriminators
+        assert hash(discriminator) 
+
         if kw is None:
             kw = {}
 
         autocommit = self.autocommit
         action_info = self.action_info
-        introspector = self.introspector
+
+        if not self.introspection:
+            # if we're not introspecting, ignore any introspectables passed
+            # to us
+            introspectables = ()
 
         if autocommit:
             if callable is not None:
                 callable(*args, **kw)
-            if introspector is not None:
-                for introspectable in introspectables:
-                    introspectable.register(introspector, action_info)
+            for introspectable in introspectables:
+                introspectable.register(self.introspector, action_info)
 
         else:
             action = extra
@@ -702,11 +707,23 @@ class Configurator(
             route_prefix = None
 
         c = self.maybe_dotted(callable)
-        module = inspect.getmodule(c)
+        module = self.inspect.getmodule(c)
         if module is c:
-            c = getattr(module, 'includeme')
+            try:
+                c = getattr(module, 'includeme')
+            except AttributeError:
+                raise ConfigurationError(
+                    "module %r has no attribute 'includeme'" % (module.__name__)
+                    )
+                                                       
         spec = module.__name__ + ':' + c.__name__
-        sourcefile = inspect.getsourcefile(c)
+        sourcefile = self.inspect.getsourcefile(c)
+
+        if sourcefile is None:
+            raise ConfigurationError(
+                'No source file for module %r (.py file must exist, '
+                'refusing to use orphan .pyc or .pyo file).' % module.__name__)
+            
 
         if action_state.processSpec(spec):
             configurator = self.__class__(
@@ -765,22 +782,6 @@ class Configurator(
             m = types.MethodType(c, self, self.__class__)
         return m
 
-    @classmethod
-    def with_context(cls, context):
-        """A classmethod used by ``pyramid_zcml`` directives to obtain a
-        configurator with 'the right' context.  Returns a new Configurator
-        instance."""
-        configurator = cls(
-            registry=context.registry,
-            package=context.package,
-            autocommit=context.autocommit,
-            route_prefix=context.route_prefix
-            )
-        configurator.basepath = context.basepath
-        configurator.includepath = context.includepath
-        configurator.info = context.info
-        return configurator
-
     def with_package(self, package):
         """ Return a new Configurator instance with the same registry
         as this configurator using the package supplied as the
@@ -792,6 +793,7 @@ class Configurator(
             package=package,
             autocommit=self.autocommit,
             route_prefix=self.route_prefix,
+            introspection=self.introspection,
             )
         configurator.basepath = self.basepath
         configurator.includepath = self.includepath
@@ -841,7 +843,8 @@ class Configurator(
         return self.manager.pop()
 
     # this is *not* an action method (uses caller_package)
-    def scan(self, package=None, categories=None, onerror=None, **kw):
+    def scan(self, package=None, categories=None, onerror=None, ignore=None,
+             **kw):
         """Scan a Python package and any of its subpackages for objects
         marked with :term:`configuration decoration` such as
         :class:`pyramid.view.view_config`.  Any decorated object found will
@@ -869,6 +872,20 @@ class Configurator(
         :term:`Venusian` documentation for more information about ``onerror``
         callbacks.
 
+        The ``ignore`` argument, if provided, should be a Venusian ``ignore``
+        value.  Providing an ``ignore`` argument allows the scan to ignore
+        particular modules, packages, or global objects during a scan.
+        ``ignore`` can be a string or a callable, or a list containing
+        strings or callables.  The simplest usage of ``ignore`` is to provide
+        a module or package by providing a full path to its dotted name.  For
+        example: ``config.scan(ignore='my.module.subpackage')`` would ignore
+        the ``my.module.subpackage`` package during a scan, which would
+        prevent the subpackage and any of its submodules from being imported
+        and scanned.  See the :term:`Venusian` documentation for more
+        information about the ``ignore`` argument.
+
+        .. note:: the ``ignore`` argument is new in Pyramid 1.3.
+        
         To perform a ``scan``, Pyramid creates a Venusian ``Scanner`` object.
         The ``kw`` argument represents a set of keyword arguments to pass to
         the Venusian ``Scanner`` object's constructor.  See the
@@ -890,7 +907,9 @@ class Configurator(
         ctorkw.update(kw)
 
         scanner = self.venusian.Scanner(**ctorkw)
-        scanner.scan(package, categories=categories, onerror=onerror)
+        
+        scanner.scan(package, categories=categories, onerror=onerror,
+                     ignore=ignore)
 
     def make_wsgi_app(self):
         """ Commits any pending configuration statements, sends a
