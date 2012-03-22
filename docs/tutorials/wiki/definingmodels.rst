@@ -15,8 +15,8 @@ single instance of the "Wiki" class will serve as a container for "Page"
 objects, which will be instances of the "Page" class.
 
 The source code for this tutorial stage can be browsed via
-`http://github.com/Pylons/pyramid/tree/master/docs/tutorials/wiki/src/models/
-<http://github.com/Pylons/pyramid/tree/master/docs/tutorials/wiki/src/models/>`_.
+`http://github.com/Pylons/pyramid/tree/1.3-branch/docs/tutorials/wiki/src/models/
+<http://github.com/Pylons/pyramid/tree/1.3-branch/docs/tutorials/wiki/src/models/>`_.
 
 Delete the Database
 -------------------
@@ -88,7 +88,8 @@ View the Application in a Browser
 
 We can't.  At this point, our system is in a "non-runnable" state; we'll need
 to change view-related files in the next chapter to be able to start the
-application successfully.  If you try to start the application, you'll wind
+application successfully.  If you try to start the application (See
+:ref:`wiki-start-the-application`), you'll wind
 up with a Python traceback on your console that ends with this exception:
 
 .. code-block:: text

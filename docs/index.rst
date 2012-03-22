@@ -68,10 +68,10 @@ Pyramid Web アプリケーション開発フレームワーク
    conventions.rst
 
 
-.. "What's New" Documents
+.. "What's New"
 
-"What's New" ドキュメント
-=========================
+What's New
+==========
 
 .. toctree::
    :maxdepth: 1
@@ -143,14 +143,13 @@ Pyramid Web アプリケーション開発フレームワーク
 チュートリアル
 ==============
 
-.. Detailed tutorials explaining how to use :app:`Pyramid` to build
-.. various types of applications and how to deploy :app:`Pyramid`
-.. applications to various platforms.
+.. Tutorials explaining how to use :app:`Pyramid` to build various types of
+.. applications, and how to deploy :app:`Pyramid` applications to various
+.. platforms.
 
 様々なタイプのアプリケーションを構築するために :app:`Pyramid` を使用
 する方法や、 :app:`Pyramid` アプリケーションを様々なプラットフォームへ
-展開する方法について説明した、詳細なチュートリアルです。
-
+展開する方法について説明したチュートリアルです。
 
 .. toctree::
    :maxdepth: 2
@@ -160,16 +159,12 @@ Pyramid Web アプリケーション開発フレームワーク
    tutorials/bfg/index.rst
    tutorials/modwsgi/index.rst
 
-
-.. Reference Material
-
-リファレンス資料
+API Documentation
 ==================
 
-.. Reference material includes documentation for every :app:`Pyramid` API.
+.. Documentation for every :app:`Pyramid` API.
 
-リファレンス資料には、すべての :app:`Pyramid` API に対するドキュメント
-が含まれています。
+すべての :app:`Pyramid` API に対するドキュメント
 
 
 .. toctree::
@@ -178,21 +173,20 @@ Pyramid Web アプリケーション開発フレームワーク
    api
 
 
-.. Detailed Change History
+.. Change History
 
-詳細な変更履歴
-=======================
+変更履歴
+==============
 
 .. toctree::
    :maxdepth: 1
 
    changes
 
-
-.. Design Documentation
+.. Design Documents
 
 設計ドキュメント
-====================
+================
 
 .. toctree::
    :maxdepth: 1
@@ -260,55 +254,19 @@ Guardia と Lukasz Fidosz による「アイデア競争」アプリケーショ
 
   git clone git://github.com/Pylons/shootout.git
 
-
-.. Older Sample Applications (repoze.bfg)
-
-古いサンプルアプリケーション (repoze.bfg)
-=========================================
-
-.. note::
-
-   .. These applications are for an older version of :app:`Pyramid`, which was
-   .. named :mod:`repoze.bfg`.  They won't work unmodified under Pyramid, but
-   .. might provide useful clues.
-
-   これらのアプリケーションは、 :app:`Pyramid` のより古いバージョンである
-   repoze.bfg 向けです。変更なしでは Pyramid の下で動作しませんが、
-   有用な手掛かりを提供するかもしれません。
-
-
-.. `bfgsite <http://svn.repoze.org/bfgsite/trunk>`_ is the software which
-.. runs the `bfg.repoze.org <http://bfg.repoze.org>`_ website.  It
-.. demonstrates integration with Trac, and includes several
-.. mini-applications such as a pastebin and tutorial engine.  Check a
-.. buildout for this application out of Subversion via:
-
-`bfgsite <http://svn.repoze.org/bfgsite/trunk>`_ は bfg.repoze.org
-ウェブサイトを動かしているソフトウェアです。 Trac との統合を実証し、
-pastebin やチュートリアルエンジンのようないくつかのミニアプリケーションを
-含んでいます。次のようにして Subversion からこのアプリケーションの
-buildout をチェックアウトしてください:
-
-
-.. code-block:: text
-
-  svn co http://svn.repoze.org/buildouts/bfgsite/ bfgsite_buildout
-
-
-.. `KARL <http://karlproject.org>`_ is a moderately-sized application
-.. (roughly 70K lines of Python code) built on top of :mod:`repoze.bfg`
-.. and other Repoze software.  It is an open source web system for
-.. collaboration, organizational intranets, and knowledge management, It
-.. provides facilities for wikis, calendars, manuals, searching, tagging,
-.. commenting, and file uploads.  See the `KARL site
+.. `KARL <http://karlproject.org>`_ is a moderately-sized application (roughly
+.. 80K lines of Python code) built on top of :app:`Pyramid`.  It is an open
+.. source web system for collaboration, organizational intranets, and knowledge
+.. management. It provides facilities for wikis, calendars, manuals, searching,
+.. tagging, commenting, and file uploads.  See the `KARL site
 .. <http://karlproject.org>`_ for download and installation details.
 
-`KARL <http://karlproject.org>`_ は、 `repoze.bfg` とその他の Repoze
-ソフトウェアの上に構築された 中程度のサイズ (およそ 70K 行の Python コード)
-のアプリケーションです。それは、共同作業、組織的なイントラネット、
-ナレッジマネジメント用のオープンソース・ウェブシステムで、
-Wiki 、カレンダー、マニュアル、検索、タグ付け、コメント、ファイル
-アップロード機能を提供します。ダウンロードとインストールの詳細については、
+`KARL <http://karlproject.org>`_ は :app:`Pyramid` の上に構築された
+中程度のサイズ (およそ 80K 行の Python コード) のアプリケーションです。
+それは、共同作業、組織的なイントラネット、ナレッジマネジメント用の
+オープンソース・ウェブシステムで、 Wiki 、カレンダー、マニュアル、検索、
+タグ付け、コメント、ファイルアップロード機能を提供します。
+ダウンロードとインストールの詳細については、
 `KARL サイト <http://karlproject.org>`_ を参照してください。
 
 
@@ -332,12 +290,12 @@ Wiki 、カレンダー、マニュアル、検索、タグ付け、コメント
 
 
 .. If you've got questions that aren't answered by this documentation,
-.. contact the `Pylons-devel maillist
-.. <http://groups.google.com/group/pylons-devel>`_ or join the `#pyramid
+.. contact the `Pylons-discuss maillist
+.. <http://groups.google.com/group/pylons-discuss>`_ or join the `#pyramid
 .. IRC channel <irc://irc.freenode.net/#pyramid>`_.
 
-このドキュメントが答えていない質問がある場合は、 `Pylons-devel メーリン
-グリスト <http://groups.google.com/group/pylons-devel>`_ に連絡するか、
+このドキュメントが答えていない質問がある場合は、 `Pylons-discuss メーリン
+グリスト <http://groups.google.com/group/pylons-discuss>`_ に連絡するか、
 `#pyramid IRCチャンネル <irc://irc.freenode.net/#pyramid>`_ に join
 してください。
 

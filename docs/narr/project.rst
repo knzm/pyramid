@@ -68,10 +68,13 @@ Creating the Project
 
 In :ref:`installing_chapter`, you created a virtual Python environment via
 the ``virtualenv`` command.  To start a :app:`Pyramid` :term:`project`, use
-the ``pcreate`` command installed within the virtualenv.  In
-:ref:`installing_chapter` we called the virtualenv directory ``env``; the
-following command assumes that our current working directory is that
-directory.  We'll choose the ``starter`` scaffold for this purpose.
+the ``pcreate`` command installed within the virtualenv.  We'll choose the
+``starter`` scaffold for this purpose.  When we invoke ``pcreate``, it will
+create a directory that represents our project.
+
+In :ref:`installing_chapter` we called the virtualenv directory ``env``; the
+following commands assume that our current working directory is the ``env``
+directory.
 
 On UNIX:
 
@@ -83,7 +86,7 @@ Or on Windows:
 
 .. code-block:: text
 
-   $ Scripts\pcreate -s starter MyProject
+   > Scripts\pcreate -s starter MyProject
 
 The above command uses the ``pcreate`` command to create a project with the
 ``starter`` scaffold.  To use a different scaffold, such as
@@ -98,7 +101,7 @@ Or on Windows:
 
 .. code-block:: text
 
-   $ Scripts\pcreate -s alchemy MyProject
+   > Scripts\pcreate -s alchemy MyProject
 
 Here's sample output from a run of ``pcreate`` on UNIX for a project we name
 ``MyProject``:
@@ -111,10 +114,10 @@ Here's sample output from a run of ``pcreate`` on UNIX for a project we name
    # ... more output ...
    Running /Users/chrism/projects/pyramid/bin/python setup.py egg_info
 
-As a result of invoking the ``pcreate`` command, a project is created in a
-directory named ``MyProject``.  That directory is a :term:`project`
-directory.  The ``setup.py`` file in that directory can be used to distribute
-your application, or install your application for deployment or development.
+As a result of invoking the ``pcreate`` command, a directory named
+``MyProject`` is created.  That directory is a :term:`project` directory.
+The ``setup.py`` file in that directory can be used to distribute your
+application, or install your application for deployment or development.
 
 A ``.ini`` file named ``development.ini`` will be created in the project
 directory.  You will use this ``.ini`` file to configure a server, to run
@@ -131,6 +134,25 @@ The ``MyProject`` project directory contains an additional subdirectory named
 ``myproject`` (note the case difference) representing a Python
 :term:`package` which holds very simple :app:`Pyramid` sample code.  This is
 where you'll edit your application's Python code and templates.
+
+We created this project within an ``env`` virtualenv directory.  However,
+note that this is not mandatory.  The project directory can go more or less
+anywhere on your filesystem.  You don't need to put it in a special "web
+server" directory, and you don't need to put it within a virtualenv
+directory.  The author uses Linux mainly, and tends to put project
+directories which he creates within his ``~/projects`` directory.  On
+Windows, it's a good idea to put project directories within a directory that
+contains no space characters, so it's wise to *avoid* a path that contains
+i.e. ``My Documents``.  As a result, the author, when he uses Windows, just
+puts his projects in ``C:\\projects``.
+
+.. warning:: 
+
+   You’ll need to avoid using ``pcreate`` to create a project with the same
+   as a Python standard library component. In particular, this means you
+   should avoid using names the names ``site`` or ``test``, both of which
+   conflict with Python standard library packages.  You should also avoid
+   using the name ``pyramid``, which will conflict with Pyramid itself.
 
 .. index::
    single: setup.py develop
@@ -161,8 +183,8 @@ Or on Windows:
 
 .. code-block:: text
 
-   $ cd MyProject
-   $ ..\Scripts\python.exe setup.py develop
+   > cd MyProject
+   > ..\Scripts\python.exe setup.py develop
 
 Elided output from a run of this command on UNIX is shown below:
 
@@ -200,7 +222,7 @@ Or on Windows:
 
 .. code-block:: text
 
-   $ ..\Scripts\python.exe setup.py test -q
+   > ..\Scripts\python.exe setup.py test -q
 
 Here's sample output from a test run on UNIX:
 
@@ -256,7 +278,7 @@ On Windows:
 
 .. code-block:: text
 
-   $ ..\Scripts\pserve development.ini
+   > ..\Scripts\pserve development.ini
 
 Here's sample output from a run of ``pserve`` on UNIX:
 
@@ -269,6 +291,38 @@ Here's sample output from a run of ``pserve`` on UNIX:
 By default, :app:`Pyramid` applications generated from a scaffold
 will listen on TCP port 6543.  You can shut down a server started this way by
 pressing ``Ctrl-C``.
+
+The default server used to run your Pyramid application when a project is
+created from a scaffold is named :term:`Waitress`.  This server is what
+prints the ``serving on...`` line when you run ``pserve``.  It's a good idea
+to use this server during development, because it's very simple.  It can also
+be used for light production.  Setting your application up under a different
+server is not advised until you've done some development work under the
+default server, particularly if you're not yet experienced with Python web
+development.  Python web server setup can be complex, and you should get some
+confidence that your application works in a default environment before trying
+to optimize it or make it "more like production".  It's awfully easy to get
+sidetracked trying to set up a nondefault server for hours without actually
+starting to do any development.  One of the nice things about Python web
+servers is that they're largely interchangeable, so if your application works
+under the default server, it will almost certainly work under any other
+server in production if you eventually choose to use a different one.  Don't
+worry about it right now.
+
+You can change the port on which the server runs on by changing the
+``development.ini`` file.  For example, you can change the ``port = 6543``
+line in the ``development.ini`` file's ``[server:main]`` section to ``port =
+8080`` to run the server on port 8080 instead of port 6543.
+
+For more detailed information about the startup process, see
+:ref:`startup_chapter`.  For more information about environment variables and
+configuration file settings that influence startup and runtime behavior, see
+:ref:`environment_chapter`.
+
+.. _reloading_code:
+
+Reloading Code
+~~~~~~~~~~~~~~
 
 During development, it's often useful to run ``pserve`` using its
 ``--reload`` option.  When ``--reload`` is passed to ``pserve``, changes to
@@ -283,12 +337,23 @@ For example, on UNIX:
    $ ../bin/pserve development.ini --reload
    Starting subprocess with file monitor
    Starting server in PID 16601.
-   Starting HTTP server on http://0.0.0.0:6543
+   serving on http://0.0.0.0:6543
 
-For more detailed information about the startup process, see
-:ref:`startup_chapter`.  For more information about environment variables and
-configuration file settings that influence startup and runtime behavior, see
-:ref:`environment_chapter`.
+Now if you make a change to any of your project's ``.py`` files or ``.ini``
+files, you'll see the server restart automatically:
+
+.. code-block:: text
+
+   development.ini changed; reloading...
+   -------------------- Restarting --------------------
+   Starting server in PID 16602.
+   serving on http://0.0.0.0:6543
+
+Changes to template files (such as ``.pt`` or ``.mak`` files) won't cause the
+server to restart.  Changes to template files don't require a server restart
+as long as the ``pyramid.reload_templates`` setting in the
+``development.ini`` file is ``true``.  Changes made to template files when
+this setting is true will take effect immediately without a server restart.
 
 .. index::
    single: WSGI
@@ -370,7 +435,7 @@ Put a hash mark at the beginning of the ``pyramid_debugtoolbar`` line:
 
 Then restart the application to see that the toolbar has been turned off.
 
-Note that if you comment out the ``pryamid_debugtoolbar`` line, the ``#``
+Note that if you comment out the ``pyramid_debugtoolbar`` line, the ``#``
 *must* be in the first column.  If you put the hash mark anywhere except the
 first column instead, for example like this:
 
@@ -497,15 +562,9 @@ exists, and its value is ``true``, :term:`Chameleon` and :term:`Mako`
 template changes will not require an application restart to be detected.  See
 :ref:`reload_templates_section` for more information.
 
-The ``pyramid.debug_templates`` setting in the ``[app:main]`` section is a
-:app:`Pyramid` -specific setting which is passed into the framework.  If it
-exists, and its value is ``true``, :term:`Chameleon` template exceptions will
-contain more detailed and helpful information about the error than when this
-value is ``false``.  See :ref:`debug_templates_section` for more information.
-
-.. warning:: The ``pyramid.reload_templates`` and ``pyramid.debug_templates``
-   options should be turned off for production applications, as template
-   rendering is slowed when either is turned on.
+.. warning:: The ``pyramid.reload_templates`` option should be turned off for
+   production applications, as template rendering is slowed when it is turned
+   on.
 
 The ``pyramid.includes`` setting in the ``[app:main]`` section tells Pyramid
 to "include" configuration from another package.  In this case, the line
@@ -756,8 +815,8 @@ also informs Python that the directory which contains it is a *package*.
    Line 6 creates an instance of a :term:`Configurator`.
 
    Line 7 registers a static view, which will serve up the files from the
-   ``mypackage:static`` :term:`asset specification` (the ``static``
-   directory of the ``mypackage`` package).
+   ``myproject:static`` :term:`asset specification` (the ``static``
+   directory of the ``myproject`` package).
 
    Line 8 adds a :term:`route` to the configuration.  This route is later
    used by a view in the ``views`` module.
@@ -894,7 +953,7 @@ If your project package name was ``myproject`` and you wanted to arrange all
 your views in a Python subpackage within the ``myproject`` :term:`package`
 named ``views`` instead of within a single ``views.py`` file, you might:
 
-- Create a ``views`` directory inside your ``mypackage`` package directory
+- Create a ``views`` directory inside your ``myproject`` package directory
   (the same directory which holds ``views.py``).
 
 - *Move* the existing ``views.py`` file to a file inside the new ``views``
@@ -914,10 +973,10 @@ is restarted.
 Using the Interactive Shell
 ---------------------------
 
-It is possible to use a Python interpreter prompt loaded with a similar
-configuration as would be loaded if you were running your Pyramid application
-via ``pserve``.  This can be a useful debugging tool.  See
-:ref:`interactive_shell` for more details.
+It is possible to use the ``pshell`` command to load a Python interpreter
+prompt with a similar configuration as would be loaded if you were running
+your Pyramid application via ``pserve``.  This can be a useful debugging tool.
+See :ref:`interactive_shell` for more details.
 
 What Is This ``pserve`` Thing
 -----------------------------
@@ -969,4 +1028,5 @@ details.
 Another good production alternative is :term:`Green Unicorn` (aka
 ``gunicorn``).  It's faster than Waitress and slightly easier to configure
 than mod_wsgi, although it depends, in its default configuration, on having a
-buffering HTTP proxy in front of it.
+buffering HTTP proxy in front of it.  It does not, as of this writing, work
+on Windows.

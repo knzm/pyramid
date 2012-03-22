@@ -29,8 +29,8 @@ We're going to define several :term:`view callable` functions, then wire them
 into :app:`Pyramid` using some :term:`view configuration`.
 
 The source code for this tutorial stage can be browsed via
-`http://github.com/Pylons/pyramid/tree/master/docs/tutorials/wiki/src/views/
-<http://github.com/Pylons/pyramid/tree/master/docs/tutorials/wiki/src/views/>`_.
+`http://github.com/Pylons/pyramid/tree/1.3-branch/docs/tutorials/wiki/src/views/
+<http://github.com/Pylons/pyramid/tree/1.3-branch/docs/tutorials/wiki/src/views/>`_.
 
 Declaring Dependencies in Our ``setup.py`` File
 ===============================================
@@ -301,8 +301,8 @@ subdirectories) and are just referred to by URL.
 Viewing the Application in a Browser
 ====================================
 
-We can finally examine our application in a
-browser.  The views we'll try are as follows:
+We can finally examine our application in a browser (See
+:ref:`wiki-start-the-application`).  The views we'll try are as follows:
 
 - Visiting ``http://localhost:6543/`` in a browser invokes the ``view_wiki``
   view.  This always redirects to the ``view_page`` view of the ``FrontPage``

@@ -41,6 +41,7 @@ from pyramid.compat import (
     im_func,
     url_quote,
     WIN,
+    is_bound_method,
     )
 
 from pyramid.exceptions import (
@@ -139,7 +140,8 @@ class ViewDeriver(object):
                             self.http_cached_view(
                                 self.decorated_view(
                                     self.rendered_view(
-                                        self.mapped_view(view)))))))))
+                                        self.mapped_view(
+                                                view)))))))))
 
     @wraps_view
     def mapped_view(self, view):
@@ -416,9 +418,16 @@ class DefaultViewMapper(object):
         elif self.attr:
             mapped_view = self.map_nonclass_attr(view)
         if inspect.isroutine(mapped_view):
-            # we potentially mutate an unwrapped view here if it's a function;
-            # we do this to avoid function call overhead of injecting another
-            # wrapper
+            # This branch will be true if the view is a function or a method.
+            # We potentially mutate an unwrapped object here if it's a
+            # function.  We do this to avoid function call overhead of
+            # injecting another wrapper.  However, we must wrap if the
+            # function is a bound method because we can't set attributes on a
+            # bound method.
+            if is_bound_method(view):
+                _mapped_view = mapped_view
+                def mapped_view(context, request):
+                    return _mapped_view(context, request)
             if self.attr is not None:
                 mapped_view.__text__ = 'attr %s of %s' % (
                     self.attr, object_description(view))

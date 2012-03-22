@@ -48,7 +48,7 @@ install_requires=[
     'PasteDeploy >= 1.5.0', # py3 compat
     ]
 
-tests_require = install_requires + [
+tests_require = [
     'WebTest >= 1.3.1', # py3 compat
     'virtualenv',
     ]
@@ -61,8 +61,10 @@ if not PY3:
         'zope.component>=3.11.0',
         ])
 
+testing_extras = tests_require + ['nose', 'coverage']
+
 setup(name='pyramid',
-      version='1.3b2',
+      version='1.3',
       description=('The Pyramid web application development framework, a '
                    'Pylons project'),
       long_description=README + '\n\n' +  CHANGES,
@@ -82,13 +84,16 @@ setup(name='pyramid',
         ],
       keywords='web wsgi pylons pyramid',
       author="Chris McDonough, Agendaless Consulting",
-      author_email="pylons-devel@googlegroups.com",
+      author_email="pylons-discuss@googlegroups.com",
       url="http://pylonsproject.org",
       license="BSD-derived (http://www.repoze.org/LICENSE.txt)",
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,
       install_requires = install_requires,
+      extras_require = {
+          'testing':testing_extras,
+          },
       tests_require = tests_require,
       test_suite="pyramid.tests",
       entry_points = """\
