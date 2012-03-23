@@ -1,141 +1,289 @@
 What's New In Pyramid 1.3
 =========================
 
-This article explains the new features in :app:`Pyramid` version 1.3 as
-compared to its predecessor, :app:`Pyramid` 1.2.  It also documents backwards
-incompatibilities between the two versions and deprecations added to
-:app:`Pyramid` 1.3, as well as software dependency changes and notable
-documentation additions.
+.. This article explains the new features in :app:`Pyramid` version 1.3 as
+.. compared to its predecessor, :app:`Pyramid` 1.2.  It also documents backwards
+.. incompatibilities between the two versions and deprecations added to
+.. :app:`Pyramid` 1.3, as well as software dependency changes and notable
+.. documentation additions.
+
+この記事は、 :app:`Pyramid` バージョン 1.3 とその前身である
+:app:`Pyramid` 1.2 を比較して、新しい特徴について説明します。
+さらに、2つのバージョンの間の後方非互換性と :app:`Pyramid` 1.3 に
+加えられた廃止 (deprecation) 、ソフトウェア依存性の変更、
+特に重要なドキュメンテーションの追加について文書化します。
+
 
 Major Feature Additions
 -----------------------
 
-The major feature additions in Pyramid 1.3 follow.
+.. The major feature additions in Pyramid 1.3 follow.
+
+Pyramid 1.3 の主な機能追加は以下の通りです。
+
 
 Python 3 Compatibility
 ~~~~~~~~~~~~~~~~~~~~~~
 
 .. image:: python-3.png
 
-Pyramid continues to run on Python 2, but Pyramid is now also Python 3
-compatible.  To use Pyramid under Python 3, Python 3.2 or better is required.
+.. Pyramid continues to run on Python 2, but Pyramid is now also Python 3
+.. compatible.  To use Pyramid under Python 3, Python 3.2 or better is required.
 
-Many Pyramid add-ons are already Python 3 compatible.  For example,
+Pyramid は引き続き Python 2 上で動きますが、 Pyramid はさらに
+Python 3 互換になりました。 Python 3 の下で Pyramid を使用するために、
+Python 3.2 あるいはそれ以上が要求されます。
+
+
+.. Many Pyramid add-ons are already Python 3 compatible.  For example,
+.. ``pyramid_debugtoolbar``, ``pyramid_jinja2``, ``pyramid_exclog``,
+.. ``pyramid_tm``, ``pyramid_mailer``, and ``pyramid_handlers`` are all Python
+.. 3-ready.  But other add-ons are known to work only under Python 2.  Also,
+.. some scaffolding dependencies (particularly ZODB) do not yet work under
+.. Python 3.
+
+多くの Pyramid アドオンが既に Python 3 互換になっています。例えば、
 ``pyramid_debugtoolbar``, ``pyramid_jinja2``, ``pyramid_exclog``,
-``pyramid_tm``, ``pyramid_mailer``, and ``pyramid_handlers`` are all Python
-3-ready.  But other add-ons are known to work only under Python 2.  Also,
-some scaffolding dependencies (particularly ZODB) do not yet work under
-Python 3.
+``pyramid_tm``, ``pyramid_mailer``, ``pyramid_handlers`` はすべて
+Python 3 対応済です。しかし、他のアドオンは Python 2 でのみ動くことが
+知られています。さらに、いくつかの scaffold 依存性(特にZODB)は、まだ
+Python 3 の下で動きません。
 
-Please be patient as we gain full ecosystem support for Python 3.  You can
-see more details about ongoing porting efforts at
-https://github.com/Pylons/pyramid/wiki/Python-3-Porting .
 
-Python 3 compatibility required dropping some package dependencies and
-support for older Python versions and platforms.  See the "Backwards
-Incompatibilities" section below for more information.
+.. Please be patient as we gain full ecosystem support for Python 3.  You can
+.. see more details about ongoing porting efforts at
+.. https://github.com/Pylons/pyramid/wiki/Python-3-Porting .
+
+Python 3 に対する全面的なエコシステムのサポートを獲得するまでの間
+しばらく待ってください。進行中の移植作業に関しては
+https://github.com/Pylons/pyramid/wiki/Python-3-Porting
+でより多くの詳細を見ることができます。
+
+
+.. Python 3 compatibility required dropping some package dependencies and
+.. support for older Python versions and platforms.  See the "Backwards
+.. Incompatibilities" section below for more information.
+
+Python 3 互換性のために、いくつかのパッケージ依存性の削除と、古い
+Python バージョンおよびプラットフォームのサポートを打ち切ることが必要で
+した。詳細は下記の "Backwards Incompatibilities" セクションを参照して
+ください。
+
 
 The ``paster`` Command Has Been Replaced
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We've replaced the ``paster`` command with Pyramid-specific analogues.  Why?
-The libraries that supported the ``paster`` command named ``Paste`` and
-``PasteScript`` do not run under Python 3, and we were unwilling to port and
-maintain them ourselves.  As a result, we've had to make some changes.
+.. We've replaced the ``paster`` command with Pyramid-specific analogues.  Why?
+.. The libraries that supported the ``paster`` command named ``Paste`` and
+.. ``PasteScript`` do not run under Python 3, and we were unwilling to port and
+.. maintain them ourselves.  As a result, we've had to make some changes.
 
-Previously (in Pyramid 1.0, 1.1 and 1.2), you created a Pyramid application
-using ``paster create``, like so::
+私たちは ``paster`` コマンドを Pyramid 固有の類似品に置き換えました。
+なぜか? ``paster`` コマンドを提供する ``Paste`` と ``PasteScript``
+という名前のライブラリが Python 3 の下では動かず、それらのライブラリを
+私たち自身で移植してメンテナンスすることに気が進まなかったからです。
+その結果、いくつかの変更を加える必要がありました。
+
+
+.. Previously (in Pyramid 1.0, 1.1 and 1.2), you created a Pyramid application
+.. using ``paster create``, like so:
+
+以前 (Pyramid 1.0, 1.1 および 1.2) は、 ``paster create`` を使って
+Pyramid アプリケーションを作成していました:
+
+
+::
 
     $ myvenv/bin/paster create -t pyramid_starter foo
 
-In 1.3, you're now instead required to create an application using
-``pcreate`` like so::
+
+.. In 1.3, you're now instead required to create an application using
+.. ``pcreate`` like so:
+
+1.3 では、その代りに ``pcreate`` を使用してアプリケーションを作成する
+必要があります:
+
+
+::
 
     $ myvenv/bin/pcreate -s starter foo
 
-``pcreate`` is required to be used for internal Pyramid scaffolding;
-externally distributed scaffolding may allow for both ``pcreate`` and/or
-``paster create``.
 
-In previous Pyramid versions, you ran a Pyramid application like so::
+.. ``pcreate`` is required to be used for internal Pyramid scaffolding;
+.. externally distributed scaffolding may allow for both ``pcreate`` and/or
+.. ``paster create``.
+
+内蔵の Pyramid scaffold のためには ``pcreate`` を使う必要があります;
+Pyramid の外部で配布された scaffold は、 ``pcreate`` と ``paster
+create`` の両方またはどちらかに対応しています。
+
+
+.. In previous Pyramid versions, you ran a Pyramid application like so:
+
+Pyramid の前のバージョンでは、 Pyramid アプリケーションを起動するのに
+以下のようにしていました:
+
+
+::
 
     $ myvenv/bin/paster serve development.ini
 
-Instead, you now must use the ``pserve`` command in 1.3::
+
+.. Instead, you now must use the ``pserve`` command in 1.3:
+
+この代わりに 1.3 では ``pserve`` コマンドを使用しなければなりません:
+
+
+::
 
     $ myvenv/bin/pserve development.ini
 
-The ``ini`` configuration file format supported by Pyramid has not changed.
-As a result, Python 2-only users can install PasteScript manually and use
-``paster serve`` instead if they like.  However, using ``pserve`` will work
-under both Python 2 and Python 3.
 
-Analogues of ``paster pshell``, ``paster pviews``, ``paster request`` and
-``paster ptweens`` also exist under the respective console script names
-``pshell``, ``pviews``, ``prequest`` and ``ptweens``.
+.. The ``ini`` configuration file format supported by Pyramid has not changed.
+.. As a result, Python 2-only users can install PasteScript manually and use
+.. ``paster serve`` instead if they like.  However, using ``pserve`` will work
+.. under both Python 2 and Python 3.
+
+Pyramid がサポートする ``ini`` 設定ファイルのフォーマットは変わっていま
+せん。そのため、 Python 2 のみを使っているユーザは、もしそうしたければ
+PasteScript を手動でインストールして ``paster serve`` を代わりに使用す
+ることができます。しかしながら、 ``pserve`` を使用すれば Python 2 と
+Python 3 の両方の下で動くでしょう。
+
+
+.. Analogues of ``paster pshell``, ``paster pviews``, ``paster request`` and
+.. ``paster ptweens`` also exist under the respective console script names
+.. ``pshell``, ``pviews``, ``prequest`` and ``ptweens``.
+
+``paster pshell``, ``paster pviews``, ``paster request``, ``paster
+ptweens`` にはそれぞれ、 ``pshell``, ``pviews``, ``prequest``,
+``ptweens`` という対応するコンソールスクリプトが存在します。
+
 
 ``paste.httpserver`` replaced by ``waitress`` in Scaffolds
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Because the ``paste.httpserver`` server we used previously in scaffolds is
-not Python 3 compatible, we've made the default WSGI server used by Pyramid
-scaffolding the :term:`waitress` server.  The waitress server is both Python
-2 and Python 3 compatible.
+.. Because the ``paste.httpserver`` server we used previously in scaffolds is
+.. not Python 3 compatible, we've made the default WSGI server used by Pyramid
+.. scaffolding the :term:`waitress` server.  The waitress server is both Python
+.. 2 and Python 3 compatible.
 
-Once you create a project from a scaffold, its ``development.ini`` and
-``production.ini`` will have the following line::
+以前 scaffold の中で使用していた ``paste.httpserver`` サーバーが
+Python 3 互換ではないので、私たちは Pyramid scaffold によって使用される
+デフォルト WSGI サーバーを :term:`waitress` サーバーに変更しました。
+waitress サーバーは Python 2 と Python 3 の両方と互換性があります。
+
+
+.. Once you create a project from a scaffold, its ``development.ini`` and
+.. ``production.ini`` will have the following line:
+
+scaffold からプロジェクトを作成すれば ``development.ini`` と
+``production.ini`` は次の行を持つでしょう:
+
+
+::
 
     use = egg:waitress#main
 
-Instead of this (which was the default in older versions)::
+
+.. Instead of this (which was the default in older versions):
+
+これの代わりに (古いバージョンではこれがデフォルトでした):
+
+
+::
 
     use = egg:Paste#http
 
+
 .. note::
 
-  ``paste.httpserver`` "helped" by converting header values that were Unicode
-  into strings, which was a feature that subverted the :term:`WSGI`
-  specification. The ``waitress`` server, on the other hand implements the
-  WSGI spec more fully. This specifically may affect you if you are modifying
-  headers on your responses. The following error might be an indicator of
-  this problem: **AssertionError: Header values must be strings, please check
-  the type of the header being returned.** A common case would be returning
-  Unicode headers instead of string headers.
+  .. ``paste.httpserver`` "helped" by converting header values that were Unicode
+  .. into strings, which was a feature that subverted the :term:`WSGI`
+  .. specification. The ``waitress`` server, on the other hand implements the
+  .. WSGI spec more fully. This specifically may affect you if you are modifying
+  .. headers on your responses. The following error might be an indicator of
+  .. this problem: **AssertionError: Header values must be strings, please check
+  .. the type of the header being returned.** A common case would be returning
+  .. Unicode headers instead of string headers.
+
+  ``paste.httpserver`` はヘッダーの値が Unicode だった場合 string 文字列
+  に自動変換する機能がありました (それは WSGI 仕様に反した特徴でした)。
+  それに対して ``waitress`` サーバーは WSGI 仕様をより完全に実装しています。
+  これは特に、レスポンスのヘッダーを修正している場合に影響があるかもしれ
+  ません。次のエラーがこの問題の指標になります: **AssertionError: Header
+  values must be strings, please check the type of the header being
+  returned.** よくあるケースは string ヘッダーの代わりに Unicode ヘッダーを
+  返している場合です。
+
 
 Compatibility Helper Library
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A new :mod:`pyramid.compat` module was added which provides Python 2/3
-straddling support for Pyramid add-ons and development environments.
+.. A new :mod:`pyramid.compat` module was added which provides Python 2/3
+.. straddling support for Pyramid add-ons and development environments.
+
+新しく :mod:`pyramid.compat` モジュールが加えられました。
+このモジュールは Pyramid アドオンおよび開発環境に対して
+Python 2/3 にまたがるサポートを提供します。
+
 
 Introspection
 ~~~~~~~~~~~~~
 
-A configuration introspection system was added; see
-:ref:`using_introspection` and :ref:`introspection` for more information on
-using the introspection system as a developer.
+.. A configuration introspection system was added; see
+.. :ref:`using_introspection` and :ref:`introspection` for more information on
+.. using the introspection system as a developer.
 
-The latest release of the pyramid debug toolbar (0.9.7+) provides an
-"Introspection" panel that exposes introspection information to a Pyramid
-application developer.
+設定情報の introspection システムが加えられました; 開発者として
+introspection システムを使用することについての詳細は、
+:ref:`using_introspection` と :ref:`introspection` を参照してください。
 
-New APIs were added to support introspection
+
+.. The latest release of the pyramid debug toolbar (0.9.7+) provides an
+.. "Introspection" panel that exposes introspection information to a Pyramid
+.. application developer.
+
+最新の Pyramid デバッグツールバー (0.9.7+) は、 Pyramid アプリケーション
+開発者に introspection 情報を露出する "Introspection" パネルを提供します。
+
+
+.. New APIs were added to support introspection
+.. :attr:`pyramid.registry.Introspectable`,
+.. :attr:`pyramid.config.Configurator.introspector`,
+.. :attr:`pyramid.config.Configurator.introspectable`,
+.. :attr:`pyramid.registry.Registry.introspector`.
+
+introspection をサポートするために新しい API が追加されました:
 :attr:`pyramid.registry.Introspectable`,
 :attr:`pyramid.config.Configurator.introspector`,
 :attr:`pyramid.config.Configurator.introspectable`,
-:attr:`pyramid.registry.Registry.introspector`.
+:attr:`pyramid.registry.Registry.introspector`
+
 
 ``@view_defaults`` Decorator
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you use a class as a view, you can use the new
-:class:`pyramid.view.view_defaults` class decorator on the class to provide
-defaults to the view configuration information used by every ``@view_config``
-decorator that decorates a method of that class.
+.. If you use a class as a view, you can use the new
+.. :class:`pyramid.view.view_defaults` class decorator on the class to provide
+.. defaults to the view configuration information used by every ``@view_config``
+.. decorator that decorates a method of that class.
 
-For instance, if you've got a class that has methods that represent "REST
-actions", all which are mapped to the same route, but different request
-methods, instead of this:
+クラスをビューとして使用する場合、そのクラスに対して新しい
+:class:`pyramid.view.view_defaults` クラスデコレータを使用することがで
+きます。このクラスデコレータを使うと、そのクラスのメソッドをデコレート
+するすべての ``@view_config`` デコレータによって使用されるビュー設定情報
+にデフォルトを提供することができます。
+
+
+.. For instance, if you've got a class that has methods that represent "REST
+.. actions", all which are mapped to the same route, but different request
+.. methods, instead of this:
+
+例えば、 "REST アクション" を表わすメソッドを持つクラスがある場合、すな
+わち、すべてのメソッドが同じルートにマップされリクエストメソッドだけが
+異なる場合、このようにする代わりに:
+
 
 .. code-block:: python
    :linenos:
@@ -159,7 +307,11 @@ methods, instead of this:
        def delete(self):
            return Response('delete')
 
-You can do this:
+
+.. You can do this:
+
+こうすることができます:
+
 
 .. code-block:: python
    :linenos:
@@ -185,56 +337,112 @@ You can do this:
        def delete(self):
            return Response('delete')
 
-This also works for imperative view configurations that involve a class.
 
-See :ref:`view_defaults` for more information.
+.. This also works for imperative view configurations that involve a class.
+
+これは、クラスに作用する命令的なビュー設定でも同様に機能します。
+
+
+.. See :ref:`view_defaults` for more information.
+
+詳細は :ref:`view_defaults` を参照してください。
+
 
 Extending a Request without Subclassing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-It is now possible to extend a :class:`pyramid.request.Request` object
-with property descriptors without having to create a custom request factory.
-The new method :meth:`pyramid.config.Configurator.set_request_property`
-provides an entry point for addons to register properties which will be
-added to each request. New properties may be reified, effectively caching
-the return value for the lifetime of the instance. Common use-cases for this
-would be to get a database connection for the request or identify the current
-user. The new method :meth:`pyramid.request.Request.set_property` has been
-added, as well, but the configurator method should be preferred as it
-provides conflict detection and consistency in the lifetime of the
-properties.
+.. It is now possible to extend a :class:`pyramid.request.Request` object
+.. with property descriptors without having to create a custom request factory.
+.. The new method :meth:`pyramid.config.Configurator.set_request_property`
+.. provides an entry point for addons to register properties which will be
+.. added to each request. New properties may be reified, effectively caching
+.. the return value for the lifetime of the instance. Common use-cases for this
+.. would be to get a database connection for the request or identify the current
+.. user. The new method :meth:`pyramid.request.Request.set_property` has been
+.. added, as well, but the configurator method should be preferred as it
+.. provides conflict detection and consistency in the lifetime of the
+.. properties.
+
+プロパティディスクリプタを持つ :class:`pyramid.request.Request`
+オブジェクトを、カスタムリクエストファクトリを作ることなく拡張すること
+ができるようになりました。新しいメソッド
+:meth:`pyramid.config.Configurator.set_request_property` は、アドオンに
+対し各リクエストに加えられるプロパティを登録するためのエントリポイント
+を提供します。新しいプロパティは、インスタンスのライフタイムにおいて
+返り値を事実上キャッシュして、具象化されるかもしれません。このための
+通常のユースケースは、リクエストのためにデータベース接続を得たり、
+カレントユーザーを識別したりすることです。新メソッド
+:meth:`pyramid.request.Request.set_property` も追加されましたが、
+configurator メソッドの方が、プロパティのライフタイムにおける
+矛盾検知および一貫性を提供するので推奨されます。
+
 
 Not Found and Forbidden View Helpers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Not Found helpers:
+.. Not Found helpers:
 
-- New API: :meth:`pyramid.config.Configurator.add_notfound_view`.  This is a
-  wrapper for :meth:`pyramid.Config.configurator.add_view` which provides
-  support for an "append_slash" feature as well as doing the right thing when
-  it comes to permissions (a not found view should always be public).  It
-  should be preferred over calling ``add_view`` directly with
-  ``context=HTTPNotFound`` as was previously recommended.
+Not Found ヘルパー:
 
-- New API: :class:`pyramid.view.notfound_view_config``.  This is a decorator
-  constructor like :class:`pyramid.view.view_config` that calls
-  :meth:`pyramid.config.Configurator.add_notfound_view` when scanned.  It
-  should be preferred over using ``pyramid.view.view_config`` with
-  ``context=HTTPNotFound`` as was previously recommended.
 
-Forbidden helpers:
+.. - New API: :meth:`pyramid.config.Configurator.add_notfound_view`.  This is a
+..   wrapper for :meth:`pyramid.Config.configurator.add_view` which provides
+..   support for an "append_slash" feature as well as doing the right thing when
+..   it comes to permissions (a not found view should always be public).  It
+..   should be preferred over calling ``add_view`` directly with
+..   ``context=HTTPNotFound`` as was previously recommended.
 
-- New API: :meth:`pyramid.config.Configurator.add_forbidden_view`.  This is a
-  wrapper for :meth:`pyramid.Config.configurator.add_view` which does the
-  right thing about permissions.  It should be preferred over calling
-  ``add_view`` directly with ``context=HTTPForbidden`` as was previously
-  recommended.
+- 新 API: :meth:`pyramid.config.Configurator.add_notfound_view` 。
+  これは :meth:`pyramid.Config.configurator.add_view` のラッパーで、
+  "append_slash" 機能のサポートを提供すると同時にパーミッションに関して
+  正しいことを行います (not found ビューは常に public であるべきです)。
+  以前に推奨されていた ``context=HTTPNotFound`` で ``add_view`` を直接
+  呼び出すよりも、こちらの方がより好まれます。
 
-- New API: :class:`pyramid.view.forbidden_view_config`.  This is a decorator
-  constructor like :class:`pyramid.view.view_config` that calls
-  :meth:`pyramid.config.Configurator.add_forbidden_view` when scanned.  It
-  should be preferred over using ``pyramid.view.view_config`` with
-  ``context=HTTPForbidden`` as was previously recommended.
+
+.. - New API: :class:`pyramid.view.notfound_view_config``.  This is a decorator
+..   constructor like :class:`pyramid.view.view_config` that calls
+..   :meth:`pyramid.config.Configurator.add_notfound_view` when scanned.  It
+..   should be preferred over using ``pyramid.view.view_config`` with
+..   ``context=HTTPNotFound`` as was previously recommended.
+
+- 新 API: :class:`pyramid.view.notfound_view_config`` 。
+  これは :class:`pyramid.view.view_config` のようなデコレータコンストラクタで、
+  スキャンされた時に :meth:`pyramid.config.Configurator.add_notfound_view`
+  を呼び出します。以前に推奨されていた ``context=HTTPNotFound`` で
+  ``pyramid.view.view_config`` を使用するよりも、こちらの方がより好まれます。
+
+
+.. Forbidden helpers:
+
+Forbidden ヘルパー:
+
+
+.. - New API: :meth:`pyramid.config.Configurator.add_forbidden_view`.  This is a
+..   wrapper for :meth:`pyramid.Config.configurator.add_view` which does the
+..   right thing about permissions.  It should be preferred over calling
+..   ``add_view`` directly with ``context=HTTPForbidden`` as was previously
+..   recommended.
+
+- 新 API: :meth:`pyramid.config.Configurator.add_forbidden_view` 。
+  これは :meth:`pyramid.Config.configurator.add_view` のラッパーで、
+  パーミッションに関して正しいことを行います。
+  以前に推奨されていた ``context=HTTPForbidden`` で ``add_view`` を直接
+  呼び出すよりも、こちらの方がより好まれます。
+
+
+.. - New API: :class:`pyramid.view.forbidden_view_config`.  This is a decorator
+..   constructor like :class:`pyramid.view.view_config` that calls
+..   :meth:`pyramid.config.Configurator.add_forbidden_view` when scanned.  It
+..   should be preferred over using ``pyramid.view.view_config`` with
+..   ``context=HTTPForbidden`` as was previously recommended.
+
+- 新 API: :class:`pyramid.view.forbidden_view_config`` 。
+  これは :class:`pyramid.view.view_config` のようなデコレータコンストラクタで、
+  スキャンされた時に :meth:`pyramid.config.Configurator.add_forbidden_view`
+  を呼び出します。以前に推奨されていた ``context=HTTPForbidden`` で
+  ``pyramid.view.view_config`` を使用するよりも、こちらの方がより好まれます。
+
 
 Minor Feature Additions
 -----------------------
