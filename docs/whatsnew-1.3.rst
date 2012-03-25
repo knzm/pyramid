@@ -562,149 +562,308 @@ Minor Feature Additions
 Backwards Incompatibilities
 ---------------------------
 
-- Pyramid no longer runs on Python 2.5.  This includes the most recent
-  release of Jython and the Python 2.5 version of Google App Engine.
+.. - Pyramid no longer runs on Python 2.5.  This includes the most recent
+..   release of Jython and the Python 2.5 version of Google App Engine.
 
-  The reason?  We could not easily "straddle" Python 2 and 3 versions and
-  support Python 2 versions older than Python 2.6.  You will need Python 2.6
-  or better to run this version of Pyramid.  If you need to use Python 2.5,
-  you should use the most recent 1.2.X release of Pyramid.
+..   The reason?  We could not easily "straddle" Python 2 and 3 versions and
+..   support Python 2 versions older than Python 2.6.  You will need Python 2.6
+..   or better to run this version of Pyramid.  If you need to use Python 2.5,
+..   you should use the most recent 1.2.X release of Pyramid.
 
-- The names of available scaffolds have changed and the flags supported by
-  ``pcreate`` are different than those that were supported by ``paster
-  create``.  For example, ``pyramid_alchemy`` is now just ``alchemy``.
+- Pyramid はもう Python 2.5 上で動きません。これは Jython の最新の
+  リリースおよび Google App Engine の Python 2.5 バージョンを含みます。
 
-- The ``paster`` command is no longer the documented way to create projects,
-  start the server, or run debugging commands.  To create projects from
-  scaffolds, ``paster create`` is replaced by the ``pcreate`` console script.
-  To serve up a project, ``paster serve`` is replaced by the ``pserve``
-  console script.  New console scripts named ``pshell``, ``pviews``,
-  ``proutes``, and ``ptweens`` do what their ``paster <commandname>``
-  equivalents used to do.  All relevant narrative documentation has been
-  updated.  Rationale: the Paste and PasteScript packages do not run under
-  Python 3.
+  理由?  Python 2 と 3 の複数のバージョンに「またがって (straggle)」かつ
+  Python 2.6 以前の古い Python 2 バージョンをサポートすることは容易では
+  ありません。Pyramid のこのバージョンを実行するには Python 2.6 か
+  それ以上が必要です。もし Python 2.5 を使用する必要があれば、 Pyramid
+  1.2.X の最新のリリースを使用してください。
 
-- The default WSGI server run as the result of ``pserve`` from newly rendered
-  scaffolding is now the ``waitress`` WSGI server instead of the
-  ``paste.httpserver`` server.  Rationale: the Paste and PasteScript packages
-  do not run under Python 3.
 
-- The ``pshell`` command (see "paster pshell") no longer accepts a
-  ``--disable-ipython`` command-line argument.  Instead, it accepts a ``-p``
-  or ``--python-shell`` argument, which can be any of the values ``python``,
-  ``ipython`` or ``bpython``.
+.. - The names of available scaffolds have changed and the flags supported by
+..   ``pcreate`` are different than those that were supported by ``paster
+..   create``.  For example, ``pyramid_alchemy`` is now just ``alchemy``.
 
-- Removed the ``pyramid.renderers.renderer_from_name`` function.  It has been
-  deprecated since Pyramid 1.0, and was never an API.
+- 利用できる scaffold の名前が変わりました。また、 ``pcreate`` がサポート
+  するフラグは、 ``paster create`` のサポートするフラグとは異なります。
+  例えば、 ``pyramid_alchemy`` は単に ``alchemy`` になりました。
 
-- To use ZCML with versions of Pyramid >= 1.3, you will need ``pyramid_zcml``
-  version >= 0.8 and ``zope.configuration`` version >= 3.8.0.  The
-  ``pyramid_zcml`` package version 0.8 is backwards compatible all the way to
-  Pyramid 1.0, so you won't be warned if you have older versions installed
-  and upgrade Pyramid itself "in-place"; it may simply break instead
-  (particularly if you use ZCML's ``includeOverrides`` directive).
 
-- String values passed to :meth:`Pyramid.request.Request.route_url` or
-  :meth:`Pyramid.request.Request.route_path` that are meant to replace
-  "remainder" matches will now be URL-quoted except for embedded slashes. For
-  example::
+.. - The ``paster`` command is no longer the documented way to create projects,
+..   start the server, or run debugging commands.  To create projects from
+..   scaffolds, ``paster create`` is replaced by the ``pcreate`` console script.
+..   To serve up a project, ``paster serve`` is replaced by the ``pserve``
+..   console script.  New console scripts named ``pshell``, ``pviews``,
+..   ``proutes``, and ``ptweens`` do what their ``paster <commandname>``
+..   equivalents used to do.  All relevant narrative documentation has been
+..   updated.  Rationale: the Paste and PasteScript packages do not run under
+..   Python 3.
+
+- ``paster`` コマンドは、プロジェクトを作成したり、サーバーを始めたり、
+  デバッグコマンドを実行したりするための文書化された方法ではなくなりま
+  した。 scaffold からプロジェクトを作成するのに、 ``paster create`` は
+  ``pcreate`` コンソール・スクリプトに置き換えられます。プロジェクトを
+  実行するのに、 ``paster serve`` は ``pserve`` コンソール・スクリプト
+  に置き換えられます。 ``pshell``, ``pviews``, ``proutes``, ``ptweens``
+  という名前の新しいコンソール・スクリプトは、それらの
+  ``paster <コマンド名>`` 等価物が行っていたことを行います。
+  関連する narrative documentation がすべて更新されました。根拠:
+  Paste と PasteScript パッケージは Python 3 の下で動きません。
+
+
+.. - The default WSGI server run as the result of ``pserve`` from newly rendered
+..   scaffolding is now the ``waitress`` WSGI server instead of the
+..   ``paste.httpserver`` server.  Rationale: the Paste and PasteScript packages
+..   do not run under Python 3.
+
+- 新しく生成された scaffold で ``pserve`` を実行した場合、デフォルトの
+  WSGI サーバーは ``paste.httpserver`` サーバーの代わりに ``waitress``
+  WSGI サーバーになりました。根拠: Paste と PasteScript パッケージは
+  Python 3 の下で動きません。
+
+
+.. - The ``pshell`` command (see "paster pshell") no longer accepts a
+..   ``--disable-ipython`` command-line argument.  Instead, it accepts a ``-p``
+..   or ``--python-shell`` argument, which can be any of the values ``python``,
+..   ``ipython`` or ``bpython``.
+
+- ``pshell`` コマンド ("paster pshell" を参照) はコマンドライン引数
+  ``--disable-ipython`` を受け付けなくなりました。代わりに、それは ``-p``
+  引数または ``--python-shell`` 引数を受け付けます。その値は ``python``,
+  ``ipython`` or ``bpython`` のいずれかです。
+
+
+.. - Removed the ``pyramid.renderers.renderer_from_name`` function.  It has been
+..   deprecated since Pyramid 1.0, and was never an API.
+
+- ``pyramid.renderers.renderer_from_name`` 関数を削除しました。それは
+  Pyramid 1.0 以降廃止されており、 API ではありませんでした。
+
+
+.. - To use ZCML with versions of Pyramid >= 1.3, you will need ``pyramid_zcml``
+..   version >= 0.8 and ``zope.configuration`` version >= 3.8.0.  The
+..   ``pyramid_zcml`` package version 0.8 is backwards compatible all the way to
+..   Pyramid 1.0, so you won't be warned if you have older versions installed
+..   and upgrade Pyramid itself "in-place"; it may simply break instead
+..   (particularly if you use ZCML's ``includeOverrides`` directive).
+
+- Pyramid >= 1.3 バージョンと共に ZCML を使用するために、
+  ``pyramid_zcml`` バージョン >= 0.8 と ``zope.configuration`` バージョン
+  >= 3.8.0 が必要です。 ``pyramid_zcml`` パッケージのバージョン 0.8
+  は Pyramid 1.0 までずっと後方互換性を持ちます。したがって、より古いバー
+  ジョンをインストールしていて Pyramid 自体を "in-place" でアップグレード
+  した場合、警告されません; その代わりに単に壊れるでしょう。
+  (特に ZCML の ``includeOverrides`` ディレクティブを使用している場合)
+
+
+.. - String values passed to :meth:`Pyramid.request.Request.route_url` or
+..   :meth:`Pyramid.request.Request.route_path` that are meant to replace
+..   "remainder" matches will now be URL-quoted except for embedded slashes. For
+..   example:
+
+..      config.add_route('remain', '/foo*remainder')
+..      request.route_path('remain', remainder='abc / def')
+..      # -> '/foo/abc%20/%20def'
+
+..   Previously string values passed as remainder replacements were tacked on
+..   untouched, without any URL-quoting.  But this doesn't really work logically
+..   if the value passed is Unicode (raw unicode cannot be placed in a URL or in
+..   a path) and it is inconsistent with the rest of the URL generation
+..   machinery if the value is a string (it won't be quoted unless by the
+..   caller).
+
+..   Some folks will have been relying on the older behavior to tack on query
+..   string elements and anchor portions of the URL; sorry, you'll need to
+..   change your code to use the ``_query`` and/or ``_anchor`` arguments to
+..   ``route_path`` or ``route_url`` to do this now.
+
+- :meth:`Pyramid.request.Request.route_url` または
+  :meth:`Pyramid.request.Request.route_path` に渡された "remainder"
+  マッチを置き換えることを意図した文字列の値は、埋め込まれたスラッシュ
+  を除いて URL クォートされるようになりました。例えば::
 
      config.add_route('remain', '/foo*remainder')
      request.route_path('remain', remainder='abc / def')
      # -> '/foo/abc%20/%20def'
 
-  Previously string values passed as remainder replacements were tacked on
-  untouched, without any URL-quoting.  But this doesn't really work logically
-  if the value passed is Unicode (raw unicode cannot be placed in a URL or in
-  a path) and it is inconsistent with the rest of the URL generation
-  machinery if the value is a string (it won't be quoted unless by the
-  caller).
+  以前は、 remainder 置換として渡された文字列の値は URLクォートされる
+  ことなくそのまま扱われていました。しかし、渡された値が Unicode である
+  場合、これは実際のところ理論的に動きません(生の Unicode は URL または
+  パスに含めることができません)。また、値が文字列である場合、それは他の
+  URL 生成機構と一致しません(呼び出し元でしなければ、 URL クォートされ
+  ません)
 
-  Some folks will have been relying on the older behavior to tack on query
-  string elements and anchor portions of the URL; sorry, you'll need to
-  change your code to use the ``_query`` and/or ``_anchor`` arguments to
-  ``route_path`` or ``route_url`` to do this now.
 
-- If you pass a bytestring that contains non-ASCII characters to
-  :meth:`pyramid.config.Configurator.add_route` as a pattern, it will now
-  fail at startup time.  Use Unicode instead.
+.. - If you pass a bytestring that contains non-ASCII characters to
+..   :meth:`pyramid.config.Configurator.add_route` as a pattern, it will now
+..   fail at startup time.  Use Unicode instead.
 
-- The ``path_info`` route and view predicates now match against
-  ``request.upath_info`` (Unicode) rather than ``request.path_info``
-  (indeterminate value based on Python 3 vs. Python 2).  This has to be done
-  to normalize matching on Python 2 and Python 3.
+- 非 ASCII 文字を含むバイト文字列をパターンとして
+  :meth:`pyramid.config.Configurator.add_route` に渡した場合、
+  スタートアップ時に失敗します。 Unicode を代わりに使用してください。
 
-- The ``match_param`` view predicate no longer accepts a dict. This will have
-  no negative affect because the implementation was broken for dict-based
-  arguments.
 
-- The ``pyramid.interfaces.IContextURL`` interface has been deprecated.
-  People have been instructed to use this to register a resource url adapter
-  in the "Hooks" chapter to use to influence
-  :meth:`pyramid.request.Request.resource_url` URL generation for resources
-  found via custom traversers since Pyramid 1.0.
+.. - The ``path_info`` route and view predicates now match against
+..   ``request.upath_info`` (Unicode) rather than ``request.path_info``
+..   (indeterminate value based on Python 3 vs. Python 2).  This has to be done
+..   to normalize matching on Python 2 and Python 3.
 
-  The interface still exists and registering an adapter using it as
-  documented in older versions still works, but this interface will be
-  removed from the software after a few major Pyramid releases.  You should
-  replace it with an equivalent :class:`pyramid.interfaces.IResourceURL`
-  adapter, registered using the new
-  :meth:`pyramid.config.Configurator.add_resource_url_adapter` API.  A
-  deprecation warning is now emitted when a
-  ``pyramid.interfaces.IContextURL`` adapter is found when
-  :meth:`pyramid.request.Request.resource_url` is called.
+- ``path_info`` ルートとビュー述語は、 ``request.path_info`` (Python 3
+  と Python 2 で不定の値) ではなく ``request.upath_info`` (Unicode)
+  に対してマッチするようになりました。 Python 2 と Python 3 でマッチを
+  標準化するために、これを行わなければなりませんでした。
 
-- Remove ``pyramid.config.Configurator.with_context`` class method.  It was
-  never an API, it is only used by ``pyramid_zcml`` and its functionality has
-  been moved to that package's latest release.  This means that you'll need
-  to use the 0.9.2 or later release of ``pyramid_zcml`` with this release of
-  Pyramid.
 
-- The older deprecated ``set_notfound_view`` Configurator method is now an
-  alias for the new ``add_notfound_view`` Configurator method.  Likewise, the
-  older deprecated ``set_forbidden_view`` is now an alias for the new
-  ``add_forbidden_view`` Configurator method. This has the following impact:
-  the ``context`` sent to views with a ``(context, request)`` call signature
-  registered via the ``set_notfound_view`` or ``set_forbidden_view`` will now
-  be an exception object instead of the actual resource context found.  Use
-  ``request.context`` to get the actual resource context.  It's also
-  recommended to disuse ``set_notfound_view`` in favor of
-  ``add_notfound_view``, and disuse ``set_forbidden_view`` in favor of
-  ``add_forbidden_view`` despite the aliasing.
+.. - The ``match_param`` view predicate no longer accepts a dict. This will have
+..   no negative affect because the implementation was broken for dict-based
+..   arguments.
+
+- ``match_param`` ビュー述語は dict を受け付けなくなりました。
+  これによるネガティブな影響はないでしょう。
+  なぜなら dict ベースの引数に対する実装は壊れていたからです。
+
+
+.. - The ``pyramid.interfaces.IContextURL`` interface has been deprecated.
+..   People have been instructed to use this to register a resource url adapter
+..   in the "Hooks" chapter to use to influence
+..   :meth:`pyramid.request.Request.resource_url` URL generation for resources
+..   found via custom traversers since Pyramid 1.0.
+
+..   The interface still exists and registering an adapter using it as
+..   documented in older versions still works, but this interface will be
+..   removed from the software after a few major Pyramid releases.  You should
+..   replace it with an equivalent :class:`pyramid.interfaces.IResourceURL`
+..   adapter, registered using the new
+..   :meth:`pyramid.config.Configurator.add_resource_url_adapter` API.  A
+..   deprecation warning is now emitted when a
+..   ``pyramid.interfaces.IContextURL`` adapter is found when
+..   :meth:`pyramid.request.Request.resource_url` is called.
+
+- ``pyramid.interfaces.IContextURL`` インターフェースが廃止されました。
+  Pyramid 1.0 以降、カスタムトラバーサーによって見つかったリソースに対する
+  :meth:`pyramid.request.Request.resource_url` URL 生成に影響を及ぼすために
+  リソース url アダプターを登録するのにこれを使用するように "Hooks" 章の中で
+  指示されていました。
+
+  このインターフェースはまだ存在します。また、古いバージョンで文書化
+  されていたようにそれを使用してアダプターを登録することはまだ動きます。
+  しかし、このインターフェースは Pyramid のいくつかのメジャーリリース後
+  にソフトウェアから除去されるでしょう。新しい
+  :meth:`pyramid.config.Configurator.add_resource_url_adapter` APIを使用
+  して登録された等価な :meth:`pyramid.interfaces.IResourceURL` アダプター
+  に置き換えてください。
+  :meth:`pyramid.request.Request.resource_url` が呼ばれたときに
+  ``pyramid.interfaces.IContextURL`` アダプターが見つかった場合、
+  deprecation 警告が発生します。
+
+
+.. - Remove ``pyramid.config.Configurator.with_context`` class method.  It was
+..   never an API, it is only used by ``pyramid_zcml`` and its functionality has
+..   been moved to that package's latest release.  This means that you'll need
+..   to use the 0.9.2 or later release of ``pyramid_zcml`` with this release of
+..   Pyramid.
+
+- ``pyramid.config.Configurator.with_context`` クラスメソッドが削除され
+  ました。これは API ではなく、単に ``pyramid_zcml`` によって使用されて
+  いました。また、その機能は ``pyramid_zcml`` パッケージの最新版に移動
+  されました。このことは、 Pyramid のこのリリースと共に ``pyramid_zcml``
+  のリリース 0.9.2 以降を使用する必要があるということを意味します。
+
+
+.. - The older deprecated ``set_notfound_view`` Configurator method is now an
+..   alias for the new ``add_notfound_view`` Configurator method.  Likewise, the
+..   older deprecated ``set_forbidden_view`` is now an alias for the new
+..   ``add_forbidden_view`` Configurator method. This has the following impact:
+..   the ``context`` sent to views with a ``(context, request)`` call signature
+..   registered via the ``set_notfound_view`` or ``set_forbidden_view`` will now
+..   be an exception object instead of the actual resource context found.  Use
+..   ``request.context`` to get the actual resource context.  It's also
+..   recommended to disuse ``set_notfound_view`` in favor of
+..   ``add_notfound_view``, and disuse ``set_forbidden_view`` in favor of
+..   ``add_forbidden_view`` despite the aliasing.
+
+- 古い廃止された ``set_notfound_view`` Configurator メソッドは新しい
+  ``add_notfound_view`` Configurator メソッドの別名になりました。同様に、
+  古い廃止された ``set_forbidden_view`` は新しい ``add_forbidden_view``
+  Configurator メソッドの別名になりました。これには次の影響があります:
+  ``set_notfound_view`` または ``set_forbidden_view`` によって登録された
+  ``(context, request)`` 呼び出し署名を持つビューに送られる
+  ``context`` は、見つかった実際のリソースコンテキストではなく例外
+  オブジェクトになるでしょう。実際のリソースコンテキストを得るためには
+  ``request.context`` を使用してください。さらに、エイリアスされていた
+  としても、 ``set_notfound_view`` を使わずに ``add_notfound_view`` を
+  使うこと、 ``set_forbidden_view`` を使わずに ``add_forbidden_view`` を
+  使うことが推奨されます。
+
 
 Deprecations
 ------------
 
-- The API documentation for ``pyramid.view.append_slash_notfound_view`` and
-  ``pyramid.view.AppendSlashNotFoundViewFactory`` was removed.  These names
-  still exist and are still importable, but they are no longer APIs.  Use
-  ``pyramid.config.Configurator.add_notfound_view(append_slash=True)`` or
-  ``pyramid.view.notfound_view_config(append_slash=True)`` to get the same
-  behavior.
+.. - The API documentation for ``pyramid.view.append_slash_notfound_view`` and
+..   ``pyramid.view.AppendSlashNotFoundViewFactory`` was removed.  These names
+..   still exist and are still importable, but they are no longer APIs.  Use
+..   ``pyramid.config.Configurator.add_notfound_view(append_slash=True)`` or
+..   ``pyramid.view.notfound_view_config(append_slash=True)`` to get the same
+..   behavior.
 
-- The ``set_forbidden_view`` and ``set_notfound_view`` methods of the
-  Configurator were removed from the documentation.  They have been
-  deprecated since Pyramid 1.1.
+- ``pyramid.view.append_slash_notfound_view`` および
+  ``pyramid.view.AppendSlashNotFoundViewFactory`` の API ドキュメンテー
+  ションが削除されました。これらの名前はまだ存在し、インポート可能ですが、
+  それらはもはや API ではありません。同じ振る舞いを得るために
+  ``pyramid.config.Configurator.add_notfound_view(append_slash=True)``
+  あるいは ``pyramid.view.notfound_view_config(append_slash=True)`` を
+  使用してください。
 
-- All references to the ``tmpl_context`` request variable were removed from
-  the docs.  Its existence in Pyramid is confusing for people who were never
-  Pylons users.  It was added as a porting convenience for Pylons users in
-  Pyramid 1.0, but it never caught on because the Pyramid rendering system is
-  a lot different than Pylons' was, and alternate ways exist to do what it
-  was designed to offer in Pylons.  It will continue to exist "forever" but
-  it will not be recommended or mentioned in the docs.
+
+.. - The ``set_forbidden_view`` and ``set_notfound_view`` methods of the
+..   Configurator were removed from the documentation.  They have been
+..   deprecated since Pyramid 1.1.
+
+- Configurator の ``set_forbidden_view`` と ``set_notfound_view`` メソッド
+  がドキュメンテーションから取り除かれました。それらは Pyramid 1.1 以降
+  廃止されていました。
+
+
+.. - All references to the ``tmpl_context`` request variable were removed from
+..   the docs.  Its existence in Pyramid is confusing for people who were never
+..   Pylons users.  It was added as a porting convenience for Pylons users in
+..   Pyramid 1.0, but it never caught on because the Pyramid rendering system is
+..   a lot different than Pylons' was, and alternate ways exist to do what it
+..   was designed to offer in Pylons.  It will continue to exist "forever" but
+..   it will not be recommended or mentioned in the docs.
+
+- ``tmpl_context`` リクエスト変数に対するすべての言及はドキュメントから
+  取り除かれました。 Pyramid におけるその存在は、 Pylons ユーザでなかった
+  人々を混乱させます。それは Pyramid 1.0 で Pylons ユーザの移行の利便性の
+  ために加えられました。しかし、 Pyramid のレンダリングシステムは Pylons
+  のものとは非常に異なるので、それは人気を得ませんでした。また、Pylons
+  で designed to offer されたことを行うための代替の方法が存在します。
+  この機能は「永久に」存在し続けるでしょうが、ドキュメントの中では推奨、
+  または言及されません。
+
 
 Known Issues
 ------------
 
-- As of this writing (the release of Pyramid 1.3b2), if you attempt to
-  install a Pyramid project that used the ``alchemy`` scaffold via ``setup.py
-  develop`` on Python 3.2, it will quit with an installation error while
-  trying to install ``Pygments``.  If this happens, please just rerun the
-  ``setup.py develop`` command again, and it will complete successfully.
-  This is due to a minor bug in SQLAlchemy 0.7.5 under Python 3, and will be
-  fixed in a later SQLAlchemy release.  Keep an eye on
-  http://www.sqlalchemy.org/trac/ticket/2421
+.. - As of this writing (the release of Pyramid 1.3b2), if you attempt to
+..   install a Pyramid project that used the ``alchemy`` scaffold via ``setup.py
+..   develop`` on Python 3.2, it will quit with an installation error while
+..   trying to install ``Pygments``.  If this happens, please just rerun the
+..   ``setup.py develop`` command again, and it will complete successfully.
+..   This is due to a minor bug in SQLAlchemy 0.7.5 under Python 3, and will be
+..   fixed in a later SQLAlchemy release.  Keep an eye on
+..   http://www.sqlalchemy.org/trac/ticket/2421
+
+- この記述 (ピラミッド 1.3b2 のリリース) の時点で、 Python 3.2 上で
+  ``setup.py develop`` によって ``alchemy`` scaffold を使用した
+  Pyramid プロジェクトをインストールしようとした場合、 ``Pygments`` を
+  インストールする間にインストールエラーで中止します。これが起こる
+  場合、単に ``setup.py develop`` を再実行してください。そうすれば完全
+  に成功するでしょう。これは Pythoon 3 の下の SQLAlchemy 0.7.5 の中の
+  マイナーなバグによるもので、新しい SQLAlchemy リリースで修正されるで
+  しょう。 http://www.sqlalchemy.org/trac/ticket/2421 を注視していてく
+  ださい。
+
 
 Documentation Enhancements
 --------------------------
@@ -756,29 +915,63 @@ Documentation Enhancements
 Dependency Changes
 ------------------
 
-- Pyramid no longer depends on the ``zope.component`` package, except as a
-  testing dependency.
+.. - Pyramid no longer depends on the ``zope.component`` package, except as a
+..   testing dependency.
 
-- Pyramid now depends on the following package versions:
+- Pyramid は、テスト依存性として以外には、もはや ``zope.component``
+  パッケージに依存しません。
+
+
+.. - Pyramid now depends on the following package versions:
+..   zope.interface>=3.8.0, WebOb>=1.2dev, repoze.lru>=0.4,
+..   zope.deprecation>=3.5.0, translationstring>=0.4 for Python 3 compatibility
+..   purposes.  It also, as a testing dependency, depends on WebTest>=1.3.1 for
+..   the same reason.
+
+- Pyramid は次のパッケージ・バージョンに依存するようになりました:
+  Python 3 互換性の目的のために
   zope.interface>=3.8.0, WebOb>=1.2dev, repoze.lru>=0.4,
-  zope.deprecation>=3.5.0, translationstring>=0.4 for Python 3 compatibility
-  purposes.  It also, as a testing dependency, depends on WebTest>=1.3.1 for
-  the same reason.
+  zope.deprecation 3.5.0, translationstring 0.4 。
+  さらに、テスト依存性として、同じ理由で WebTest 1.3.1 に依存します。
 
-- Pyramid no longer depends on the ``Paste`` or ``PasteScript`` packages.
-  These packages are not Python 3 compatible.
 
-- Depend on ``venusian`` >= 1.0a3 to provide scan ``ignore`` support.
+.. - Pyramid no longer depends on the ``Paste`` or ``PasteScript`` packages.
+..   These packages are not Python 3 compatible.
+
+- Pyramid は ``Paste`` または ``PasteScript`` パッケージに依存しなく
+  なりました。これらのパッケージは Python 3 互換ではありません。
+
+
+.. - Depend on ``venusian`` >= 1.0a3 to provide scan ``ignore`` support.
+
+- scan ``ignore`` サポートを提供するため ``venusian`` >= 1.0a3 に依存し
+  ています。
+
 
 Scaffolding Changes
 -------------------
 
-- Rendered scaffolds have now been changed to be more relocatable (fewer
-  mentions of the package name within files in the package).
+.. - Rendered scaffolds have now been changed to be more relocatable (fewer
+..   mentions of the package name within files in the package).
 
-- The ``routesalchemy`` scaffold has been renamed ``alchemy``, replacing the
-  older (traversal-based) ``alchemy`` scaffold (which has been retired).
+- 生成された scaffold は、より再配置可能 (パッケージ中のファイル内でパッ
+  ケージ名に言及する箇所が少数) になるように変更されました。
 
-- The ``alchemy`` and ``starter`` scaffolds are Python 3 compatible.
 
-- The ``starter`` scaffold now uses URL dispatch by default.
+.. - The ``routesalchemy`` scaffold has been renamed ``alchemy``, replacing the
+..   older (traversal-based) ``alchemy`` scaffold (which has been retired).
+
+- ``routesalchemy`` scaffold は ``alchemy`` と改名され、より古い (トラ
+  バーサルに基づいた) ``alchemy`` scaffold を置き代えました (古い
+  ``alchemy`` scaffold は引退しました)。
+
+
+.. - The ``alchemy`` and ``starter`` scaffolds are Python 3 compatible.
+
+- ``alchemy`` と ``starter`` scaffold は Python 3 互換です。
+
+
+.. - The ``starter`` scaffold now uses URL dispatch by default.
+
+- ``starter`` scaffold は、デフォルトで URL ディスパッチを使用するよう
+  になりました。
