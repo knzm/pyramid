@@ -14,7 +14,9 @@ What's New In Pyramid 1.3
 特に重要なドキュメンテーションの追加について文書化します。
 
 
-Major Feature Additions
+.. Major Feature Additions
+
+メジャー機能追加
 -----------------------
 
 .. The major feature additions in Pyramid 1.3 follow.
@@ -22,7 +24,9 @@ Major Feature Additions
 Pyramid 1.3 の主な機能追加は以下の通りです。
 
 
-Python 3 Compatibility
+.. Python 3 Compatibility
+
+Python 3 互換性
 ~~~~~~~~~~~~~~~~~~~~~~
 
 .. image:: python-3.png
@@ -70,7 +74,9 @@ Python バージョンおよびプラットフォームのサポートを打ち�
 ください。
 
 
-The ``paster`` Command Has Been Replaced
+.. The ``paster`` Command Has Been Replaced
+
+``paster`` コマンドが置き換えられました
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. We've replaced the ``paster`` command with Pyramid-specific analogues.  Why?
@@ -160,8 +166,10 @@ ptweens`` にはそれぞれ、 ``pshell``, ``pviews``, ``prequest``,
 ``ptweens`` という対応するコンソールスクリプトが存在します。
 
 
-``paste.httpserver`` replaced by ``waitress`` in Scaffolds
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. ``paste.httpserver`` replaced by ``waitress`` in Scaffolds
+
+scaffold 中で ``paste.httpserver`` は ``waitress`` で置き換えられました
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. Because the ``paste.httpserver`` server we used previously in scaffolds is
 .. not Python 3 compatible, we've made the default WSGI server used by Pyramid
@@ -217,7 +225,9 @@ scaffold からプロジェクトを作成すれば ``development.ini`` と
   返している場合です。
 
 
-Compatibility Helper Library
+.. Compatibility Helper Library
+
+互換性ヘルパーライブラリ
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. A new :mod:`pyramid.compat` module was added which provides Python 2/3
@@ -261,8 +271,10 @@ introspection をサポートするために新しい API が追加されまし�
 :attr:`pyramid.registry.Registry.introspector`
 
 
-``@view_defaults`` Decorator
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. ``@view_defaults`` Decorator
+
+``@view_defaults`` デコレータ
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. If you use a class as a view, you can use the new
 .. :class:`pyramid.view.view_defaults` class decorator on the class to provide
@@ -348,7 +360,9 @@ introspection をサポートするために新しい API が追加されまし�
 詳細は :ref:`view_defaults` を参照してください。
 
 
-Extending a Request without Subclassing
+.. Extending a Request without Subclassing
+
+サブクラス化をしない Request 拡張
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. It is now possible to extend a :class:`pyramid.request.Request` object
@@ -377,8 +391,10 @@ configurator メソッドの方が、プロパティのライフタイムにお�
 矛盾検知および一貫性を提供するので推奨されます。
 
 
-Not Found and Forbidden View Helpers
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. Not Found and Forbidden View Helpers
+
+Not Found と Forbidden ビューヘルパー
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. Not Found helpers:
 
@@ -444,7 +460,9 @@ Forbidden ヘルパー:
   ``pyramid.view.view_config`` を使用するよりも、こちらの方がより好まれます。
 
 
-Minor Feature Additions
+.. Minor Feature Additions
+
+マイナー機能追加
 -----------------------
 
 .. - New APIs: :class:`pyramid.path.AssetResolver` and
@@ -699,7 +717,9 @@ Minor Feature Additions
   返す必要のあるビューで使用するためのものです。
 
 
-Backwards Incompatibilities
+.. Backwards Incompatibilities
+
+後方非互換性
 ---------------------------
 
 .. - Pyramid no longer runs on Python 2.5.  This includes the most recent
@@ -936,7 +956,9 @@ Backwards Incompatibilities
   使うことが推奨されます。
 
 
-Deprecations
+.. Deprecations
+
+廃止
 ------------
 
 .. - The API documentation for ``pyramid.view.append_slash_notfound_view`` and
@@ -982,7 +1004,9 @@ Deprecations
   または言及されません。
 
 
-Known Issues
+.. Known Issues
+
+既知の問題
 ------------
 
 .. - As of this writing (the release of Pyramid 1.3b2), if you attempt to
@@ -1005,7 +1029,9 @@ Known Issues
   ださい。
 
 
-Documentation Enhancements
+.. Documentation Enhancements
+
+ドキュメントの改善
 --------------------------
 
 .. - The :ref:`bfg_sql_wiki_tutorial` has been updated.  It now uses
@@ -1116,7 +1142,9 @@ Documentation Enhancements
   ``pyramid.view.forbidden_view_config`` を使うように更新されました。
 
 
-Dependency Changes
+.. Dependency Changes
+
+依存性の変更
 ------------------
 
 .. - Pyramid no longer depends on the ``zope.component`` package, except as a
@@ -1152,7 +1180,9 @@ Dependency Changes
   ています。
 
 
-Scaffolding Changes
+.. Scaffolding Changes
+
+scaffold の変更
 -------------------
 
 .. - Rendered scaffolds have now been changed to be more relocatable (fewer
