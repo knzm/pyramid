@@ -1,6 +1,8 @@
+.. Defending Pyramid's Design
+
 .. _design_defense:
 
-Defending Pyramid's Design
+Pyramid の設計擁護
 ==========================
 
 .. From time to time, challenges to various aspects of :app:`Pyramid` design are

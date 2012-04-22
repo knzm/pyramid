@@ -1,4 +1,6 @@
-What's New In Pyramid 1.3
+.. What's New In Pyramid 1.3
+
+Pyramid 1.3 の新機能
 =========================
 
 .. This article explains the new features in :app:`Pyramid` version 1.3 as
