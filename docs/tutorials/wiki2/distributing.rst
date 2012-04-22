@@ -10,14 +10,15 @@
 .. we've created and that the parent directory of the ``tutorial``
 .. package is a virtualenv representing a :app:`Pyramid` environment.
 
-あなたのアプリケーションが正常に動作したら、 ``setup.py sdist`` コマンドを使ってそこから "tarball" を作成できます。
-次のコマンドはあなたの現在の作業ディレクトリが私たちによって作成された ``tutorial`` パッケージで、
-``tutorial`` パッケージの親ディレクトリは :app:`Pyramid` 環境を表すvirtualenvであると想定しています。
+アプリケーションが正常に動作したら、 ``setup.py sdist`` コマンドを使って
+"tarball" を生成できます。次のコマンドは、現在の作業ディレクトリが作成した
+``tutorial`` パッケージで、 ``tutorial`` パッケージの親ディレクトリは
+:app:`Pyramid` 環境を表す virtualenv であると想定しています。
 
 
 .. On UNIX:
 
-UNIXの場合:
+UNIX の場合:
 
 
 .. code-block:: text
@@ -27,7 +28,7 @@ UNIXの場合:
 
 .. On Windows:
 
-Windowsの場合:
+Windows の場合:
 
 
 .. code-block:: text
@@ -59,8 +60,10 @@ Windowsの場合:
 .. ``easy_install`` remotely like any other package people download from
 .. PyPI.
 
-なお、このコマンドは ``tutorial-0.0.tar.gz`` という名前で "dist" サブディレクトリにtarballを作成します。
-あなたはこれらのクールな新しいアプリケーションを見せるために、友達にこのファイルを送ることができます。
-彼らはこれに直接 ``easy_install`` コマンドをポイントすることによってインストールできるようになるはずです。
-または、これを `PyPI <http://pypi.python.org>`_ にアップロードし、国外と共有することができます。
-ここでPyPIから他人がリモートで他のパッケージをダウンロードしているみたいに ``easy_install`` を使ってこれをダウンロードできます。
+このコマンドは ``tutorial-0.0.tar.gz`` という名前で "dist" サブディレクトリに
+tarball を作成します。友達にこのファイルを送って、この新しいクールな
+アプリケーションを見せることができます。友達は ``easy_install`` コマンドを
+使って直接これをインストールできるはずです。または、これを `PyPI
+<http://pypi.python.org>`_ にアップロードして世界中の人と共有することが
+できます。この場合、人々が PyPI からダウンロードしている他のパッケージと
+同じように ``easy_install`` を使ってリモートでこれをダウンロードできます。

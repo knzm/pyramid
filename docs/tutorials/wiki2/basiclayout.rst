@@ -8,181 +8,323 @@
 .. they provide a good orientation for the high-level patterns common to most
 .. :term:`url dispatch` -based :app:`Pyramid` projects.
 
-骨組み ``alchemy`` によって生成される初期ファイルは非常に基本的なものですが、
-ほとんどの :term:`url dispatch` ベースの :app:`Pyramid` プロジェクトに共通の高レベルパターンの方向性を提供します。
+``alchemy`` scaffold によって生成される初期ファイルは非常に基本的なもの
+ですが、ほとんどの :term:`url dispatch` ベースの :app:`Pyramid` プロジェクト
+に共通する高レベルパターンの良い方向性を提供します。
+
 
 .. The source code for this tutorial stage can be browsed at
 .. `http://github.com/Pylons/pyramid/tree/1.3-branch/docs/tutorials/wiki2/src/basiclayout/
 .. <http://github.com/Pylons/pyramid/tree/1.3-branch/docs/tutorials/wiki2/src/basiclayout/>`_.
 
-このチュートリアルステージのソースコードを閲覧することができます。
+このチュートリアルステージのソースコードを以下の場所で閲覧することができます。
 `http://github.com/Pylons/pyramid/tree/1.3-branch/docs/tutorials/wiki2/src/basiclayout/
 <http://github.com/Pylons/pyramid/tree/1.3-branch/docs/tutorials/wiki2/src/basiclayout/>`_.
 
 
-Application Configuration with ``__init__.py``
+.. Application Configuration with ``__init__.py``
+
+``__init__.py`` でのアプリケーション設定
 ----------------------------------------------
 
-A directory on disk can be turned into a Python :term:`package` by containing
-an ``__init__.py`` file.  Even if empty, this marks a directory as a Python
-package.  We use ``__init__.py`` both as a marker indicating the directory
-it's contained within is a package, and to contain configuration code.
+.. A directory on disk can be turned into a Python :term:`package` by containing
+.. an ``__init__.py`` file.  Even if empty, this marks a directory as a Python
+.. package.  We use ``__init__.py`` both as a marker indicating the directory
+.. it's contained within is a package, and to contain configuration code.
 
-Open ``tutorial/tutorial/__init__.py``.  It should already contain
-the following:
+ディスク上のディレクトリは ``__init__.py`` ファイルを含むことによって
+Python :term:`package` になることができます。このファイルがたとえ空でも、
+Python パッケージとしてディレクトリをマークします。私たちはディレクトリ
+がパッケージであることを示すマーカーとして、および設定コードを置くために
+``__init__.py`` を使用します。
+
+
+.. Open ``tutorial/tutorial/__init__.py``.  It should already contain
+.. the following:
+
+``tutorial/tutorial/__init__.py`` を開いてください。
+すでに以下の内容が含まれているはずです:
+
 
    .. literalinclude:: src/basiclayout/tutorial/__init__.py
       :linenos:
       :language: py
 
-Let's go over this piece-by-piece.  First, we need some imports to support
-later code:
+
+.. Let's go over this piece-by-piece.  First, we need some imports to support
+.. later code:
+
+順番に見て行きましょう。
+まず、後のコードのためにいくつかのインポートが必要です:
+
 
    .. literalinclude:: src/basiclayout/tutorial/__init__.py
       :end-before: main
       :linenos:
       :language: py
 
-``__init__.py`` defines a function named ``main``.  Here is the entirety of
-the ``main`` function we've defined in our ``__init__.py``:
+
+.. ``__init__.py`` defines a function named ``main``.  Here is the entirety of
+.. the ``main`` function we've defined in our ``__init__.py``:
+
+``__init__.py`` は ``main`` という名前の関数を定義しています。
+これは ``__init__.py`` の中で定義された ``main`` 関数全体です:
+
 
    .. literalinclude:: src/basiclayout/tutorial/__init__.py
       :pyobject: main
       :linenos:
       :language: py
 
-When you invoke the ``pserve development.ini`` command, the ``main`` function
-above is executed.  It accepts some settings and returns a :term:`WSGI`
-application.  (See :ref:`startup_chapter` for more about ``pserve``.)
 
-The main function first creates a SQLAlchemy database engine using
-``engine_from_config`` from the ``sqlalchemy.`` prefixed settings in the
-``development.ini`` file's ``[app:main]`` section.  This will be a URI
-(something like ``sqlite://``):
+.. When you invoke the ``pserve development.ini`` command, the ``main`` function
+.. above is executed.  It accepts some settings and returns a :term:`WSGI`
+.. application.  (See :ref:`startup_chapter` for more about ``pserve``.)
+
+``pserve development.ini`` コマンドを起動すると、上記の ``main`` 関数が
+実行されます。 ``main`` 関数は、いくつかの設定を受け取って :term:`WSGI`
+アプリケーションを返します (``pserve`` に関する詳細は
+:ref:`startup_chapter` を参照してください)。
+
+
+.. The main function first creates a SQLAlchemy database engine using
+.. ``engine_from_config`` from the ``sqlalchemy.`` prefixed settings in the
+.. ``development.ini`` file's ``[app:main]`` section.  This will be a URI
+.. (something like ``sqlite://``):
+
+main 関数は最初に ``engine_from_config`` を使用して ``development.ini``
+ファイルの ``[app:main]`` セクション中の ``sqlalchemy.`` 接頭辞のついた
+設定から SQLAlchemy データベースエンジンを作成します。これは
+(``sqlite://`` のような) URI になります:
+
 
    .. literalinclude:: src/basiclayout/tutorial/__init__.py
       :lines: 9
       :linenos:
       :language: py
 
-``main`` then initializes our SQL database using SQLAlchemy, passing it the
-engine:
+
+.. ``main`` then initializes our SQL database using SQLAlchemy, passing it the
+.. engine:
+
+``main`` はその後、エンジンを渡すことで SQLAlchemy を使って SQL データ
+ベースを初期化します:
+
 
    .. literalinclude:: src/basiclayout/tutorial/__init__.py
       :lines: 10
       :language: py
 
-The next step of ``main`` is to construct a :term:`Configurator` object:
+
+.. The next step of ``main`` is to construct a :term:`Configurator` object:
+
+``main`` の次のステップは :term:`Configurator` オブジェクトを構築することです:
+
 
    .. literalinclude:: src/basiclayout/tutorial/__init__.py
       :lines: 11
       :language: py
 
-``settings`` is passed to the Configurator as a keyword argument with the
-dictionary values passed as the ``**settings`` argument.  This will be a
-dictionary of settings parsed from the ``.ini`` file, which contains
-deployment-related values such as ``pyramid.reload_templates``,
-``db_string``, etc.
 
-``main`` now calls :meth:`pyramid.config.Configurator.add_static_view` with
-two arguments: ``static`` (the name), and ``static`` (the path):
+.. ``settings`` is passed to the Configurator as a keyword argument with the
+.. dictionary values passed as the ``**settings`` argument.  This will be a
+.. dictionary of settings parsed from the ``.ini`` file, which contains
+.. deployment-related values such as ``pyramid.reload_templates``,
+.. ``db_string``, etc.
+
+``settings`` は ``**settings`` 引数として渡された辞書の値を持つ
+キーワード引数として Configurator に渡されます。
+これは ``.ini`` ファイルからパースされた設定の辞書になり、これには
+デプロイ関連の値である ``pyramid.reload_templates`` や ``db_string``
+などが含まれます。
+
+
+.. ``main`` now calls :meth:`pyramid.config.Configurator.add_static_view` with
+.. two arguments: ``static`` (the name), and ``static`` (the path):
+
+``main`` は 2つの引数、 ``static`` (名前) と ``static`` (パス) を引数と
+して :meth:`pyramid.config.Configurator.add_static_view` を呼び出します。
+
 
    .. literalinclude:: src/basiclayout/tutorial/__init__.py
       :lines: 12
       :language: py
 
-This registers a static resource view which will match any URL that starts
-with the prefix ``/static`` (by virtue of the first argument to add_static
-view).  This will serve up static resources for us from within the ``static``
-directory of our ``tutorial`` package, in this case, via
-``http://localhost:6543/static/`` and below (by virtue of the second argument
-to add_static_view).  With this declaration, we're saying that any URL that
-starts with ``/static`` should go to the static view; any remainder of its
-path (e.g. the ``/foo`` in ``/static/foo``) will be used to compose a path to
-a static file resource, such as a CSS file.
 
-Using the configurator ``main`` also registers a :term:`route configuration`
-via the :meth:`pyramid.config.Configurator.add_route` method that will be
-used when the URL is ``/``:
+.. This registers a static resource view which will match any URL that starts
+.. with the prefix ``/static`` (by virtue of the first argument to add_static
+.. view).  This will serve up static resources for us from within the ``static``
+.. directory of our ``tutorial`` package, in this case, via
+.. ``http://localhost:6543/static/`` and below (by virtue of the second argument
+.. to add_static_view).  With this declaration, we're saying that any URL that
+.. starts with ``/static`` should go to the static view; any remainder of its
+.. path (e.g. the ``/foo`` in ``/static/foo``) will be used to compose a path to
+.. a static file resource, such as a CSS file.
+
+これは ``/static`` 接頭辞から始まる全ての URL に一致する静的リソースの
+ビューを登録します (add_static_view への最初の引数によって)。これによって
+``tutorial`` パッケージの中の ``static`` ディレクトリにある静的リソースが、
+この場合は ``http://localhost:6543/static/`` 以下を経由して返されるように
+なります (add_static_view への2番目の引数によって)。この宣言によって、
+``/static`` から始まる全ての URL は静的ビューに行かなくてはならない、と
+いうことを表しています。パスの残りの全ての部分 (例: ``/static/foo`` の ``/foo``)
+は CSS ファイルなどの静的ファイルリソースへのパスを作成するのに使われます。
+
+
+.. Using the configurator ``main`` also registers a :term:`route configuration`
+.. via the :meth:`pyramid.config.Configurator.add_route` method that will be
+.. used when the URL is ``/``:
+
+また、 ``main`` は configurator を使用して URL が ``/`` の場合に使用される
+:term:`route configuration` を
+:meth:`pyramid.config.Configurator.add_route` メソッド経由で登録します。
+
 
    .. literalinclude:: src/basiclayout/tutorial/__init__.py
       :lines: 13
       :language: py
 
-Since this route has a ``pattern`` equalling ``/`` it is the route that will
-be matched when the URL ``/`` is visted, e.g. ``http://localhost:6543/``.
 
-``main`` next calls the ``scan`` method of the configurator, which will
-recursively scan our ``tutorial`` package, looking for ``@view_config`` (and
-other special) decorators.  When it finds a ``@view_config`` decorator, a
-view configuration will be registered, which will allow one of our
-application URLs to be mapped to some code.
+.. Since this route has a ``pattern`` equalling ``/`` it is the route that will
+.. be matched when the URL ``/`` is visted, e.g. ``http://localhost:6543/``.
+
+このルートは ``/`` に一致する ``パターン`` を持っているので、 URL ``/`` 、
+例えば ``http://localhost:6543/`` を閲覧した場合にマッチします。
+
+
+.. ``main`` next calls the ``scan`` method of the configurator, which will
+.. recursively scan our ``tutorial`` package, looking for ``@view_config`` (and
+.. other special) decorators.  When it finds a ``@view_config`` decorator, a
+.. view configuration will be registered, which will allow one of our
+.. application URLs to be mapped to some code.
+
+``main`` は、次に configurator の ``scan`` メソッドを呼び出します。
+これは ``@view_config`` (また他の特別な) デコレータを探して ``tutorial``
+パッケージを再帰的に走査します。 ``@view_config`` デコレータが見つかったら、
+ビュー設定が登録されます。それはアプリケーション URL の 1 つをあるコード
+にマップすることを可能にするでしょう。
+
 
    .. literalinclude:: src/basiclayout/tutorial/__init__.py
       :lines: 14
       :language: py
 
-Finally, ``main`` is finished configuring things, so it uses the
-:meth:`pyramid.config.Configurator.make_wsgi_app` method to return a
-:term:`WSGI` application:
+
+.. Finally, ``main`` is finished configuring things, so it uses the
+.. :meth:`pyramid.config.Configurator.make_wsgi_app` method to return a
+.. :term:`WSGI` application:
+
+最後に、 ``main`` は設定を終えて、
+:meth:`pyramid.config.Configurator.make_wsgi_app` メソッドを使用して
+:term:`WSGI` アプリケーションを返します。
+
 
    .. literalinclude:: src/basiclayout/tutorial/__init__.py
       :lines: 15
       :language: py
 
-View Declarations via ``views.py``
+
+.. View Declarations via ``views.py``
+
+``views.py`` によるビュー定義
 ----------------------------------
 
-Mapping a :term:`route` to code that will be executed when a match for
-the route's pattern occurs is done by registering a :term:`view
-configuration`. Our application uses the
-:meth:`pyramid.view.view_config` decorator to map view callables to
-each route, thereby mapping URL patterns to code.
+.. Mapping a :term:`route` to code that will be executed when a match for
+.. the route's pattern occurs is done by registering a :term:`view
+.. configuration`. Our application uses the
+.. :meth:`pyramid.view.view_config` decorator to map view callables to
+.. each route, thereby mapping URL patterns to code.
 
-Open ``tutorial/tutorial/views.py``.  It should already contain the following:
+:term:`route` からそのルートのパターンが一致する時に実行されるコードへ
+のマッピングは :term:`view configuration` の登録により行われます。
+このアプリケーションでは、各ルートにビュー callable をマッピングするために
+:meth:`pyramid.view.view_config` デコレータを使用していて、それによって
+URL パターンをコードにマッピングします。
+
+
+.. Open ``tutorial/tutorial/views.py``.  It should already contain the following:
+
+``tutorial/tutorial/views.py`` を開いてください。
+すでに以下の内容が含まれているはずです:
+
 
    .. literalinclude:: src/basiclayout/tutorial/views.py
       :linenos:
       :language: py
 
-The important part here is that the ``@view_config`` decorator associates the
-function it decorates (``my_view``) with a :term:`view configuration`, 
-consisting of:
 
-   * a ``route_name`` (``home``)
-   * a ``renderer``, which is a template from the ``templates`` subdirectory 
-     of the package.
+.. The important part here is that the ``@view_config`` decorator associates the
+.. function it decorates (``my_view``) with a :term:`view configuration`, 
+.. consisting of:
 
-When the pattern associated with the ``home`` view is matched during a request,
-``my_view()`` will be executed.  ``my_view()`` returns a dictionary; the 
-renderer will use the ``templates/mytemplate.pt`` template to create a response
-based on the values in the dictionary.
+ここで重要なのは、 ``@view_config`` デコレータがそれがデコレートする関数
+(``my_view``) を以下のような :term:`view configuration` と関連付けるという
+ことです:
 
-Note that ``my_view()`` accepts a single argument named ``request``.  This is
-the standard call signature for a Pyramid :term:`view callable`.
 
-Remember in our ``__init__.py`` when we executed the
-:meth:`pyramid.config.Configurator.scan` method, i.e. ``config.scan()``?  The
-purpose of calling the scan method was to find and process this
-``@view_config`` decorator in order to create a view configuration within our
-application.  Without being processed by ``scan``, the decorator effectively
-does nothing.  ``@view_config`` is inert without being detected via a
-:term:`scan`.
+   .. * a ``route_name`` (``home``)
+   .. * a ``renderer``, which is a template from the ``templates`` subdirectory 
+   ..   of the package.
+
+   * ``route_name`` (``home``)
+   * ``renderer`` これはパッケージの ``templates`` サブディレクトリに存
+     在するテンプレートです。
+
+
+.. When the pattern associated with the ``home`` view is matched during a request,
+.. ``my_view()`` will be executed.  ``my_view()`` returns a dictionary; the 
+.. renderer will use the ``templates/mytemplate.pt`` template to create a response
+.. based on the values in the dictionary.
+
+``home`` ビューに関連したパターンがリクエストの間にマッチした場合、
+``my_view()`` が実行されるようになります。 ``my_view()`` は辞書を返します;
+レンダラーは辞書中の値に基づいてレスポンスを生成するために
+``templates/mytemplate.pt`` テンプレートを使用します。
+
+
+.. Note that ``my_view()`` accepts a single argument named ``request``.  This is
+.. the standard call signature for a Pyramid :term:`view callable`.
+
+``my_view()`` が ``request`` という名前の単一の引数を受け取ることに注意
+してください。これは Pyramid :term:`view callable` の標準的な呼び出し
+シグネチャです。
+
+
+.. Remember in our ``__init__.py`` when we executed the
+.. :meth:`pyramid.config.Configurator.scan` method, i.e. ``config.scan()``?  The
+.. purpose of calling the scan method was to find and process this
+.. ``@view_config`` decorator in order to create a view configuration within our
+.. application.  Without being processed by ``scan``, the decorator effectively
+.. does nothing.  ``@view_config`` is inert without being detected via a
+.. :term:`scan`.
+
+``__init__.py`` の中で :meth:`pyramid.config.Configurator.scan` メソッド
+(つまり ``config.scan()``) を実行した時のことを覚えていますか?
+scan メソッドを呼ぶ目的は、アプリケーション内のビュー設定を生成する
+ために、この ``@view_config`` デコレータを見つけて処理することでした。
+``scan`` によって処理されなければ、デコレータは実質的に何もしません。
+:term:`scan` によって検知されなければ、 ``@view_config`` は不活発です。
+
 
 .. Content Models with ``models.py``
 
-``models.py`` によるコンテンツのモデル
+``models.py`` とコンテンツのモデル
 --------------------------------------
 
 .. In a SQLAlchemy-based application, a *model* object is an object composed by
 .. querying the SQL database. The ``models.py`` file is where the ``alchemy``
 .. scaffold put the classes that implement our models.
 
-SQLAlchemyベースのアプリケーションの中で、 *model* オブジェクトはSQLデータベースに問い合わせてオブジェクトを構成しています。
-``models.py`` ファイルは骨組み ``alchemy`` によってその私たちによるモデルのクラスの実装を出力します。
+SQLAlchemy ベースのアプリケーションの中で、 *model* オブジェクトは SQL
+データベースに問い合わせることによって構成されるオブジェクトです。
+``alchemy`` scaffold は、モデルを実装するクラスを ``models.py`` ファイルに
+出力します。
 
 
-Open ``tutorial/tutorial/models.py``.  It should already contain the following:
+.. Open ``tutorial/tutorial/models.py``.  It should already contain the following:
+
+``tutorial/tutorial/models.py`` を開いてください。
+すでに以下の内容が含まれているはずです:
 
 
    .. literalinclude:: src/basiclayout/tutorial/models.py
@@ -192,7 +334,8 @@ Open ``tutorial/tutorial/models.py``.  It should already contain the following:
 
 .. Let's examine this in detail. First, we need some imports to support later code:
 
-それでは詳しく見てみましょう。最初に、この後のコードを動かすのに必要ないくつかのものをインポートします:
+それでは詳しく見てみましょう。最初に、この後のコードを動かすために
+いくつかのインポートが必要です:
 
 
    .. literalinclude:: src/basiclayout/tutorial/models.py
@@ -203,7 +346,7 @@ Open ``tutorial/tutorial/models.py``.  It should already contain the following:
 
 .. Next we set up a SQLAlchemy "DBSession" object:
 
-次にSQLAlchemyの "DBSession" オブジェクトをセットアップします:
+次に SQLAlchemy の "DBSession" オブジェクトをセットアップします:
 
 
    .. literalinclude:: src/basiclayout/tutorial/models.py
@@ -212,20 +355,31 @@ Open ``tutorial/tutorial/models.py``.  It should already contain the following:
       :language: py
 
 
-``scoped_session`` and ``sessionmaker`` are standard SQLAlchemy helpers.
-``scoped_session`` allows us to access our database connection globally.
-``sessionmaker`` creates a database session object.  We pass to
-``sessionmaker`` the ``extension=ZopeTransactionExtension()`` extension
-option in order to allow the system to automatically manage datbase
-transactions.  With ``ZopeTransactionExtension`` activated, our application
-will automatically issue a transaction commit after every request unless an
-exception is raised, in which case the transaction will be aborted.
+.. ``scoped_session`` and ``sessionmaker`` are standard SQLAlchemy helpers.
+.. ``scoped_session`` allows us to access our database connection globally.
+.. ``sessionmaker`` creates a database session object.  We pass to
+.. ``sessionmaker`` the ``extension=ZopeTransactionExtension()`` extension
+.. option in order to allow the system to automatically manage datbase
+.. transactions.  With ``ZopeTransactionExtension`` activated, our application
+.. will automatically issue a transaction commit after every request unless an
+.. exception is raised, in which case the transaction will be aborted.
+
+``scoped_session`` と ``sessionmaker`` は SQLAlchemy の標準的なヘルパー
+です。 ``scoped_session`` は、データベース接続にグローバルにアクセスできる
+ようにします。 ``sessionmaker`` はデータベースのセッションオブジェクトを
+作成します。システムが自動的にデータベーストランザクションを管理する
+ことを可能にするために ``sessionmaker`` に
+``extension=ZopeTransactionExtension()`` 拡張オプションを渡しています。
+``ZopeTransactionExtension`` を有効にすると、アプリケーションはすべての
+リクエストの後で自動的にトランザクションのコミットを発行します。ただし、
+例外が上げられた場合にはトランザクションは abort します。
 
 
 .. We also need to create a declarative ``Base`` object to use as a
 .. base class for our model:
 
-また、私たちのモデルのベースクラスとして使うために宣言型 ``Base`` オブジェクトを作成する必要があります:
+また、モデルのベースクラスとして使うために declarative ``Base``
+オブジェクトを作成する必要があります:
 
 
    .. literalinclude:: src/basiclayout/tutorial/models.py
@@ -233,13 +387,17 @@ exception is raised, in which case the transaction will be aborted.
       :language: py
 
 
-Our model classes will inherit from this ``Base`` class so they can be
-associated with our particular database connection.
+.. Our model classes will inherit from this ``Base`` class so they can be
+.. associated with our particular database connection.
+
+モデルクラスはこの ``Base`` からクラスを継承します。そのため
+それらを特定のデータベース接続に関連付けることができます。
 
 
 .. To give a simple example of a  model class, we define one named ``MyModel``:
 
-モデルクラスの簡単な例を与えるために、 ``MyModel`` という名前の一つのモデルを定義します。
+モデルクラスの簡単な例のため、 ``MyModel`` という名前のモデルを定義して
+います。
 
 
    .. literalinclude:: src/basiclayout/tutorial/models.py
@@ -254,12 +412,15 @@ associated with our particular database connection.
 .. ``__tablename__`` attribute.  This informs SQLAlchemy which table to use to
 .. store the data representing instances of this class.
 
-私たちのサンプルモデルの ``__init__`` は2つの引数を取ります。(``name`` 、および ``value``)
-これらの値は ``__init__`` 関数自体の中の ``self.name`` と ``self.value`` としてストアされます。
-``MyModel`` クラスはまた、 ``__tablename__`` 属性を持っています。
-これは、このクラスのインスタンスを表すデータを格納するために使用するテーブルをSQLAlchemyに通知します。
+サンプルモデルの ``__init__`` は 2 つの引数を取ります (``name`` と ``value``)。
+これらの値は ``__init__`` 関数自身の中で ``self.name`` および
+``self.value`` として保存されます。 ``MyModel`` クラスはまた、
+``__tablename__`` 属性を持っています。これは、このクラスのインスタンス
+を表すデータを格納するために使用するテーブルを SQLAlchemy に通知します。
 
 
-That's about all there is to it to models, views, and initialization code in
-our stock application.
+.. That's about all there is to it to models, views, and initialization code in
+.. our stock application.
 
+アプリケーションに含まれるモデル、ビュー、および初期化コードに関して、
+これでおよそすべてです。
