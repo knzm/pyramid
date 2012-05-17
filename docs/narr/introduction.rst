@@ -6,132 +6,275 @@
    single: frameworks vs. libraries
    single: framework
 
-:app:`Pyramid` Introduction
-==============================
 
-:app:`Pyramid` is a general, open source, Python web application development
-*framework*. Its primary goal is to make it easier for a Python developer to
-create web applications.
+.. :app:`Pyramid` Introduction
+
+:app:`Pyramid` イントロダクション
+=================================
+
+.. :app:`Pyramid` is a general, open source, Python web application development
+.. *framework*. Its primary goal is to make it easier for a Python developer to
+.. create web applications.
+
+:app:`Pyramid` は、汎用的なオープンソースの Python ウェブアプリケーション
+開発 *フレームワーク* です。その主目的は Python 開発者がウェブアプリケー
+ションを作成することをより簡単にすることです。
+
 
 .. sidebar:: Frameworks vs. Libraries
 
-   A *framework* differs from a *library* in one very important way:
-   library code is always *called* by code that you write, while a
-   framework always *calls* code that you write.  Using a set of
-   libraries to create an application is usually easier than using a
-   framework initially, because you can choose to cede control to
-   library code you have not authored very selectively. But when you
-   use a framework, you are required to cede a greater portion of
-   control to code you have not authored: code that resides in the
-   framework itself.  You needn't use a framework at all to create a
-   web application using Python.  A rich set of libraries already
-   exists for the platform.  In practice, however, using a framework
-   to create an application is often more practical than rolling your
-   own via a set of libraries if the framework provides a set of
-   facilities that fits your application requirements.
+   .. A *framework* differs from a *library* in one very important way:
+   .. library code is always *called* by code that you write, while a
+   .. framework always *calls* code that you write.  Using a set of
+   .. libraries to create an application is usually easier than using a
+   .. framework initially, because you can choose to cede control to
+   .. library code you have not authored very selectively. But when you
+   .. use a framework, you are required to cede a greater portion of
+   .. control to code you have not authored: code that resides in the
+   .. framework itself.  You needn't use a framework at all to create a
+   .. web application using Python.  A rich set of libraries already
+   .. exists for the platform.  In practice, however, using a framework
+   .. to create an application is often more practical than rolling your
+   .. own via a set of libraries if the framework provides a set of
+   .. facilities that fits your application requirements.
 
-Pyramid attempts to follow these design and engineering principles:
+   *フレームワーク* は1つの非常に重要な点において *ライブラリ* とは異な
+   ります: ライブラリコードは常に、あなたが書いたコードから *呼ばれ* ます。
+   一方、フレームワークは常に、あなたが書いたコードを *呼び出し* ます。
+   アプリケーションを作成するために1セットのライブラリを使用することは、
+   初期段階ではフレームワークを使用するよりも通常は簡単です。なぜなら、
+   自分の書いたものでないライブラリコードにコントロールを譲ることに対し
+   て極めて選択的に決めることができるからです。しかし、フレームワークを
+   使用する場合、自分の書いたものでないコード、つまりフレームワーク自体
+   に存在するコードにコントロールのより大きな部分を譲ることが求められます。
+   Python を使用してウェブアプリケーションを作成するために、フレームワーク
+   を使用する必要は全くありません。既にそのプラットフォーム向けに豊富な
+   ライブラリのセットが存在しています。しかし、フレームワークがアプリケー
+   ション要件に適合する機能セットを提供している場合、実際にはライブラリ
+   を組み合わせて自作するより、アプリケーションを作成するためにフレーム
+   ワークを使用することは多くの場合により現実的です。
+
+
+
+.. Pyramid attempts to follow these design and engineering principles:
+
+Pyramid は、これらの設計とエンジニアリングの原則に従うよう努めます:
+
 
 Simplicity
-  :app:`Pyramid` takes a *"pay only for what you eat"* approach.  You can get
-  results even if you have only a partial understanding of :app:`Pyramid`.
-  It doesn’t force you to use any particular technology to produce an
-  application, and we try to keep the core set of concepts that you need to
-  understand to a minimum.
+
+  .. :app:`Pyramid` takes a *"pay only for what you eat"* approach.  You can get
+  .. results even if you have only a partial understanding of :app:`Pyramid`.
+  .. It doesn’t force you to use any particular technology to produce an
+  .. application, and we try to keep the core set of concepts that you need to
+  .. understand to a minimum.
+
+  :app:`Pyramid` は、 *「食べた分だけお支払い」* アプローチを取ります。
+  :app:`Pyramid` について部分的な理解だけしか持っていなくも、結果を得る
+  ことができます。 Pyramid はアプリケーションを生成するために特別な技術
+  の使用を強制しません。私たちは、理解する必要のある概念の中核セットを
+  最小に維持しようとしています。
+
 
 Minimalism
-  :app:`Pyramid` tries to solve only the fundamental problems of creating
-  a web application: the mapping of URLs to code, templating, security and
-  serving static assets. We consider these to be the core activities that are
-  common to nearly all web applications.
+
+  .. :app:`Pyramid` tries to solve only the fundamental problems of creating
+  .. a web application: the mapping of URLs to code, templating, security and
+  .. serving static assets. We consider these to be the core activities that are
+  .. common to nearly all web applications.
+
+  :app:`Pyramid` は、ウェブアプリケーション作成の根本問題だけを解決しよ
+  うとします: URL からコードへのマッピング、テンプレート、セキュリティ、
+  静的 asset の表示。私たちは、これらをほぼすべてのウェブアプリケーション
+  に共通の中核的な活動と考えます。
+
 
 Documentation
-  Pyramid's minimalism means that it is easier for us to maintain complete
-  and up-to-date documentation. It is our goal that no aspect of Pyramid
-  is undocumented.
+
+  .. Pyramid's minimalism means that it is easier for us to maintain complete
+  .. and up-to-date documentation. It is our goal that no aspect of Pyramid
+  .. is undocumented.
+
+  Pyramid のミニマリズムは、完全で最新のドキュメンテーションを維持する
+  ことがより簡単であることを意味します。私たちのゴールは、 Pyramid の
+  どの側面も文書化されている、という状態です。
+
 
 Speed
-  :app:`Pyramid` is designed to provide noticeably fast execution for common
-  tasks such as templating and simple response generation. Although "hardware
-  is cheap", the limits of this approach become painfully evident when one
-  finds him or herself responsible for managing a great many machines.
+
+  .. :app:`Pyramid` is designed to provide noticeably fast execution for common
+  .. tasks such as templating and simple response generation. Although "hardware
+  .. is cheap", the limits of this approach become painfully evident when one
+  .. finds him or herself responsible for managing a great many machines.
+
+  :app:`Pyramid` は、テンプレート処理や単純なレスポンス生成のような共通
+  タスクのために、顕著に高速な実行速度を提供することを目指しています。
+  確かに「ハードウェアは安い」ですが、非常に多数のマシンを管理する責任
+  を持つことになると、このアプローチの限界はひどく明らかになります。
 
 Reliability
-  :app:`Pyramid` is developed conservatively and tested exhaustively. Where
-  Pyramid source code is concerned, our motto is: "If it ain’t tested, it’s
-  broke".
+
+  .. :app:`Pyramid` is developed conservatively and tested exhaustively. Where
+  .. Pyramid source code is concerned, our motto is: "If it ain’t tested, it’s
+  .. broke".
+
+  :app:`Pyramid` は保守的に開発されており、徹底的にテストされています。
+  Pyramid のソースコードに関して、私たちのモットーは次の通りです:
+  「テストされていないものは壊れている」
+
 
 Openness
-  As with Python, the Pyramid software is distributed under a `permissive
-  open source license <http://repoze.org/license.html>`_.
+
+  .. As with Python, the Pyramid software is distributed under a `permissive
+  .. open source license <http://repoze.org/license.html>`_.
+
+  Python と同じように、 Pyramid ソフトウェアは `寛容なオープンソース
+  ライセンス <http://repoze.org/license.html>`_ の下で配布されます。
+
+
+.. What Makes Pyramid Unique
 
 .. _what_makes_pyramid_unique:
 
-What Makes Pyramid Unique
+Pyramid のユニークな点
 -------------------------
 
-Understandably, people don't usually want to hear about squishy engineering
-principles, they want to hear about concrete stuff that solves their
-problems.  With that in mind, what would make someone want to use Pyramid
-instead of one of the many other web frameworks available today?  What makes
-Pyramid unique?
+.. Understandably, people don't usually want to hear about squishy engineering
+.. principles, they want to hear about concrete stuff that solves their
+.. problems.  With that in mind, what would make someone want to use Pyramid
+.. instead of one of the many other web frameworks available today?  What makes
+.. Pyramid unique?
 
-This is a hard question to answer, because there are lots of excellent
-choices, and it's actually quite hard to make a wrong choice, particularly in
-the Python web framework market.  But one reasonable answer is this: you can
-write very small applications in Pyramid without needing to know a lot.
-"What?", you say, "that can't possibly be a unique feature, lots of other web
-frameworks let you do that!"  Well, you're right.  But unlike many other
-systems, you can also write very large applications in Pyramid if you learn a
-little more about it.  Pyramid will allow you to become productive quickly,
-and will grow with you; it won't hold you back when your application is small
-and it won't get in your way when your application becomes large.  "Well
-that's fine," you say, "lots of other frameworks let me write large apps
-too."  Absolutely.  But other Python web frameworks don't seamlessly let you
-do both.  They seem to fall into two non-overlapping categories: frameworks
-for "small apps" and frameworks for "big apps".  The "small app" frameworks
-typically sacrifice "big app" features, and vice versa.
+当然ながら、人々は通常 squishy なエンジニアリング原則が聞きたいのではなく、
+自分たちの問題を解決する具体的な事柄に関して聞くことを望みます。それを
+念頭において、なぜ今日利用可能な他の多くのウェブフレームワークに代わって
+Pyramid を使用するのでしょうか。Pyramid のユニークな点は何でしょうか。
 
-We don't think it's a universally reasonable suggestion to write "small apps"
-in a "small framework" and "big apps" in a "big framework".  You can't really
-know to what size every application will eventually grow.  We don't really
-want to have to rewrite a previously small application in another framework
-when it gets "too big".  We believe the current binary distinction between
-frameworks for small and large applications is just false; a well-designed
-framework should be able to be good at both.  Pyramid strives to be that kind
-of framework.
 
-To this end, Pyramid provides a set of features, that, combined, are unique
-amongst Python web frameworks.  Lots of other frameworks contain some
-combination of these features; Pyramid of course actually stole many of them
-from those other frameworks.  But Pyramid is the only one that has all of
-them in one place, documented appropriately, and useful a la carte without
-necessarily paying for the entire banquet.  These are detailed below.
+.. This is a hard question to answer, because there are lots of excellent
+.. choices, and it's actually quite hard to make a wrong choice, particularly in
+.. the Python web framework market.  But one reasonable answer is this: you can
+.. write very small applications in Pyramid without needing to know a lot.
+.. "What?", you say, "that can't possibly be a unique feature, lots of other web
+.. frameworks let you do that!"  Well, you're right.  But unlike many other
+.. systems, you can also write very large applications in Pyramid if you learn a
+.. little more about it.  Pyramid will allow you to become productive quickly,
+.. and will grow with you; it won't hold you back when your application is small
+.. and it won't get in your way when your application becomes large.  "Well
+.. that's fine," you say, "lots of other frameworks let me write large apps
+.. too."  Absolutely.  But other Python web frameworks don't seamlessly let you
+.. do both.  They seem to fall into two non-overlapping categories: frameworks
+.. for "small apps" and frameworks for "big apps".  The "small app" frameworks
+.. typically sacrifice "big app" features, and vice versa.
 
-Single-file applications
-~~~~~~~~~~~~~~~~~~~~~~~~
+これは答えることが困難な質問です。多くの優れた選択肢があり、特に Python
+ウェブフレームワーク業界では、間違った選択を行なうことは実際にまったく
+困難なためです。しかし、1つの合理的な回答がこれです: Pyramid をあまり
+よく知らなくても、非常に小さなアプリケーションを書くことができます。
+「え?」とあなたは言うでしょう。「それは別にユニークな特徴なんかじゃない。
+他の多くのウェブフレームワークでもできるよ!」ええ、それは正しいです。
+しかし、他の多くのシステムと異なり、もう少し学習すれば、さらに Pyramid
+で非常に大きなアプリケーションを書くことができます。 Pyramid は、あな
+たが素早く生産的になることを可能にし、あなたと共に成長します;
+アプリケーションが小さい場合、 Pyramid はあなたを hold back しません。また、
+アプリケーションが大きくなる場合、それはあなたのやり方を get in しません。
+「なるほど、それは素晴らしい」とあなたは言います。「でも他の多くの
+フレームワークでも大きなアプリケーションを書くことはできるよ」
+もちろんです。しかし、他の Python ウェブフレームワークでは、両方を
+シームレスに行うことができません。それらは、オーバーラップしない2つの
+カテゴリに分類されるように見えます:「小さなアプリケーション」用のフレーム
+ワークと「大きなアプリケーション」用のフレームワークです。「小さなアプリ」
+フレームワークは、典型的には「大きなアプリ」の特徴を犠牲にしていて、
+その逆も然りです。
 
-You can write a Pyramid application that lives entirely in one Python file,
-not unlike existing Python microframeworks.  This is beneficial for one-off
-prototyping, bug reproduction, and very small applications.  These
-applications are easy to understand because all the information about the
-application lives in a single place, and you can deploy them without needing
-to understand much about Python distributions and packaging.  Pyramid isn't
-really marketed as a microframework, but it allows you to do almost
-everything that frameworks that are marketed as micro offer in very similar
-ways.
+
+.. We don't think it's a universally reasonable suggestion to write "small apps"
+.. in a "small framework" and "big apps" in a "big framework".  You can't really
+.. know to what size every application will eventually grow.  We don't really
+.. want to have to rewrite a previously small application in another framework
+.. when it gets "too big".  We believe the current binary distinction between
+.. frameworks for small and large applications is just false; a well-designed
+.. framework should be able to be good at both.  Pyramid strives to be that kind
+.. of framework.
+
+私たちは、「小さなフレームワーク」で「小さなアプリケーション」を書き、
+「大きなフレームワーク」で「大きなアプリケーション」を書く、というのは
+普遍的な合理的提案ではないと思います。すべてのアプリケーションが最終的
+にどれだけのサイズに成長するかを実際に知ることはできません。以前は小さな
+アプリケーションだったものを、それが「大きく」なりすぎた場合に別のフレーム
+ワークで書き直さなければならない、なんてことは全然望んでいません。
+私たちは、大小のアプリケーションに対してフレームワークが二分されている
+現状はまったく誤りであると信じます; 良く設計されたフレームワークは、
+両方に対して優れているはずです。 Pyramid はその種のフレームワークになる
+ように努力します。
+
+
+.. To this end, Pyramid provides a set of features, that, combined, are unique
+.. amongst Python web frameworks.  Lots of other frameworks contain some
+.. combination of these features; Pyramid of course actually stole many of them
+.. from those other frameworks.  But Pyramid is the only one that has all of
+.. them in one place, documented appropriately, and useful a la carte without
+.. necessarily paying for the entire banquet.  These are detailed below.
+
+この目的のために、 Pyramid は1セットの特徴を提供します(それらの組み合わせは、
+Python ウェブフレームワークの中でユニークです)。他の多くのフレームワークは、
+これらの特徴の特定の組み合わせを含んでいます; Pyramid は、もちろんそれらの
+特徴のうちの多くのものを実際に他のフレームワークから盗みました。しかし、
+Pyramid はそれらすべてを適切な文書化とともに一ヶ所に持つただ一つの
+フレームワークです。それはフルコースに対する必然的な支払いを必要としない
+便利な一品料理です。これらは以下に詳述されます。
+
+
+.. Single-file applications
+
+単一ファイルアプリケーション
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. You can write a Pyramid application that lives entirely in one Python file,
+.. not unlike existing Python microframeworks.  This is beneficial for one-off
+.. prototyping, bug reproduction, and very small applications.  These
+.. applications are easy to understand because all the information about the
+.. application lives in a single place, and you can deploy them without needing
+.. to understand much about Python distributions and packaging.  Pyramid isn't
+.. really marketed as a microframework, but it allows you to do almost
+.. everything that frameworks that are marketed as micro offer in very similar
+.. ways.
+
+既存の Python マイクロフレームワークと同じく、単一の Python ファイルの
+中だけで完結する Pyramid アプリケーションを書くことができます。これは、
+1回限りのプロトタイピングや、バグの再現、非常に小さなアプリケーション
+には有益です。アプリケーションに関するすべての情報が一つの場所にまとまって
+いるので、これらのアプリケーションは理解するのが簡単です。また、
+Python の配布やパッケージングに関して多くのことを理解する必要なしに
+それらを展開させることができます。実際のところ Pyramid はマイクロフレーム
+ワークとして世に出ているわけではありませんが、マイクロフレームワークと
+呼ばれているような他のフレームワークが提供することはほとんどすべて、
+良く似た方法で実現できます。
+
 
 .. literalinclude:: helloworld.py
 
-See also :ref:`firstapp_chapter`.
 
-Decorator-based configuration
+.. See also :ref:`firstapp_chapter`.
+
+:ref:`firstapp_chapter` も参照してください。
+
+
+.. Decorator-based configuration
+
+デコレータベースの設定
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you like the idea of framework configuration statements living next to the
-code it configures, so you don't have to constantly switch between files to
-refer to framework configuration when adding new code, you can use Pyramid
-decorators to localize the configuration.  For example:
+.. If you like the idea of framework configuration statements living next to the
+.. code it configures, so you don't have to constantly switch between files to
+.. refer to framework configuration when adding new code, you can use Pyramid
+.. decorators to localize the configuration.  For example:
+
+フレームワークの設定が関連するコードのすぐ近くにあり、したがって新しい
+コードを追加する場合にフレームワーク設定を参照するためにファイル間で絶えず
+切り替える必要がない、というアイデアが好きなら、設定を局所化するために
+Pyramid デコレータを使用することができます。例えば:
+
 
 .. code-block:: python
 
@@ -142,100 +285,207 @@ decorators to localize the configuration.  For example:
    def fred_view(request):
        return Response('fred')
 
-However, unlike some other systems, using decorators for Pyramid
-configuration does not make your application difficult to extend, test or
-reuse.  The :class:`~pyramid.view.view_config` decorator, for example, does
-not actually *change* the input or output of the function it decorates, so
-testing it is a "WYSIWYG" operation; you don't need to understand the
-framework to test your own code, you just behave as if the decorator is not
-there.  You can also instruct Pyramid to ignore some decorators, or use
-completely imperative configuration instead of decorators to add views.
-Pyramid decorators are inert instead of eager: you detect and activate them
-with a :term:`scan`.
 
-Example: :ref:`mapping_views_using_a_decorator_section`.
+.. However, unlike some other systems, using decorators for Pyramid
+.. configuration does not make your application difficult to extend, test or
+.. reuse.  The :class:`~pyramid.view.view_config` decorator, for example, does
+.. not actually *change* the input or output of the function it decorates, so
+.. testing it is a "WYSIWYG" operation; you don't need to understand the
+.. framework to test your own code, you just behave as if the decorator is not
+.. there.  You can also instruct Pyramid to ignore some decorators, or use
+.. completely imperative configuration instead of decorators to add views.
+.. Pyramid decorators are inert instead of eager: you detect and activate them
+.. with a :term:`scan`.
 
-URL generation
+しかし、他のいくつかのシステムとは異なり、 Pyramid 設定にデコレータを
+利用することはアプリケーションの拡張、テスト、再使用を困難にしません。
+例えば、 :class:`~pyramid.view.view_config` デコレータは、デコレートする
+関数の入出力を実際には *変更* しません。したがって、そのテストは
+「WYSIWYG」な操作です; 自分のコードをテストするためにフレームワークを
+理解する必要はありません。単にあたかもそこにデコレータが存在しないかの
+ように振る舞えば良いのです。さらに、 Pyramid がいくつかのデコレータを無視
+するようにしたり、ビューを追加するためにデコレータの代わりに完全に命令
+的な設定を使用することもできます。 Pyramid デコレータは積極的 (eager)
+ではなく消極的 (inert) です。 :term:`scan` によってそれらを検知し活性化
+します。
+
+
+.. Example: :ref:`mapping_views_using_a_decorator_section`.
+
+例: :ref:`mapping_views_using_a_decorator_section`
+
+
+.. URL generation
+
+URL 生成
 ~~~~~~~~~~~~~~
 
-Pyramid is capable of generating URLs for resources, routes, and static
-assets.  Its URL generation APIs are easy to use and flexible.  If you use
-Pyramid's various APIs for generating URLs, you can change your configuration
-around arbitrarily without fear of breaking a link on one of your web pages.
+.. Pyramid is capable of generating URLs for resources, routes, and static
+.. assets.  Its URL generation APIs are easy to use and flexible.  If you use
+.. Pyramid's various APIs for generating URLs, you can change your configuration
+.. around arbitrarily without fear of breaking a link on one of your web pages.
 
-Example: :ref:`generating_route_urls`.
+Pyramid は、リソース、ルートおよび静的 asset 用に URL を生成することが
+できます。その URL 生成 API は使いやすく柔軟です。 URL を生成するために
+Pyramid の様々な API を使用すれば、多数のウェブページ中で一つのリンク
+切れも起こす心配なしに設定を任意に変更することができます。
 
-Static file serving
+
+.. Example: :ref:`generating_route_urls`.
+
+例: :ref:`generating_route_urls`
+
+
+.. Static file serving
+
+静的ファイルサーバ
 ~~~~~~~~~~~~~~~~~~~
 
-Pyramid is perfectly willing to serve static files itself.  It won't make you
-use some external web server to do that.  You can even serve more than one
-set of static files in a single Pyramid web application (e.g. ``/static`` and
-``/static2``).  You can also, optionally, place your files on an external web
-server and ask Pyramid to help you generate URLs to those files, so you can
-use Pyramid's internal fileserving while doing development, and a faster
-static file server in production without changing any code.
+.. Pyramid is perfectly willing to serve static files itself.  It won't make you
+.. use some external web server to do that.  You can even serve more than one
+.. set of static files in a single Pyramid web application (e.g. ``/static`` and
+.. ``/static2``).  You can also, optionally, place your files on an external web
+.. server and ask Pyramid to help you generate URLs to those files, so you can
+.. use Pyramid's internal fileserving while doing development, and a faster
+.. static file server in production without changing any code.
 
-Example: :ref:`static_assets_section`.
+Pyramid はそれ自体で静的ファイルを返す完全な機能を持ちます。そのため
+外部のウェブサーバを使用する必要はありません。さらに、 1 つの Pyramid
+ウェブアプリケーションで複数の静的ファイルの集合を返すことができます
+(例えば ``/static`` と ``/static2``)。さらに、任意で、ファイルを外部
+ウェブサーバに置き、 Pyramid がそれらのファイルへの URL を生成するように
+できます。したがって、コードも一切変更することなく、開発時には Pyramid
+の内部ファイルサーバを使い、プロダクション環境ではより高速な静的ファイル
+サーバを使用することができます。
 
-Debug Toolbar
-~~~~~~~~~~~~~
 
-Pyramid's debug toolbar comes activated when you use a Pyramid scaffold to
-render a project.  This toolbar overlays your application in the browser, and
-allows you access to framework data such as the routes configured, the last
-renderings performed, the current set of packages installed, SQLAlchemy
-queries run, logging data, and various other facts.  When an exception
-occurs, you can use its interactive debugger to poke around right in your
-browser to try to determine the cause of the exception.  It's handy.
+.. Example: :ref:`static_assets_section`.
 
-Example: :ref:`debug_toolbar`.
+例: :ref:`static_assets_section`
 
-Debugging settings
+
+.. Debug Toolbar
+
+デバッグツールバー
 ~~~~~~~~~~~~~~~~~~
 
-Pyramid has debugging settings that allow you to print Pyramid runtime
-information to the console when things aren't behaving as you're expecting.
-For example, you can turn on "debug_notfound", which prints an informative
-message to the console every time a URL does not match any view.  You can
-turn on "debug_authorization", which lets you know why a view execution was
-allowed or denied by printing a message to the console.  These features are
-useful for those WTF moments.
+.. Pyramid's debug toolbar comes activated when you use a Pyramid scaffold to
+.. render a project.  This toolbar overlays your application in the browser, and
+.. allows you access to framework data such as the routes configured, the last
+.. renderings performed, the current set of packages installed, SQLAlchemy
+.. queries run, logging data, and various other facts.  When an exception
+.. occurs, you can use its interactive debugger to poke around right in your
+.. browser to try to determine the cause of the exception.  It's handy.
 
-There are also a number of commands that you can invoke within a Pyramid
-environment that allow you to introspect the configuration of your system:
-``proutes`` shows all configured routes for an application in the order
-they'll be evaluated for matching; ``pviews`` shows all configured views for
-any given URL.  These are also WTF-crushers in some circumstances.
+Pyramid scaffold を使用した場合、 Pyramid のデバッグツールバーが有効に
+なった状態でプロジェクトが作成されます。このツールバーは、ブラウザ内で
+アプリケーションに overlay して、フレームワークデータへのアクセスを与え
+ます: 設定されたルート、最後のレンダリング結果、現在インストールされて
+いるパッケージ一覧、 SQLAlchemy クエリ実行、ログデータ、および他の
+様々な情報。例外が生じた場合、例外の原因を特定するためにブラウザの中で
+色々とつつき回るのに対話型デバッガを使用することができます。それは手軽です。
 
-Examples: :ref:`debug_authorization_section` and :ref:`command_line_chapter`.
 
-Add-ons
+.. Example: :ref:`debug_toolbar`.
+
+例: :ref:`debug_toolbar`
+
+
+.. Debugging settings
+
+デバッグ設定
+~~~~~~~~~~~~~~~~~~
+
+.. Pyramid has debugging settings that allow you to print Pyramid runtime
+.. information to the console when things aren't behaving as you're expecting.
+.. For example, you can turn on "debug_notfound", which prints an informative
+.. message to the console every time a URL does not match any view.  You can
+.. turn on "debug_authorization", which lets you know why a view execution was
+.. allowed or denied by printing a message to the console.  These features are
+.. useful for those WTF moments.
+
+Pyramid にはデバッグ設定があり、物事が期待した通りに動作していない場合
+に Pyramid ランタイム情報をコンソールに表示することができます。例えば、
+"debug_notfound" を有効にすると、 URL がビューと一致しない場合はいつで
+もコンソールに通知メッセージを表示するようになります。
+"debug_authorization" を有効にすることで、なぜビュー実行が許可または禁
+止されたをコンソールにメッセージ表示することで知らせます。これらの特徴
+は、これらの WTF 時に役立ちます (訳注: WTF ってなに?)。
+
+
+.. There are also a number of commands that you can invoke within a Pyramid
+.. environment that allow you to introspect the configuration of your system:
+.. ``proutes`` shows all configured routes for an application in the order
+.. they'll be evaluated for matching; ``pviews`` shows all configured views for
+.. any given URL.  These are also WTF-crushers in some circumstances.
+
+さらに、システムの設定を調査するために Pyramid 環境内で実行できる数々の
+コマンドがあります: ``proutes`` は、アプリケーション用に設定されたルートを
+マッチに際してそれらが評価される順番ですべて示します; ``pviews`` は、
+所定の URL に対して設定されたビューをすべて表示します。これらはまた、
+いくつかの状況で WTF-crushers です。
+
+
+.. Examples: :ref:`debug_authorization_section` and :ref:`command_line_chapter`.
+
+例: :ref:`debug_authorization_section`, :ref:`command_line_chapter`
+
+
+.. Add-ons
+
+アドオン
 ~~~~~~~~
 
-Pyramid has an extensive set of add-ons held to the same quality standards as
-the Pyramid core itself.  Add-ons are packages which provide functionality
-that the Pyramid core doesn't.  Add-on packages already exist which let you
-easily send email, let you use the Jinja2 templating system, let you use
-XML-RPC or JSON-RPC, let you integrate with jQuery Mobile, etc.
+.. Pyramid has an extensive set of add-ons held to the same quality standards as
+.. the Pyramid core itself.  Add-ons are packages which provide functionality
+.. that the Pyramid core doesn't.  Add-on packages already exist which let you
+.. easily send email, let you use the Jinja2 templating system, let you use
+.. XML-RPC or JSON-RPC, let you integrate with jQuery Mobile, etc.
 
-Examples: http://docs.pylonsproject.org/docs/pyramid.html#pyramid-add-on-documentation
+Pyramid には、 Pyramid コアそれ自体と同じ品質水準を持つ広範囲なアドオン
+のセットがあります。アドオンは Pyramid コアが提供しない機能を提供する
+パッケージです。電子メールを簡単に送ったり、Jinja2テンプレートシステム
+を使用したり、 XML-RPC あるいは JSON-RPC を使用したり、jQuery Mobile と
+統合したりするアドオンパッケージは既に存在します。
 
-Class-based and function-based views
+
+.. Examples: http://docs.pylonsproject.org/docs/pyramid.html#pyramid-add-on-documentation
+
+例: http://docs.pylonsproject.org/docs/pyramid.html#pyramid-add-on-documentation
+
+
+.. Class-based and function-based views
+
+クラスベースと関数ベースのビュー
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Pyramid has a structured, unified concept of a :term:`view callable`.
-View callables can be functions, methods of classes, or even instances.  When
-you add a new view callable, you can choose to make it a function or a method
-of a class; in either case, Pyramid treats it largely the same way.  You can
-change your mind later, and move code between methods of classes and
-functions.  A collection of similar view callables can be attached to a
-single class as methods, if that floats your boat, and they can share
-initialization code as necessary.  All kinds of views are easy to understand
-and use and operate similarly.  There is no phony distinction between them;
-they can be used for the same purposes.
+.. Pyramid has a structured, unified concept of a :term:`view callable`.
+.. View callables can be functions, methods of classes, or even instances.  When
+.. you add a new view callable, you can choose to make it a function or a method
+.. of a class; in either case, Pyramid treats it largely the same way.  You can
+.. change your mind later, and move code between methods of classes and
+.. functions.  A collection of similar view callables can be attached to a
+.. single class as methods, if that floats your boat, and they can share
+.. initialization code as necessary.  All kinds of views are easy to understand
+.. and use and operate similarly.  There is no phony distinction between them;
+.. they can be used for the same purposes.
 
-Here's a view callable defined as a function:
+Pyramid には :term:`view callable` という構造化された統一的な概念があり
+ます。ビュー callable は、関数、クラスのメソッド、あるいはインスタンス
+です。新しいビュー callable を加える場合、それを関数あるいはクラスの
+メソッドのどちらにするか選択することができます; いずれの場合も Pyramid
+はそれを大部分は同じ方法で扱います。もし後で気が変わっても、クラスの
+メソッドと関数の間でコードを移動させることができます。類似したビュー
+callable のコレクションは、メソッドとして単一のクラスに取り付けることが
+できます。好みに応じて、必要なら初期化コードを共有することもできます。
+すべての種類のビューは、理解して使用するのが簡単で、かつ同様に作動します。
+それらの間に偽りの区別はありません; それらは同じ目的のために使用できます。
+
+
+.. Here's a view callable defined as a function:
+
+これは関数として定義したビュー callable です:
+
 
 .. code-block:: python
    :linenos:
@@ -247,7 +497,11 @@ Here's a view callable defined as a function:
    def aview(request):
        return Response('one')
 
-Here's a few views defined as methods of a class instead:
+
+.. Here's a few views defined as methods of a class instead:
+
+これは代わりにクラスのメソッドとして定義したビュー callable です:
+
 
 .. code-block:: python
    :linenos:
@@ -267,22 +521,40 @@ Here's a few views defined as methods of a class instead:
        def view_two(self):
            return Response('two')
 
-See also :ref:`view_config_placement`.
+
+.. See also :ref:`view_config_placement`.
+
+:ref:`view_config_placement` も参照してください。
+
+
+.. Asset specifications
 
 .. _intro_asset_specs:
 
-Asset specifications
+asset 仕様
 ~~~~~~~~~~~~~~~~~~~~
 
-Asset specifications are strings that contain both a Python package name and
-a file or directory name, e.g. ``MyPackage:static/index.html``.  Use of these
-specifications is omnipresent in Pyramid.  An asset specification can refer
-to a template, a translation directory, or any other package-bound static
-resource.  This makes a system built on Pyramid extensible, because you don't
-have to rely on globals ("*the* static directory") or lookup schemes ("*the*
-ordered set of template directories") to address your files.  You can move
-files around as necessary, and include other packages that may not share your
-system's templates or static files without encountering conflicts.
+.. Asset specifications are strings that contain both a Python package name and
+.. a file or directory name, e.g. ``MyPackage:static/index.html``.  Use of these
+.. specifications is omnipresent in Pyramid.  An asset specification can refer
+.. to a template, a translation directory, or any other package-bound static
+.. resource.  This makes a system built on Pyramid extensible, because you don't
+.. have to rely on globals ("*the* static directory") or lookup schemes ("*the*
+.. ordered set of template directories") to address your files.  You can move
+.. files around as necessary, and include other packages that may not share your
+.. system's templates or static files without encountering conflicts.
+
+asset 仕様は、例えば ``MyPackage:static/index.html`` のように Python
+パッケージ名とファイルまたはディレクトリ名の両方を含む文字列です。
+この仕様は Pyramid の中のほとんどあらゆる場所で使われています。
+asset 仕様は、テンプレート、翻訳ディレクトリ、あるいは他のパッケージに
+結合された静的なリソースを指すことができます。これは Pyramid 上に構築された
+システムを拡張可能にします。なぜなら、ファイルを指し示すためにグローバル
+変数 (「static ディレクトリ」) や、検索スキーム (「テンプレートディレクトリ
+の順序集合」) に頼る必要がないからです。必要に応じてファイルを移動する
+ことができ、システムのテンプレートや静的ファイルを共有することができない
+他のパッケージを衝突することなくインクルードすることができます。
+
 
 Because asset specifications are used heavily in Pyramid, we've also provided
 a way to allow users to override assets.  Say you love a system that someone
@@ -291,38 +563,85 @@ to make it all better.  No need to fork the application.  Just override the
 asset specification for that template with your own inside a wrapper, and
 you're good to go.
 
-Examples: :ref:`asset_specifications` and :ref:`overriding_assets_section`.
+asset 仕様が Pyramid の中で極度に使用されるので、さらに、私たちはユーザ
+が asset をオーバーライドできるようにする方法を提供しています。仮に誰か
+他の人が Pyramid で作成したシステムを気に入って、それを改良するために
+「ある1つのテンプレート」だけを変更する必要があるとします。アプリケーション
+をフォークする必要はありません。ラッパー内部でそのテンプレート用の
+asset 仕様をあなた自身のもので単にオーバーライドしてください。それだけ
+でうまくいきます。
 
-Extensible templating
-~~~~~~~~~~~~~~~~~~~~~
 
-Pyramid has a structured API that allows for pluggability of "renderers".
-Templating systems such as Mako, Genshi, Chameleon, and Jinja2 can be treated
-as renderers.  Renderer bindings for all of these templating systems already
-exist for use in Pyramid.  But if you'd rather use another, it's not a big
-deal.  Just copy the code from an existing renderer package, and plug in your
-favorite templating system.  You'll then be able to use that templating
-system from within Pyramid just as you'd use one of the "built-in" templating
-systems.
+.. Examples: :ref:`asset_specifications` and :ref:`overriding_assets_section`.
 
-Pyramid does not make you use a single templating system exclusively.  You
-can use multiple templating systems, even in the same project.
+例: :ref:`asset_specifications`, :ref:`overriding_assets_section`
 
-Example: :ref:`templates_used_directly`.
 
-Rendered views can return dictionaries
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. Extensible templating
 
-If you use a :term:`renderer`, you don't have to return a special kind of
-"webby" ``Response`` object from a view.  Instead, you can return a
-dictionary instead, and Pyramid will take care of converting that dictionary
-to a Response using a template on your behalf.  This makes the view easier to
-test, because you don't have to parse HTML in your tests; just make an
-assertion instead that the view returns "the right stuff" in the dictionary
-it returns.  You can write "real" unit tests instead of functionally testing
-all of your views.
+拡張可能なテンプレート
+~~~~~~~~~~~~~~~~~~~~~~
 
-For example, instead of:
+.. Pyramid has a structured API that allows for pluggability of "renderers".
+.. Templating systems such as Mako, Genshi, Chameleon, and Jinja2 can be treated
+.. as renderers.  Renderer bindings for all of these templating systems already
+.. exist for use in Pyramid.  But if you'd rather use another, it's not a big
+.. deal.  Just copy the code from an existing renderer package, and plug in your
+.. favorite templating system.  You'll then be able to use that templating
+.. system from within Pyramid just as you'd use one of the "built-in" templating
+.. systems.
+
+Pyramid には「レンダラ」の pluggability を可能にする構造化 API があります。
+Mako, Genshi, Chameleon, Jinja2 のようなテンプレートシステムをレンダラ
+として扱うことができます。これらすべてのテンプレートシステムのための
+レンダラバインディングは Pyramid で使用するために既に存在しています。
+しかし、あなたがもし別のテンプレートシステムを使用したかったとしても、
+それは大したことではありません。既存のレンダラパッケージからコードを
+単にコピーして、好きなテンプレートシステムをプラグインしてください。
+そうすれば、ちょうど「内蔵の」テンプレートシステムを使用するのと同じように、
+Pyramid の内部からのそのテンプレートシステムを使用することが
+できるようになります。
+
+
+.. Pyramid does not make you use a single templating system exclusively.  You
+.. can use multiple templating systems, even in the same project.
+
+Pyramid では単一のテンプレートシステムを排他的に使用する必要はありません。
+同じプロジェクトの中でも多数のテンプレートシステムを使用することができます。
+
+
+.. Example: :ref:`templates_used_directly`.
+
+例: :ref:`templates_used_directly`
+
+
+.. Rendered views can return dictionaries
+
+レンダリングされるビューは辞書を返すことができる
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. If you use a :term:`renderer`, you don't have to return a special kind of
+.. "webby" ``Response`` object from a view.  Instead, you can return a
+.. dictionary instead, and Pyramid will take care of converting that dictionary
+.. to a Response using a template on your behalf.  This makes the view easier to
+.. test, because you don't have to parse HTML in your tests; just make an
+.. assertion instead that the view returns "the right stuff" in the dictionary
+.. it returns.  You can write "real" unit tests instead of functionally testing
+.. all of your views.
+
+:term:`renderer` を使用していれば、ビューから特別な種類の「Web 特有」の
+``Response`` オブジェクトを返す必要はありません。代わりに辞書を返すことが
+できます。すると Pyramid は、代わりにテンプレートを使用してその辞書をレスポ
+ンスに変換する世話をします。これはビューをテストすることをより簡単にします。
+テストで HTML を解析する必要がないからです; 代わりに、単にビューが「正しい値」
+を含んだ辞書を返すという assertion をしてください。あなたのビューすべてを
+機能的にテストする代わりに、「本物の」ユニットテストを書くことができます。
+
+
+.. For example, instead of:
+
+例えば、こうする代わりに:
+
 
 .. code-block:: python
    :linenos:
@@ -333,7 +652,11 @@ For example, instead of:
         return render_to_response('myapp:templates/mytemplate.pt', {'a':1},
                                   request=request)
 
-You can do this:
+
+.. You can do this:
+
+このようにすることができます:
+
 
 .. code-block:: python
    :linenos:
@@ -344,93 +667,196 @@ You can do this:
     def myview(request):
         return {'a':1}
 
-When this view callable is called by Pyramid, the ``{'a':1}`` dictionary will
-be rendered to a response on your behalf.  The string passed as ``renderer=``
-above is an :term:`asset specification`.  It is in the form
-``packagename:directoryname/filename.ext``.  In this case, it refers to the
-``mytemplate.pt`` file in the ``templates`` directory within the ``myapp``
-Python package.  Asset specifications are omnipresent in Pyramid: see
-:ref:`intro_asset_specs` for more information.
 
-Example: :ref:`renderers_chapter`.
+.. When this view callable is called by Pyramid, the ``{'a':1}`` dictionary will
+.. be rendered to a response on your behalf.  The string passed as ``renderer=``
+.. above is an :term:`asset specification`.  It is in the form
+.. ``packagename:directoryname/filename.ext``.  In this case, it refers to the
+.. ``mytemplate.pt`` file in the ``templates`` directory within the ``myapp``
+.. Python package.  Asset specifications are omnipresent in Pyramid: see
+.. :ref:`intro_asset_specs` for more information.
 
-Event system
-~~~~~~~~~~~~
+このビュー callable が Pyramid によって呼ばれる時、辞書 ``{'a':1}`` が
+あなたの代わりにレスポンスに与えられるでしょう。上記の ``renderer=`` と
+して渡された文字列は :term:`asset specification` です。それは
+``packagename:directoryname/filename.ext`` の形式です。この場合、それは
+``myapp`` Python パッケージ内の ``templates`` ディレクトリにある
+``mytemplate.pt`` ファイルを指します。 asset 仕様は Pyramid において
+広範に使用されます: 詳細は :ref:`intro_asset_specs` を参照してください。
 
-Pyramid emits *events* during its request processing lifecycle.  You can
-subscribe any number of listeners to these events.  For example, to be
-notified of a new request, you can subscribe to the ``NewRequest`` event.  To
-be notified that a template is about to be rendered, you can subscribe to the
-``BeforeRender`` event, and so forth.  Using an event publishing system as a
-framework notification feature instead of hardcoded hook points tends to make
-systems based on that framework less brittle.
 
-You can also use Pyramid's event system to send your *own* events.  For
-example, if you'd like to create a system that is itself a framework, and may
-want to notify subscribers that a document has just been indexed, you can
-create your own event type (``DocumentIndexed`` perhaps) and send the event
-via Pyramid.  Users of this framework can then subscribe to your event like
-they'd subscribe to the events that are normally sent by Pyramid itself.
+.. Example: :ref:`renderers_chapter`.
 
-Example: :ref:`events_chapter` and :ref:`event_types`.
+例: :ref:`renderers_chapter`
 
-Built-in internationalization
+
+.. Event system
+
+イベントシステム
+~~~~~~~~~~~~~~~~
+
+.. Pyramid emits *events* during its request processing lifecycle.  You can
+.. subscribe any number of listeners to these events.  For example, to be
+.. notified of a new request, you can subscribe to the ``NewRequest`` event.  To
+.. be notified that a template is about to be rendered, you can subscribe to the
+.. ``BeforeRender`` event, and so forth.  Using an event publishing system as a
+.. framework notification feature instead of hardcoded hook points tends to make
+.. systems based on that framework less brittle.
+
+Pyramid はそのリクエスト処理ライフサイクル中に *イベント* を送出します。
+これらのイベントに任意の数のリスナを登録することができます。例えば、
+新しいリクエストについて通知を受けるために、 ``NewRequest`` イベントに
+登録することができます。テンプレートをレンダリングする直前で通知を受け
+るために、 ``BeforeRender`` イベントに登録することができます。などなど。
+ハードコードされたフックポイントの代わりに、フレームワーク通知機能として
+イベント公開システムを使用することは、そのフレームワークに基づくシステム
+をより壊れにくくする傾向があります (訳注: この文の意味は良く分からない)。
+
+
+.. You can also use Pyramid's event system to send your *own* events.  For
+.. example, if you'd like to create a system that is itself a framework, and may
+.. want to notify subscribers that a document has just been indexed, you can
+.. create your own event type (``DocumentIndexed`` perhaps) and send the event
+.. via Pyramid.  Users of this framework can then subscribe to your event like
+.. they'd subscribe to the events that are normally sent by Pyramid itself.
+
+さらに、自分のイベントを送るために Pyramid のイベントシステムを使用する
+ことができます。例えば、それ自体がフレームワークであるようなシステムを
+構築していて、ドキュメントがたった今インデックス化されたことを受信者に
+通知したければ、自分のイベントタイプ (恐らく ``DocumentIndexed``) を
+作成して Pyramid 経由でイベントを送ることができます。そうすればこの
+フレームワークのユーザは、 Pyramid 自体によって通常送られるイベントと
+同じように、あなたのイベントに登録することができます。
+
+
+.. Example: :ref:`events_chapter` and :ref:`event_types`.
+
+例: :ref:`events_chapter`, :ref:`event_types`.
+
+
+.. Built-in internationalization
+
+組み込みの国際化機能
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Pyramid ships with internationalization-related features in its core:
-localization, pluralization, and creating message catalogs from source files
-and templates.  Pyramid allows for a plurality of message catalog via the use
-of translation domains: you can create a system that has its own translations
-without conflict with other translations in other domains.
+.. Pyramid ships with internationalization-related features in its core:
+.. localization, pluralization, and creating message catalogs from source files
+.. and templates.  Pyramid allows for a plurality of message catalog via the use
+.. of translation domains: you can create a system that has its own translations
+.. without conflict with other translations in other domains.
 
-Example: :ref:`i18n_chapter`.
+Pyramid はコアの中に国際化関連の機能を備えています: ローカライゼーション、
+複数形変換、およびソースファイルとテンプレートからのメッセージカタログの作成。
+Pyramid は翻訳ドメインの使用によって複数のメッセージカタログを可能にします:
+他のドメインの他の翻訳と衝突することなくそれ自身の翻訳を持つシステムを
+作成することができます。
 
-HTTP caching
-~~~~~~~~~~~~
 
-Pyramid provides an easy way to associate views with HTTP caching policies.
-You can just tell Pyramid to configure your view with an ``http_cache``
-statement, and it will take care of the rest::
+.. Example: :ref:`i18n_chapter`.
+
+例: :ref:`i18n_chapter`
+
+
+.. HTTP caching
+
+HTTP キャッシュ
+~~~~~~~~~~~~~~~
+
+.. Pyramid provides an easy way to associate views with HTTP caching policies.
+.. You can just tell Pyramid to configure your view with an ``http_cache``
+.. statement, and it will take care of the rest:
+
+Pyramid はビューを HTTP キャッシングポリシーに関連させる簡単な方法を
+提供しています。 ``http_cache`` を付けてビューを設定すれば、残りは
+Pyramid が面倒を見てくれます:
+
+
+::
 
    @view_config(http_cache=3600) # 60 minutes
    def myview(request): ....
 
-Pyramid will add appropriate ``Cache-Control`` and ``Expires`` headers to
-responses generated when this view is invoked.
 
-See the :meth:`~pyramid.config.Configurator.add_view` method's
-``http_cache`` documentation for more information.
+.. Pyramid will add appropriate ``Cache-Control`` and ``Expires`` headers to
+.. responses generated when this view is invoked.
 
-Sessions
+Pyramid は、適切な ``Cache-Control`` および ``Expires`` ヘッダーを
+このビューが起動された時に生成されたレスポンスに追加します。
+
+
+.. See the :meth:`~pyramid.config.Configurator.add_view` method's
+.. ``http_cache`` documentation for more information.
+
+詳細については :meth:`~pyramid.config.Configurator.add_view` メソッドの
+``http_cache`` ドキュメンテーションを参照してください。
+
+
+.. Sessions
+
+セッション
+~~~~~~~~~~
+
+.. Pyramid has built-in HTTP sessioning.  This allows you to associate data with
+.. otherwise anonymous users between requests.  Lots of systems do this.  But
+.. Pyramid also allows you to plug in your own sessioning system by creating
+.. some code that adheres to a documented interface.  Currently there is a
+.. binding package for the third-party Beaker sessioning system that does exactly
+.. this.  But if you have a specialized need (perhaps you want to store your
+.. session data in MongoDB), you can.  You can even switch between
+.. implementations without changing your application code.
+
+Pyramid は内蔵の HTTP セッション管理を持っています。これは、それ以外の
+点では匿名のユーザにリクエスト間でデータを関連付けることを可能にします。
+多くのシステムがこれをします。しかし、 Pyramid はさらに、文書化された
+インターフェースに適合する多少のコードを作成することにより、あなた自身
+のセッション管理システムをプラグインすることを可能にします。現在、まさに
+これを行っているサードパーティの Beaker セッションシステムのための
+バインディングパッケージがあります。しかし、特別なニーズ (例えば
+MongoDB にセッションデータを格納したい等) を持っていれば、それも可能です。
+さらにアプリケーションコードを変更せずに、セッション管理の実装を切り替える
+ことができます。
+
+
+.. Example: :ref:`sessions_chapter`.
+
+例: :ref:`sessions_chapter`
+
+
+.. Speed
+
+スピード
 ~~~~~~~~
 
-Pyramid has built-in HTTP sessioning.  This allows you to associate data with
-otherwise anonymous users between requests.  Lots of systems do this.  But
-Pyramid also allows you to plug in your own sessioning system by creating
-some code that adheres to a documented interface.  Currently there is a
-binding package for the third-party Beaker sessioning system that does exactly
-this.  But if you have a specialized need (perhaps you want to store your
-session data in MongoDB), you can.  You can even switch between
-implementations without changing your application code.
+.. The Pyramid core is, as far as we can tell, at least marginally faster than
+.. any other existing Python web framework.  It has been engineered from the
+.. ground up for speed.  It only does as much work as absolutely necessary when
+.. you ask it to get a job done.  Extraneous function calls and suboptimal
+.. algorithms in its core codepaths are avoided.  It is feasible to get, for
+.. example, between 3500 and 4000 requests per second from a simple Pyramid view
+.. on commodity dual-core laptop hardware and an appropriate WSGI server
+.. (mod_wsgi or gunicorn).  In any case, performance statistics are largely
+.. useless without requirements and goals, but if you need speed, Pyramid will
+.. almost certainly never be your application's bottleneck; at least no more
+.. than Python will be a bottleneck.
 
-Example: :ref:`sessions_chapter`.
+Pyramid コアは、私たちが知る限り、少なくとも他のどの既存の Python ウェブ
+フレームワークよりも明らかに高速です。 Pyramid は、最初から速度のために
+エンジニアリングされました。それは、仕事を終わらせてくれるように依頼
+された場合、絶対的に必要な分の量の仕事だけをします。外部の関数呼び出し
+や準最適のアルゴリズムは、コアコードパス中では避けられています。
+例えば、デュアルコアのコモディティなラップトップハードウェアと適切な
+WSGI サーバ (mod_wsgi または gunicorn) 上で、単純な Pyramid ビューで
+毎秒 3500〜4000 リクエストを得ることは現実的ですどんな場合も、必要条件
+とゴールなしではパフォーマンス統計は大して役に立ちませんが、
+あなたが速度を必要とした場合に Pyramid はほぼ確実に
+アプリケーションのボトルネックにはなりません; 少なくとも、 Python が
+ボトルネックになる以上には。
 
-Speed
-~~~~~
 
-The Pyramid core is, as far as we can tell, at least marginally faster than
-any other existing Python web framework.  It has been engineered from the
-ground up for speed.  It only does as much work as absolutely necessary when
-you ask it to get a job done.  Extraneous function calls and suboptimal
-algorithms in its core codepaths are avoided.  It is feasible to get, for
-example, between 3500 and 4000 requests per second from a simple Pyramid view
-on commodity dual-core laptop hardware and an appropriate WSGI server
-(mod_wsgi or gunicorn).  In any case, performance statistics are largely
-useless without requirements and goals, but if you need speed, Pyramid will
-almost certainly never be your application's bottleneck; at least no more
-than Python will be a bottleneck.
+.. Example: http://blog.curiasolutions.com/the-great-web-framework-shootout/
 
-Example: http://blog.curiasolutions.com/the-great-web-framework-shootout/
+例: http://blog.curiasolutions.com/the-great-web-framework-shootout/
+
 
 Exception views
 ~~~~~~~~~~~~~~~
