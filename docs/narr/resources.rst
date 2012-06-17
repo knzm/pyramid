@@ -3,50 +3,104 @@
 Resources
 =========
 
-A :term:`resource` is an object that represents a "place" in a tree
-related to your application.  Every :app:`Pyramid` application has at
-least one resource object: the :term:`root` resource.  Even if you don't
-define a root resource manually, a default one is created for you.  The
-root resource is the root of a :term:`resource tree`.  A resource tree
-is a set of nested dictionary-like objects which you can use to
-represent your website's structure.
+.. A :term:`resource` is an object that represents a "place" in a tree
+.. related to your application.  Every :app:`Pyramid` application has at
+.. least one resource object: the :term:`root` resource.  Even if you don't
+.. define a root resource manually, a default one is created for you.  The
+.. root resource is the root of a :term:`resource tree`.  A resource tree
+.. is a set of nested dictionary-like objects which you can use to
+.. represent your website's structure.
 
-In an application which uses :term:`traversal` to map URLs to code, the
-resource tree structure is used heavily to map each URL to a :term:`view
-callable`.  When :term:`traversal` is used, :app:`Pyramid` will walk
-through the resource tree by traversing through its nested dictionary
-structure in order to find a :term:`context` resource.  Once a context
-resource is found, the context resource and data in the request will be
-used to find a :term:`view callable`.
+:term:`resource` は、アプリケーションに関係付けられたツリー上の「場所」
+を表わすオブジェクトです。すべての :app:`Pyramid` アプリケーションは
+少なくとも1つのリソースオブジェクトを持ちます: :term:`root` リソースです。
+あなたが root リソースを手動で定義しなかったとしても、デフォルトの
+root リソースが自動的に作成されます。 root リソースは :term:`resource
+tree` の根です。リソースツリーは1セットの入れ子の辞書風オブジェクトで、
+ウェブサイトの構造を表わすために使用することができます。
 
-In an application which uses :term:`URL dispatch`, the resource tree is only
-used indirectly, and is often "invisible" to the developer.  In URL dispatch
-applications, the resource "tree" is often composed of only the root resource
-by itself.  This root resource sometimes has security declarations attached
-to it, but is not required to have any.  In general, the resource tree is
-much less important in applications that use URL dispatch than applications
-that use traversal.
 
-In "Zope-like" :app:`Pyramid` applications, resource objects also often store
-data persistently, and offer methods related to mutating that persistent data.
-In these kinds of applications, resources not only represent the site
-structure of your website, but they become the :term:`domain model` of the
-application.
+.. In an application which uses :term:`traversal` to map URLs to code, the
+.. resource tree structure is used heavily to map each URL to a :term:`view
+.. callable`.  When :term:`traversal` is used, :app:`Pyramid` will walk
+.. through the resource tree by traversing through its nested dictionary
+.. structure in order to find a :term:`context` resource.  Once a context
+.. resource is found, the context resource and data in the request will be
+.. used to find a :term:`view callable`.
 
-Also:
+URL をコードにマッピングするために :term:`traversal` を使用するアプリ
+ケーションでは、リソースツリー構造は各 URL を :term:`view callable` に
+マッピングするために頻繁に使用されます。 :term:`traversal` が使用されて
+いる時、 :app:`Pyramid` は:term:`context` リソースを見つけるために、入れ子
+の辞書構造をトラバースすることによってリソースツリーを渡り歩きます。
+コンテキストリソースが見つかれば、 :term:`view callable` を見つける
+ためにコンテキストリソースとリクエスト中のデータが使用されます。
 
-- The ``context`` and ``containment`` predicate arguments to
-  :meth:`~pyramid.config.Configurator.add_view` (or a
-  :func:`~pyramid.view.view_config` decorator) reference a resource class
-  or resource :term:`interface`.
 
-- A :term:`root factory` returns a resource.
+.. In an application which uses :term:`URL dispatch`, the resource tree is only
+.. used indirectly, and is often "invisible" to the developer.  In URL dispatch
+.. applications, the resource "tree" is often composed of only the root resource
+.. by itself.  This root resource sometimes has security declarations attached
+.. to it, but is not required to have any.  In general, the resource tree is
+.. much less important in applications that use URL dispatch than applications
+.. that use traversal.
 
-- A resource is exposed to :term:`view` code as the :term:`context` of a
-  view.
+:term:`URL dispatch` を使用するアプリケーションでは、リソースツリーは
+間接的にのみ使用され、多くの場合開発者からは「見えないもの」です。 URL
+ディスパッチアプリケーションでは、リソース「ツリー」は、しばしば root
+リソース自身のみから構成されます。この root リソースには、セキュリティ
+宣言が取り付けられることがありますが、常にそうすることは要求されません。
+一般に、リソースツリーは、トラバースを使用するアプリケーションに比べて
+URL ディスパッチを使用するアプリケーションにおいてはそれほど重要では
+ありません。
 
-- Various helpful :app:`Pyramid` API methods expect a resource as an argument
-  (e.g. :meth:`~pyramid.request.Request.resource_url` and others).
+
+.. In "Zope-like" :app:`Pyramid` applications, resource objects also often store
+.. data persistently, and offer methods related to mutating that persistent data.
+.. In these kinds of applications, resources not only represent the site
+.. structure of your website, but they become the :term:`domain model` of the
+.. application.
+
+「Zope 風」の :app:`Pyramid` アプリケーションではさらに、リソースオブジェクト
+はしばしばデータを永続的に格納します。そして、その永続的なデータを変化
+させることと関係するメソッドを提供します。この種類のアプリケーションでは、
+リソースはウェブサイトのサイト構造を表わすだけでなく、アプリケーションの
+:term:`domain model` になります。
+
+
+.. Also:
+
+さらに、
+
+
+.. - The ``context`` and ``containment`` predicate arguments to
+..   :meth:`~pyramid.config.Configurator.add_view` (or a
+..   :func:`~pyramid.view.view_config` decorator) reference a resource class
+..   or resource :term:`interface`.
+
+- :meth:`~pyramid.config.Configurator.add_view`
+  (あるいは :meth:`~pyramid.view.view_config` デコレータ) に対する
+  ``context`` および ``containment`` 述語引数は、
+  リソースクラスまたはリソース :term:`interface` を参照します。
+
+
+.. - A :term:`root factory` returns a resource.
+
+- :term:`root factory` はリソースを返します。
+
+
+.. - A resource is exposed to :term:`view` code as the :term:`context` of a
+..   view.
+
+- リソースはビューの :term:`context` として :term:`view` コードに渡されます。
+
+
+.. - Various helpful :app:`Pyramid` API methods expect a resource as an argument
+..   (e.g. :meth:`~pyramid.request.Request.resource_url` and others).
+
+- 種々の有用な :app:`Pyramid` API メソッドは、引数としてリソースを期待します
+  (例えば :meth:`~pyramid.request.Request.resource_url` など)。
+
 
 .. index::
    single: resource tree
@@ -55,32 +109,62 @@ Also:
    single: container resources
    single: leaf resources
 
+
 Defining a Resource Tree
 ------------------------
 
-When :term:`traversal` is used (as opposed to a purely :term:`url dispatch`
-based application), :app:`Pyramid` expects to be able to traverse a tree
-composed of resources (the :term:`resource tree`).  Traversal begins at a
-root resource, and descends into the tree recursively, trying each resource's
-``__getitem__`` method to resolve a path segment to another resource object.
-:app:`Pyramid` imposes the following policy on resource instances in the
-tree:
+.. When :term:`traversal` is used (as opposed to a purely :term:`url dispatch`
+.. based application), :app:`Pyramid` expects to be able to traverse a tree
+.. composed of resources (the :term:`resource tree`).  Traversal begins at a
+.. root resource, and descends into the tree recursively, trying each resource's
+.. ``__getitem__`` method to resolve a path segment to another resource object.
+.. :app:`Pyramid` imposes the following policy on resource instances in the
+.. tree:
 
-- A container resource (a resource which contains other resources) must
-  supply a ``__getitem__`` method which is willing to resolve a unicode name
-  to a sub-resource.  If a sub-resource by a particular name does not exist
-  in a container resource, ``__getitem__`` method of the container resource
-  must raise a :exc:`KeyError`.  If a sub-resource by that name *does* exist,
-  the container's ``__getitem__`` should return the sub-resource.
+:term:`traversal` が使用されている場合 (純粋に :term:`url dispatch` に
+基づいたアプリケーションとは対照的に)、 :app:`Pyramid` はリソースから
+構成されるツリー (:term:`resource tree`)をトラバースできることを期待します。
+トラバースは root リソースから始まり、別のリソースオブジェクトへのパス
+セグメントを解決するために各リソースの ``__getitem__`` メソッドを試しながら、
+木を再帰的に下って行きます。 :app:`Pyramid` はツリー上のリソースインスタンスに
+以下のポリシーを課します:
 
-- Leaf resources, which do not contain other resources, must not implement a
-  ``__getitem__``, or if they do, their ``__getitem__`` method must always
-  raise a :exc:`KeyError`.
 
-See :ref:`traversal_chapter` for more information about how traversal
-works against resource instances.
+.. - A container resource (a resource which contains other resources) must
+..   supply a ``__getitem__`` method which is willing to resolve a unicode name
+..   to a sub-resource.  If a sub-resource by a particular name does not exist
+..   in a container resource, ``__getitem__`` method of the container resource
+..   must raise a :exc:`KeyError`.  If a sub-resource by that name *does* exist,
+..   the container's ``__getitem__`` should return the sub-resource.
 
-Here's a sample resource tree, represented by a variable named ``root``:
+- コンテナリソース (他のリソースを含むリソース) は、サブリソースへの
+  unicode 名を解決するための ``__getitem__`` メソッドを提供しなければ
+  なりません。特定の名前のサブリソースがコンテナ資源に存在しない場合、
+  コンテナリソースの ``__getitem__`` メソッドは :exc:`KeyError` を
+  上げなければなりません。その名前のサブリソースが存在する場合、コンテナの
+  ``__getitem__`` はサブリソースを返す必要があります。
+
+
+.. - Leaf resources, which do not contain other resources, must not implement a
+..   ``__getitem__``, or if they do, their ``__getitem__`` method must always
+..   raise a :exc:`KeyError`.
+
+- リーフリソース (他のリソースを含まないリソース) は ``__getitem__`` を
+  実装してはなりません。あるいは、実装する場合 ``__getitem__`` メソッドは
+  常に :exc:`KeyError` を上げなければなりません。
+
+
+.. See :ref:`traversal_chapter` for more information about how traversal
+.. works against resource instances.
+
+トラバーサルがリソースインスタンスに対してどのように動作するかについての
+詳細は :ref:`traversal_chapter` を参照してください。
+
+
+.. Here's a sample resource tree, represented by a variable named ``root``:
+
+これは ``root`` という名前の変数で表わされるサンプルのリソースツリーです:
+
 
 .. code-block:: python
    :linenos:
@@ -90,51 +174,98 @@ Here's a sample resource tree, represented by a variable named ``root``:
 
     root = Resource({'a':Resource({'b':Resource({'c':Resource()})})})
 
-The resource tree we've created above is represented by a dictionary-like
-root object which has a single child named ``'a'``.  ``'a'`` has a single child
-named ``'b'``, and ``'b'`` has a single child named ``'c'``, which has no
-children. It is therefore possible to access the ``'c'`` leaf resource like so:
+
+.. The resource tree we've created above is represented by a dictionary-like
+.. root object which has a single child named ``'a'``.  ``'a'`` has a single child
+.. named ``'b'``, and ``'b'`` has a single child named ``'c'``, which has no
+.. children. It is therefore possible to access the ``'c'`` leaf resource like so:
+
+上で作成したリソースツリーは、 ``'a'`` という名前の子供を持つ辞書風の
+root オブジェクトによって表わされます。 ``'a'`` は、 ``'b'`` という名前の
+単一の子供を持っています。また、 ``'b'`` は ``'c'`` という名前の単一の子供を
+持っています。 ``'c'`` は子供を持っていません。そのため、次のようにして
+``'c'`` リーフリソースにアクセスすることが可能です:
+
 
 .. code-block:: python
    :linenos:
 
    root['a']['b']['c']
 
-If you returned the above ``root`` object from a :term:`root factory`, the
-path ``/a/b/c`` would find the ``'c'`` object in the resource tree as the
-result of :term:`traversal`.
 
-In this example, each of the resources in the tree is of the same class.
-This is not a requirement.  Resource elements in the tree can be of any type.
-We used a single class to represent all resources in the tree for the sake of
-simplicity, but in a "real" app, the resources in the tree can be arbitrary.
+.. If you returned the above ``root`` object from a :term:`root factory`, the
+.. path ``/a/b/c`` would find the ``'c'`` object in the resource tree as the
+.. result of :term:`traversal`.
 
-Although the example tree above can service a traversal, the resource
-instances in the above example are not aware of :term:`location`, so their
-utility in a "real" application is limited.  To make best use of built-in
-:app:`Pyramid` API facilities, your resources should be "location-aware".
-The next section details how to make resources location-aware.
+もし :term:`root factory` から上記の ``root`` オブジェクトを返せば、
+パス ``/a/b/c`` は :term:`traversal` の結果としてリソースツリー上に
+``'c'`` オブジェクトを見つけるでしょう。
+
+
+.. In this example, each of the resources in the tree is of the same class.
+.. This is not a requirement.  Resource elements in the tree can be of any type.
+.. We used a single class to represent all resources in the tree for the sake of
+.. simplicity, but in a "real" app, the resources in the tree can be arbitrary.
+
+この例において、ツリーの各々のリソースは同じクラスです。これは必須では
+ありません。ツリーのリソース要素は任意の型になることができます。私たちは、
+単純性のためにツリーのすべてのリソースを表わすために単一のクラスを使用
+しました。しかし、「実際の」アプリでは、ツリーのリソースは任意のクラスが
+可能です。
+
+
+.. Although the example tree above can service a traversal, the resource
+.. instances in the above example are not aware of :term:`location`, so their
+.. utility in a "real" application is limited.  To make best use of built-in
+.. :app:`Pyramid` API facilities, your resources should be "location-aware".
+.. The next section details how to make resources location-aware.
+
+上記のサンプルのツリーはトラバーサルを実行することができますが、上記の
+例におけるリソースインスタンスは :term:`location` を意識していません。
+したがって、「実際の」アプリケーションでのそれらの有用性は制限されています。
+内蔵の :app:`Pyramid` API 機能を最良に利用するために、リソースは
+「location-aware (位置を意識)」すべきです。次のセクションは、リソースを
+location-aware にする方法を詳しく説明します。
+
 
 .. index::
    pair: location-aware; resource
+
 
 .. _location_aware:
 
 Location-Aware Resources
 ------------------------
 
-In order for certain :app:`Pyramid` location, security, URL-generation, and
-traversal APIs to work properly against the resources in a resource tree, all
-resources in the tree must be :term:`location` -aware.  This means they must
-have two attributes: ``__parent__`` and ``__name__``.
+.. In order for certain :app:`Pyramid` location, security, URL-generation, and
+.. traversal APIs to work properly against the resources in a resource tree, all
+.. resources in the tree must be :term:`location` -aware.  This means they must
+.. have two attributes: ``__parent__`` and ``__name__``.
 
-The ``__parent__`` attribute of a location-aware resource should be a
-reference to the resource's parent resource instance in the tree.  The
-``__name__`` attribute should be the name with which a resource's parent
-refers to the resource via ``__getitem__``.
+適切な :app:`Pyramid` ロケーション、セキュリティ、 URL 生成および
+トラバーサル API がリソースツリー上のリソースに対して適切に働くために、
+ツリー上のすべてのリソースは :term:`location` -aware である必要があります。
+これは、それらのリソースが ``__parent__`` と ``__name__`` という 2 つの
+属性を持っている必要があるということを意味します。
 
-The ``__parent__`` of the root resource should be ``None`` and its
-``__name__`` should be the empty string.  For instance:
+
+.. The ``__parent__`` attribute of a location-aware resource should be a
+.. reference to the resource's parent resource instance in the tree.  The
+.. ``__name__`` attribute should be the name with which a resource's parent
+.. refers to the resource via ``__getitem__``.
+
+location-aware なリソースの ``__parent__`` 属性は、そのリソースのツリー
+上の親リソースインスタンスへの参照でなければなりません。 ``__name__``
+属性はリソースの親が ``__getitem__`` によってそのリソースを参照する時の
+名前でなければなりません。
+
+
+.. The ``__parent__`` of the root resource should be ``None`` and its
+.. ``__name__`` should be the empty string.  For instance:
+
+root リソースの ``__parent__`` は ``None`` でなければなりません。また、
+その ``__name__`` は空文字列でなければなりません。例えば:
+
 
 .. code-block:: python
    :linenos:
@@ -143,188 +274,370 @@ The ``__parent__`` of the root resource should be ``None`` and its
        __name__ = ''
        __parent__ = None
 
-A resource returned from the root resource's ``__getitem__`` method should
-have a ``__parent__`` attribute that is a reference to the root resource, and
-its ``__name__`` attribute should match the name by which it is reachable via
-the root resource's ``__getitem__``.  A container resource within the root
-resource should have a ``__getitem__`` that returns resources with a
-``__parent__`` attribute that points at the container, and these subobjects
-should have a ``__name__`` attribute that matches the name by which they are
-retrieved from the container via ``__getitem__``.  This pattern continues
-recursively "up" the tree from the root.
 
-The ``__parent__`` attributes of each resource form a linked list that points
-"downwards" toward the root. This is analogous to the `..` entry in
-filesystem directories. If you follow the ``__parent__`` values from any
-resource in the resource tree, you will eventually come to the root resource,
-just like if you keep executing the ``cd ..`` filesystem command, eventually
-you will reach the filesystem root directory.
+.. A resource returned from the root resource's ``__getitem__`` method should
+.. have a ``__parent__`` attribute that is a reference to the root resource, and
+.. its ``__name__`` attribute should match the name by which it is reachable via
+.. the root resource's ``__getitem__``.  A container resource within the root
+.. resource should have a ``__getitem__`` that returns resources with a
+.. ``__parent__`` attribute that points at the container, and these subobjects
+.. should have a ``__name__`` attribute that matches the name by which they are
+.. retrieved from the container via ``__getitem__``.  This pattern continues
+.. recursively "up" the tree from the root.
+
+root リソースの ``__getitem__`` メソッドから返されたリソースは、 root
+リソースへの参照である ``__parent__`` 属性を持っていなければなりません。
+また、その ``__name__`` 属性は、 root リソースの ``__getitem__`` によって
+到達可能な名前と一致しなければなりません。 root リソース内のコンテナリ
+ソースは、コンテナを指す ``__parent__`` 属性を備えたリソースを返す
+``__getitem__`` を持たなければなりません。また、これらのサブオブジェクトは、
+``__getitem__`` によってコンテナから検索される名前と一致する ``__name__``
+属性を持たなければなりません。このパターンは、 root から木を「上に」
+再帰的に継続します。
+
+
+.. The ``__parent__`` attributes of each resource form a linked list that points
+.. "downwards" toward the root. This is analogous to the `..` entry in
+.. filesystem directories. If you follow the ``__parent__`` values from any
+.. resource in the resource tree, you will eventually come to the root resource,
+.. just like if you keep executing the ``cd ..`` filesystem command, eventually
+.. you will reach the filesystem root directory.
+
+各リソースの ``__parent__`` 属性は、 root に向かって「下方へ」指すリンク
+リストを形成します。これはファイルシステムのディレクトリ中の `..` エントリ
+と類似しています。リソースツリーの任意のリソースから ``__parent__`` 値
+を追って行けば、やがて root リソースに達するでしょう。ちょうど、ファイル
+システムコマンド ``cd ..`` を実行し続けるといずれファイルシステムのルート
+ディレクトリーに達するように。
+
 
 .. warning::
 
-   If your root resource has a ``__name__`` argument that is not
-   ``None`` or the empty string, URLs returned by the
-   :func:`~pyramid.request.Request.resource_url` function and paths generated
-   by the :func:`~pyramid.traversal.resource_path` and
-   :func:`~pyramid.traversal.resource_path_tuple` APIs will be generated
-   improperly.  The value of ``__name__`` will be prepended to every path and
-   URL generated (as opposed to a single leading slash or empty tuple
-   element).
+   .. If your root resource has a ``__name__`` argument that is not
+   .. ``None`` or the empty string, URLs returned by the
+   .. :func:`~pyramid.request.Request.resource_url` function and paths generated
+   .. by the :func:`~pyramid.traversal.resource_path` and
+   .. :func:`~pyramid.traversal.resource_path_tuple` APIs will be generated
+   .. improperly.  The value of ``__name__`` will be prepended to every path and
+   .. URL generated (as opposed to a single leading slash or empty tuple
+   .. element).
+
+   root リソースが ``None`` または空文字列でない ``__name__`` 引数を
+   持っていると、 :func:`~pyramid.request.Request.resource_url` 関数に
+   よって返された URLおよび :func:`~pyramid.traversal.resource_path` と
+   :func:`~pyramid.traversal.resource_path_tuple` API によって生成された
+   パスは、不適当に生成されるでしょう。 ``__name__`` の値は、生成された
+   すべてのパスおよび URL に前置されます (単一の先頭のスラッシュあるいは
+   空のタプル要素とは対照的に)。
+
 
 .. sidebar::  Using :mod:`pyramid_traversalwrapper`
 
-  If you'd rather not manage the ``__name__`` and ``__parent__`` attributes
-  of your resources "by hand", an add-on package named
-  :mod:`pyramid_traversalwrapper` can help.
+  .. If you'd rather not manage the ``__name__`` and ``__parent__`` attributes
+  .. of your resources "by hand", an add-on package named
+  .. :mod:`pyramid_traversalwrapper` can help.
 
-  In order to use this helper feature, you must first install the
-  :mod:`pyramid_traversalwrapper` package (available via PyPI), then register
-  its ``ModelGraphTraverser`` as the traversal policy, rather than the
-  default :app:`Pyramid` traverser. The package contains instructions for
-  doing so.
+  リソースの ``__name__`` と ``__parent__`` 属性を「手動で」管理したく
+  なければ、 :mod:`pyramid_traversalwrapper` という名前のアドオン
+  パッケージは助けになりえます。
 
-  Once :app:`Pyramid` is configured with this feature, you will no longer
-  need to manage the ``__parent__`` and ``__name__`` attributes on resource
-  objects "by hand".  Instead, as necessary, during traversal :app:`Pyramid`
-  will wrap each resource (even the root resource) in a ``LocationProxy``
-  which will dynamically assign a ``__name__`` and a ``__parent__`` to the
-  traversed resource (based on the last traversed resource and the name
-  supplied to ``__getitem__``).  The root resource will have a ``__name__``
-  attribute of ``None`` and a ``__parent__`` attribute of ``None``.
 
-Applications which use tree-walking :app:`Pyramid` APIs require
-location-aware resources.  These APIs include (but are not limited to)
+  .. In order to use this helper feature, you must first install the
+  .. :mod:`pyramid_traversalwrapper` package (available via PyPI), then register
+  .. its ``ModelGraphTraverser`` as the traversal policy, rather than the
+  .. default :app:`Pyramid` traverser. The package contains instructions for
+  .. doing so.
+
+  このヘルパー機能を使用するためには、最初に
+  :mod:`pyramid_traversalwrapper` パッケージをインストールして (PyPI
+  から入手可能)、次にデフォルトの :app:`Pyramid` トラバーサーではなく、
+  トラバーサルポリシーとしてその ``ModelGraphTraverser`` を登録する必要
+  があります。それをするための指示がパッケージに含まれています。
+
+
+  .. Once :app:`Pyramid` is configured with this feature, you will no longer
+  .. need to manage the ``__parent__`` and ``__name__`` attributes on resource
+  .. objects "by hand".  Instead, as necessary, during traversal :app:`Pyramid`
+  .. will wrap each resource (even the root resource) in a ``LocationProxy``
+  .. which will dynamically assign a ``__name__`` and a ``__parent__`` to the
+  .. traversed resource (based on the last traversed resource and the name
+  .. supplied to ``__getitem__``).  The root resource will have a ``__name__``
+  .. attribute of ``None`` and a ``__parent__`` attribute of ``None``.
+
+  一旦 :app:`Pyramid` にこの機能が設定されれば、もはや「手動で」リソース
+  オブジェクト上の ``__parent__`` と ``__name__`` 属性を管理する必要は
+  ありません。代わりに、必要に応じて、トラバーサル中に :app:`Pyramid` は
+  トラバースされたリソースに (最後にトラバーサルされたリソースおよび
+  ``__getitem__`` に提供された  名前に基づいて)ダイナミックに
+  ``__name__`` と ``__parent__`` を設定する ``LocationProxy`` で各リソース
+  (root リソースさえ) をラップします。 root リソースは、 ``None`` の
+  ``__name__`` 属性および ``None`` の ``__parent__`` 属性を持ちます。
+
+
+.. Applications which use tree-walking :app:`Pyramid` APIs require
+.. location-aware resources.  These APIs include (but are not limited to)
+.. :meth:`~pyramid.request.Request.resource_url`,
+.. :func:`~pyramid.traversal.find_resource`,
+.. :func:`~pyramid.traversal.find_root`,
+.. :func:`~pyramid.traversal.find_interface`,
+.. :func:`~pyramid.traversal.resource_path`,
+.. :func:`~pyramid.traversal.resource_path_tuple`, or
+.. :func:`~pyramid.traversal.traverse`, :func:`~pyramid.traversal.virtual_root`,
+.. and (usually) :func:`~pyramid.security.has_permission` and
+.. :func:`~pyramid.security.principals_allowed_by_permission`.
+
+ツリー歩行用の :app:`Pyramid` APIを使用するアプリケーションは
+location-aware なリソースを必要とします。これらの API は、以下のもの
+を含んでいます (しかしこれだけに限りません):
 :meth:`~pyramid.request.Request.resource_url`,
 :func:`~pyramid.traversal.find_resource`,
 :func:`~pyramid.traversal.find_root`,
 :func:`~pyramid.traversal.find_interface`,
 :func:`~pyramid.traversal.resource_path`,
-:func:`~pyramid.traversal.resource_path_tuple`, or
+:func:`~pyramid.traversal.resource_path_tuple`, あるいは
 :func:`~pyramid.traversal.traverse`, :func:`~pyramid.traversal.virtual_root`,
-and (usually) :func:`~pyramid.security.has_permission` and
+そして (通常) :func:`~pyramid.security.has_permission` と
 :func:`~pyramid.security.principals_allowed_by_permission`.
 
-In general, since so much :app:`Pyramid` infrastructure depends on
-location-aware resources, it's a good idea to make each resource in your tree
-location-aware.
+
+.. In general, since so much :app:`Pyramid` infrastructure depends on
+.. location-aware resources, it's a good idea to make each resource in your tree
+.. location-aware.
+
+一般に、非常に多くの :app:`Pyramid` 基盤が location-aware なリソースに
+依存しているので、ツリーに含まれる各リソースを location-aware にすることは
+良い考えです。
+
 
 .. index::
    single: resource_url
    pair: generating; resource url
+
 
 .. _generating_the_url_of_a_resource:
 
 Generating The URL Of A Resource
 --------------------------------
 
-If your resources are :term:`location` aware, you can use the
-:meth:`pyramid.request.Request.resource_url` API to generate a URL for the
-resource.  This URL will use the resource's position in the parent tree to
-create a resource path, and it will prefix the path with the current
-application URL to form a fully-qualified URL with the scheme, host, port,
-and path.  You can also pass extra arguments to
-:meth:`~pyramid.request.Request.resource_url` to influence the generated URL.
+.. If your resources are :term:`location` aware, you can use the
+.. :meth:`pyramid.request.Request.resource_url` API to generate a URL for the
+.. resource.  This URL will use the resource's position in the parent tree to
+.. create a resource path, and it will prefix the path with the current
+.. application URL to form a fully-qualified URL with the scheme, host, port,
+.. and path.  You can also pass extra arguments to
+.. :meth:`~pyramid.request.Request.resource_url` to influence the generated URL.
 
-The simplest call to :meth:`~pyramid.request.Request.resource_url` looks like
-this:
+リソースが :term:`location` aware である場合、リソース用の URL を生成す
+るために :meth:`pyramid.request.Request.resource_url` API を使用することが
+できます。この URL は、リソースパスを生成するためにリソースの親ツリー
+における位置を使用します。また、それは、スキーム、ホスト、ポートおよび
+パスを持つ完全修飾 URLを形成するためにパスの前に現在のアプリケーション
+URL を付けます。さらに、生成された URL に影響を及ぼすために追加の引数を
+:meth:`~pyramid.request.Request.resource_url` へ渡すことができます。
+
+
+.. The simplest call to :meth:`~pyramid.request.Request.resource_url` looks like
+.. this:
+
+:meth:`~pyramid.request.Request.resource_url` への最も単純な呼び出しは
+このようになります:
+
 
 .. code-block:: python
    :linenos:
 
    url = request.resource_url(resource)
 
-The ``request`` in the above example is an instance of a :app:`Pyramid`
-:term:`request` object.
 
-If the resource referred to as ``resource`` in the above example was the root
-resource, and the host that was used to contact the server was
-``example.com``, the URL generated would be ``http://example.com/``.
-However, if the resource was a child of the root resource named ``a``, the
-generated URL would be ``http://example.com/a/``.
+.. The ``request`` in the above example is an instance of a :app:`Pyramid`
+.. :term:`request` object.
 
-A slash is appended to all resource URLs when
-:meth:`~pyramid.request.Request.resource_url` is used to generate them in
-this simple manner, because resources are "places" in the hierarchy, and URLs
-are meant to be clicked on to be visited.  Relative URLs that you include on
-HTML pages rendered as the result of the default view of a resource are more
-apt to be relative to these resources than relative to their parent.
+上記の例で ``request`` は :app:`Pyramid` :term:`request` オブジェクトの
+インスタンスです。
 
-You can also pass extra elements to
-:meth:`~pyramid.request.Request.resource_url`:
+
+.. If the resource referred to as ``resource`` in the above example was the root
+.. resource, and the host that was used to contact the server was
+.. ``example.com``, the URL generated would be ``http://example.com/``.
+.. However, if the resource was a child of the root resource named ``a``, the
+.. generated URL would be ``http://example.com/a/``.
+
+上記の例で ``resource`` として参照されるリソースが root リソースで、
+サーバーにコンタクトするために使用されたホストが ``example.com`` だった場合、
+生成される URL は ``http://example.com/`` になります。しかし、もしリソースが
+``a`` という名前の root リソースの子供なら、生成される URL は
+``http://example.com/a/`` になります。
+
+
+.. A slash is appended to all resource URLs when
+.. :meth:`~pyramid.request.Request.resource_url` is used to generate them in
+.. this simple manner, because resources are "places" in the hierarchy, and URLs
+.. are meant to be clicked on to be visited.  Relative URLs that you include on
+.. HTML pages rendered as the result of the default view of a resource are more
+.. apt to be relative to these resources than relative to their parent.
+
+:meth:`pyramid.request.Request.resource_url` を使用してこの単純な方法で
+リソース URL を生成する場合、すべてのリソース URL にはスラッシュが追加
+されます。なぜなら、リソースは階層における「場所」であり、 URL はそこを
+訪れるためにクリックされるべきものだからです。リソースのデフォルトビュー
+の結果としてレンダリングされた HTML ページに含まれる相対 URL は、
+その親に対してではなく、そのリソースに対して相対的であることが適切です。
+
+
+.. You can also pass extra elements to
+.. :meth:`~pyramid.request.Request.resource_url`:
+
+さらに、追加の要素を :meth:`~pyramid.request.Request.resource_url` へ
+渡すことができます:
+
 
 .. code-block:: python
    :linenos:
 
    url = request.resource_url(resource, 'foo', 'bar')
 
-If the resource referred to as ``resource`` in the above example was the root
-resource, and the host that was used to contact the server was
-``example.com``, the URL generated would be ``http://example.com/foo/bar``.
-Any number of extra elements can be passed to
-:meth:`~pyramid.request.Request.resource_url` as extra positional arguments.
-When extra elements are passed, they are appended to the resource's URL.  A
-slash is not appended to the final segment when elements are passed.
 
-You can also pass a query string:
+.. If the resource referred to as ``resource`` in the above example was the root
+.. resource, and the host that was used to contact the server was
+.. ``example.com``, the URL generated would be ``http://example.com/foo/bar``.
+.. Any number of extra elements can be passed to
+.. :meth:`~pyramid.request.Request.resource_url` as extra positional arguments.
+.. When extra elements are passed, they are appended to the resource's URL.  A
+.. slash is not appended to the final segment when elements are passed.
+
+上記の例で ``resource`` として参照されるリソースが root リソースで、
+サーバーにコンタクトするために使用されたホストが ``example.com`` だった場合、
+生成される URL は ``http://example.com/foo/bar`` になります。任意の数の追加の
+要素を追加の位置引数として:meth:`~pyramid.request.Request.resource_url`
+に渡すことができます。追加の要素が渡される場合、それらはリソースの URL
+に追加されます。要素が渡された場合、最終セグメントにスラッシュは追加さ
+れません。
+
+
+.. You can also pass a query string:
+
+さらに、クエリ文字列を渡すこともできます:
+
 
 .. code-block:: python
    :linenos:
 
    url = request.resource_url(resource, query={'a':'1'})
 
-If the resource referred to as ``resource`` in the above example was the root
-resource, and the host that was used to contact the server was
-``example.com``, the URL generated would be ``http://example.com/?a=1``.
 
-When a :term:`virtual root` is active, the URL generated by
-:meth:`~pyramid.request.Request.resource_url` for a resource may be "shorter"
-than its physical tree path.  See :ref:`virtual_root_support` for more
-information about virtually rooting a resource.
+.. If the resource referred to as ``resource`` in the above example was the root
+.. resource, and the host that was used to contact the server was
+.. ``example.com``, the URL generated would be ``http://example.com/?a=1``.
 
-For more information about generating resource URLs, see the documentation
-for :meth:`pyramid.request.Request.resource_url`.
+上記の例で ``resource`` として参照されるリソースが root リソースで、
+サーバーにコンタクトするために使用されたホストが ``example.com`` だった場合、
+生成される URL は ``http://example.com/?a=1`` になります。
+
+
+.. When a :term:`virtual root` is active, the URL generated by
+.. :meth:`~pyramid.request.Request.resource_url` for a resource may be "shorter"
+.. than its physical tree path.  See :ref:`virtual_root_support` for more
+.. information about virtually rooting a resource.
+
+:term:`virtual root` が有効な場合、
+:meth:`~pyramid.request.Request.resource_url` によってリソースのために
+生成された URL は、その物理的なツリーパスより「短い」ことがあります。
+リソースの仮想的な root 変更についての詳細は
+:ref:`virtual_root_support` を参照してください。
+
+
+.. For more information about generating resource URLs, see the documentation
+.. for :meth:`pyramid.request.Request.resource_url`.
+
+リソース URL の生成に関する詳細は
+:meth:`pyramid.request.Request.resource_url` のドキュメンテーションを
+参照してください。
+
 
 .. index::
    pair: resource URL generation; overriding
+
 
 .. _overriding_resource_url_generation:
 
 Overriding Resource URL Generation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If a resource object implements a ``__resource_url__`` method, this method
-will be called when :meth:`~pyramid.request.Request.resource_url` is called
-to generate a URL for the resource, overriding the default URL returned for
-the resource by :meth:`~pyramid.request.Request.resource_url`.
+.. If a resource object implements a ``__resource_url__`` method, this method
+.. will be called when :meth:`~pyramid.request.Request.resource_url` is called
+.. to generate a URL for the resource, overriding the default URL returned for
+.. the resource by :meth:`~pyramid.request.Request.resource_url`.
 
-The ``__resource_url__`` hook is passed two arguments: ``request`` and
-``info``.  ``request`` is the :term:`request` object passed to
-:meth:`~pyramid.request.Request.resource_url`.  ``info`` is a dictionary with
-two keys:
+リソースオブジェクトが ``__resource_url__`` メソッドを実装していれば、
+このリソース用に URL を生成するために
+:meth:`~pyramid.request.Request.resource_url` が呼ばれる時、
+:meth:`~pyramid.request.Request.resource_url` によって返されるデフォルト
+URL を上書きしてこのメソッドが呼ばれます。
+
+
+.. The ``__resource_url__`` hook is passed two arguments: ``request`` and
+.. ``info``.  ``request`` is the :term:`request` object passed to
+.. :meth:`~pyramid.request.Request.resource_url`.  ``info`` is a dictionary with
+.. two keys:
+
+``__resource_url__`` フックには ``request`` と ``info`` という 2 つの引数
+が渡されます。 ``request`` は :meth:`~pyramid.request.Request.resource_url`
+に渡された ``request`` オブジェクトです。 ``info`` は 2 つのキーを持つ辞書です
+(訳注: 「3 つ」の間違い？):
+
 
 ``physical_path``
-   A string representing the "physical path" computed for the resource, as
-   defined by ``pyramid.traversal.resource_path(resource)``.  It will begin
-   and end with a slash.
+
+   .. A string representing the "physical path" computed for the resource, as
+   .. defined by ``pyramid.traversal.resource_path(resource)``.  It will begin
+   .. and end with a slash.
+
+   そのリソースのために計算された「物理的パス」を表わす文字列。
+   ``pyramid.traversal.resource_path(resource)`` によって定義されます。
+   スラッシュで始まりスラッシュで終わります。
+
 
 ``virtual_path``
-   A string representing the "virtual path" computed for the resource, as
-   defined by :ref:`virtual_root_support`.  This will be identical to the
-   physical path if virtual rooting is not enabled.  It will begin and end
-   with a slash.
+
+   .. A string representing the "virtual path" computed for the resource, as
+   .. defined by :ref:`virtual_root_support`.  This will be identical to the
+   .. physical path if virtual rooting is not enabled.  It will begin and end
+   .. with a slash.
+
+   そのリソースのために計算された「仮想的パス」を表わす文字列。
+   :ref:`virtual_root_support` によって定義されます。
+   仮想 root 変更が有効でなければ、これは物理的パスと同一でしょう。
+   スラッシュで始まりスラッシュで終わります。
+
 
 ``app_url``
-  A string representing the application URL generated during
-  ``request.resource_url``.  It will not end with a slash.  It represents a
-  potentially customized URL prefix, containing potentially custom scheme,
-  host and port information passed by the user to ``request.resource_url``.
-  It should be preferred over use of ``request.application_url``.
 
-The ``__resource_url__`` method of a resource should return a string
-representing a URL.  If it cannot override the default, it should return
-``None``.  If it returns ``None``, the default URL will be returned.
+  .. A string representing the application URL generated during
+  .. ``request.resource_url``.  It will not end with a slash.  It represents a
+  .. potentially customized URL prefix, containing potentially custom scheme,
+  .. host and port information passed by the user to ``request.resource_url``.
+  .. It should be preferred over use of ``request.application_url``.
 
-Here's an example ``__resource_url__`` method.
+  ``request.resource_url`` の中で生成されたアプリケーション URL を
+  表わす文字列。スラッシュで終わりません。これは、潜在的にカスタマイズ
+  された URL 接頭辞を表し、ユーザによって ``request.resource_url`` に
+  渡されたカスタムなスキーム、ホストおよびポート情報を潜在的に含みます。
+  ``request.application_url`` よりもこちらを使用することが推奨されます。
+
+
+.. The ``__resource_url__`` method of a resource should return a string
+.. representing a URL.  If it cannot override the default, it should return
+.. ``None``.  If it returns ``None``, the default URL will be returned.
+
+リソースの ``__resource_url__`` メソッドは、 URL を表わす文字列を返す
+必要があります。デフォルトを上書きできない場合 ``None`` を返すべきです。
+このメソッドが ``None`` を返せば、デフォルト URL が返されるでしょう。
+
+
+.. Here's an example ``__resource_url__`` method.
+
+これはサンプルの ``__resource_url__`` メソッドです。
+
 
 .. code-block:: python
    :linenos:
@@ -333,26 +646,46 @@ Here's an example ``__resource_url__`` method.
        def __resource_url__(self, request, info):
            return info['app_url'] + info['virtual_path']
 
-The above example actually just generates and returns the default URL, which
-would have been what was generated by the default ``resource_url`` machinery,
-but your code can perform arbitrary logic as necessary.  For example, your
-code may wish to override the hostname or port number of the generated URL.
 
-Note that the URL generated by ``__resource_url__`` should be fully
-qualified, should end in a slash, and should not contain any query string or
-anchor elements (only path elements) to work with
-:meth:`~pyramid.request.Request.resource_url`.
+.. The above example actually just generates and returns the default URL, which
+.. would have been what was generated by the default ``resource_url`` machinery,
+.. but your code can perform arbitrary logic as necessary.  For example, your
+.. code may wish to override the hostname or port number of the generated URL.
+
+上記の例は、実際には単にデフォルトの URL を生成して返します。それは
+デフォルトの ``resource_url`` 機構によって生成されたはずのものです。
+しかし、このコードは必要に応じて任意のロジックを実行できます。例えば、
+あなたのコードでは、生成された URL のホスト名またはポート番号を無視
+したいと思うかもしれません。
+
+
+.. Note that the URL generated by ``__resource_url__`` should be fully
+.. qualified, should end in a slash, and should not contain any query string or
+.. anchor elements (only path elements) to work with
+.. :meth:`~pyramid.request.Request.resource_url`.
+
+:meth:`~pyramid.request.Request.resource_url` とともに働くために、
+``__resource_url__`` によって生成される URL は、完全修飾形式で、
+スラッシュで終わり、クエリ文字列あるいはアンカー要素を含むべきでない
+(パス要素だけ)ということに注意してください。
+
 
 .. index::
    single: resource path generation
 
+
 Generating the Path To a Resource
 ---------------------------------
 
-:func:`pyramid.traversal.resource_path` returns a string object representing
-the absolute physical path of the resource object based on its position in
-the resource tree.  Each segment of the path is separated with a slash
-character.
+.. :func:`pyramid.traversal.resource_path` returns a string object representing
+.. the absolute physical path of the resource object based on its position in
+.. the resource tree.  Each segment of the path is separated with a slash
+.. character.
+
+:func:`pyramid.traversal.resource_path` は、リソースツリー上の位置
+に基づいてリソースオブジェクトの絶対的な物理的パスを表わす文字列オブジェクト
+を返します。パスのセグメントはそれぞれスラッシュ文字で分離されています。
+
 
 .. code-block:: python
    :linenos:
@@ -360,11 +693,20 @@ character.
    from pyramid.traversal import resource_path
    url = resource_path(resource)
 
-If ``resource`` in the example above was accessible in the tree as
-``root['a']['b']``, the above example would generate the string ``/a/b``.
 
-Any positional arguments passed in to :func:`~pyramid.traversal.resource_path`
-will be appended as path segments to the end of the resource path.
+.. If ``resource`` in the example above was accessible in the tree as
+.. ``root['a']['b']``, the above example would generate the string ``/a/b``.
+
+もし上記の例で ``resource`` がツリー上で ``root['a']['b']`` として
+アクセス可能ならば、上記の例は文字列 ``/a/b`` を生成するでしょう。
+
+
+.. Any positional arguments passed in to :func:`~pyramid.traversal.resource_path`
+.. will be appended as path segments to the end of the resource path.
+
+:func:`~pyramid.traversal.resource_path` に渡されたすべての位置引数も
+リソースパスの末端にパスセグメントとして追加されます。
+
 
 .. code-block:: python
    :linenos:
@@ -372,17 +714,30 @@ will be appended as path segments to the end of the resource path.
    from pyramid.traversal import resource_path
    url = resource_path(resource, 'foo', 'bar')
 
-If ``resource`` in the example above was accessible in the tree as
-``root['a']['b']``, the above example would generate the string
-``/a/b/foo/bar``.
 
-The resource passed in must be :term:`location`-aware.
+.. If ``resource`` in the example above was accessible in the tree as
+.. ``root['a']['b']``, the above example would generate the string
+.. ``/a/b/foo/bar``.
 
-The presence or absence of a :term:`virtual root` has no impact on the
-behavior of :func:`~pyramid.traversal.resource_path`.
+もし上記の例で ``resource`` がツリー上で ``root['a']['b']`` として
+アクセス可能なら、上記の例は文字列 ``/a/b/foo/bar`` を生成するでしょう。
+
+
+.. The resource passed in must be :term:`location`-aware.
+
+渡されたリソースは `location` aware でなければなりません。
+
+
+.. The presence or absence of a :term:`virtual root` has no impact on the
+.. behavior of :func:`~pyramid.traversal.resource_path`.
+
+:term:`virtual root` が存在するかどうかは
+:func:`~*pyramid.traversal.resource_path` の振る舞いに影響を及ぼしません。
+
 
 .. index::
    pair: resource; finding by path
+
 
 Finding a Resource by Path
 --------------------------
