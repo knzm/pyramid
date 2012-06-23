@@ -1,6 +1,8 @@
+.. Resources
+
 .. _resources_chapter:
 
-Resources
+リソース
 =========
 
 .. A :term:`resource` is an object that represents a "place" in a tree
@@ -12,11 +14,11 @@ Resources
 .. represent your website's structure.
 
 :term:`resource` は、アプリケーションに関係付けられたツリー上の「場所」
-を表わすオブジェクトです。すべての :app:`Pyramid` アプリケーションは
-少なくとも1つのリソースオブジェクトを持ちます: :term:`root` リソースです。
+を表わすオブジェクトです。すべての :app:`Pyramid` アプリケーションには
+少なくとも 1 つのリソースオブジェクトがあります: :term:`root` リソースです。
 あなたが root リソースを手動で定義しなかったとしても、デフォルトの
 root リソースが自動的に作成されます。 root リソースは :term:`resource
-tree` の根です。リソースツリーは1セットの入れ子の辞書風オブジェクトで、
+tree` の根です。リソースツリーは入れ子の辞書風オブジェクトの集まりで、
 ウェブサイトの構造を表わすために使用することができます。
 
 
@@ -31,8 +33,8 @@ tree` の根です。リソースツリーは1セットの入れ子の辞書風�
 URL をコードにマッピングするために :term:`traversal` を使用するアプリ
 ケーションでは、リソースツリー構造は各 URL を :term:`view callable` に
 マッピングするために頻繁に使用されます。 :term:`traversal` が使用されて
-いる時、 :app:`Pyramid` は:term:`context` リソースを見つけるために、入れ子
-の辞書構造をトラバースすることによってリソースツリーを渡り歩きます。
+いる時、 :app:`Pyramid` は :term:`context` リソースを見つけるために、
+入れ子の辞書構造をトラバースすることによってリソースツリーを渡り歩きます。
 コンテキストリソースが見つかれば、 :term:`view callable` を見つける
 ためにコンテキストリソースとリクエスト中のデータが使用されます。
 
@@ -46,13 +48,12 @@ URL をコードにマッピングするために :term:`traversal` を使用す
 .. that use traversal.
 
 :term:`URL dispatch` を使用するアプリケーションでは、リソースツリーは
-間接的にのみ使用され、多くの場合開発者からは「見えないもの」です。 URL
+間接的にのみ使用され、開発者からは多くの場合「見えないもの」です。 URL
 ディスパッチアプリケーションでは、リソース「ツリー」は、しばしば root
 リソース自身のみから構成されます。この root リソースには、セキュリティ
 宣言が取り付けられることがありますが、常にそうすることは要求されません。
-一般に、リソースツリーは、トラバースを使用するアプリケーションに比べて
-URL ディスパッチを使用するアプリケーションにおいてはそれほど重要では
-ありません。
+一般に、トラバーサルを使用するアプリケーションに比べて URL ディスパッチを
+使用するアプリケーションにおいてリソースツリーはそれほど重要ではありません。
 
 
 .. In "Zope-like" :app:`Pyramid` applications, resource objects also often store
@@ -63,7 +64,7 @@ URL ディスパッチを使用するアプリケーションにおいてはそ�
 
 「Zope 風」の :app:`Pyramid` アプリケーションではさらに、リソースオブジェクト
 はしばしばデータを永続的に格納します。そして、その永続的なデータを変化
-させることと関係するメソッドを提供します。この種類のアプリケーションでは、
+させることに関係するメソッドを提供します。この種類のアプリケーションでは、
 リソースはウェブサイトのサイト構造を表わすだけでなく、アプリケーションの
 :term:`domain model` になります。
 
@@ -110,7 +111,9 @@ URL ディスパッチを使用するアプリケーションにおいてはそ�
    single: leaf resources
 
 
-Defining a Resource Tree
+.. Defining a Resource Tree
+
+リソースツリーを定義する
 ------------------------
 
 .. When :term:`traversal` is used (as opposed to a purely :term:`url dispatch`
@@ -126,8 +129,8 @@ Defining a Resource Tree
 構成されるツリー (:term:`resource tree`)をトラバースできることを期待します。
 トラバースは root リソースから始まり、別のリソースオブジェクトへのパス
 セグメントを解決するために各リソースの ``__getitem__`` メソッドを試しながら、
-木を再帰的に下って行きます。 :app:`Pyramid` はツリー上のリソースインスタンスに
-以下のポリシーを課します:
+ツリーを再帰的に下って行きます。 :app:`Pyramid` はツリー上のリソース
+インスタンスに以下のポリシーを課します:
 
 
 .. - A container resource (a resource which contains other resources) must
@@ -139,9 +142,9 @@ Defining a Resource Tree
 
 - コンテナリソース (他のリソースを含むリソース) は、サブリソースへの
   unicode 名を解決するための ``__getitem__`` メソッドを提供しなければ
-  なりません。特定の名前のサブリソースがコンテナ資源に存在しない場合、
+  なりません。特定の名前のサブリソースがコンテナリソースに存在しない場合、
   コンテナリソースの ``__getitem__`` メソッドは :exc:`KeyError` を
-  上げなければなりません。その名前のサブリソースが存在する場合、コンテナの
+  投げげなければなりません。その名前のサブリソースが存在する場合、コンテナの
   ``__getitem__`` はサブリソースを返す必要があります。
 
 
@@ -221,8 +224,8 @@ root オブジェクトによって表わされます。 ``'a'`` は、 ``'b'`` 
 .. The next section details how to make resources location-aware.
 
 上記のサンプルのツリーはトラバーサルを実行することができますが、上記の
-例におけるリソースインスタンスは :term:`location` を意識していません。
-したがって、「実際の」アプリケーションでのそれらの有用性は制限されています。
+例におけるリソースインスタンスは :term:`location` aware ではありません。
+したがって、「実際の」アプリケーションでの有用性は制限されています。
 内蔵の :app:`Pyramid` API 機能を最良に利用するために、リソースは
 「location-aware (位置を意識)」すべきです。次のセクションは、リソースを
 location-aware にする方法を詳しく説明します。
@@ -232,10 +235,12 @@ location-aware にする方法を詳しく説明します。
    pair: location-aware; resource
 
 
+.. Location-Aware Resources
+
 .. _location_aware:
 
-Location-Aware Resources
-------------------------
+location aware なリソース
+-------------------------
 
 .. In order for certain :app:`Pyramid` location, security, URL-generation, and
 .. traversal APIs to work properly against the resources in a resource tree, all
@@ -331,7 +336,10 @@ root リソースの ``__getitem__`` メソッドから返されたリソース�
    空のタプル要素とは対照的に)。
 
 
-.. sidebar::  Using :mod:`pyramid_traversalwrapper`
+  .. Using :mod:`pyramid_traversalwrapper`
+
+.. sidebar:: \ :mod:`pyramid_traversalwrapper` を使う
+
 
   .. If you'd rather not manage the ``__name__`` and ``__parent__`` attributes
   .. of your resources "by hand", an add-on package named
@@ -386,7 +394,7 @@ root リソースの ``__getitem__`` メソッドから返されたリソース�
 .. and (usually) :func:`~pyramid.security.has_permission` and
 .. :func:`~pyramid.security.principals_allowed_by_permission`.
 
-ツリー歩行用の :app:`Pyramid` APIを使用するアプリケーションは
+ツリーをたどるための :app:`Pyramid` API を使用するアプリケーションは
 location-aware なリソースを必要とします。これらの API は、以下のもの
 を含んでいます (しかしこれだけに限りません):
 :meth:`~pyramid.request.Request.resource_url`,
@@ -396,7 +404,7 @@ location-aware なリソースを必要とします。これらの API は、以
 :func:`~pyramid.traversal.resource_path`,
 :func:`~pyramid.traversal.resource_path_tuple`, あるいは
 :func:`~pyramid.traversal.traverse`, :func:`~pyramid.traversal.virtual_root`,
-そして (通常) :func:`~pyramid.security.has_permission` と
+そして (通常は) :func:`~pyramid.security.has_permission` と
 :func:`~pyramid.security.principals_allowed_by_permission`.
 
 
@@ -414,9 +422,11 @@ location-aware なリソースを必要とします。これらの API は、以
    pair: generating; resource url
 
 
+.. Generating The URL Of A Resource
+
 .. _generating_the_url_of_a_resource:
 
-Generating The URL Of A Resource
+リソースの URL を生成する
 --------------------------------
 
 .. If your resources are :term:`location` aware, you can use the
@@ -463,7 +473,7 @@ URL を付けます。さらに、生成された URL に影響を及ぼすた�
 .. generated URL would be ``http://example.com/a/``.
 
 上記の例で ``resource`` として参照されるリソースが root リソースで、
-サーバーにコンタクトするために使用されたホストが ``example.com`` だった場合、
+サーバにコンタクトするために使用されたホストが ``example.com`` だった場合、
 生成される URL は ``http://example.com/`` になります。しかし、もしリソースが
 ``a`` という名前の root リソースの子供なら、生成される URL は
 ``http://example.com/a/`` になります。
@@ -506,10 +516,10 @@ URL を付けます。さらに、生成された URL に影響を及ぼすた�
 .. slash is not appended to the final segment when elements are passed.
 
 上記の例で ``resource`` として参照されるリソースが root リソースで、
-サーバーにコンタクトするために使用されたホストが ``example.com`` だった場合、
-生成される URL は ``http://example.com/foo/bar`` になります。任意の数の追加の
-要素を追加の位置引数として:meth:`~pyramid.request.Request.resource_url`
-に渡すことができます。追加の要素が渡される場合、それらはリソースの URL
+サーバにコンタクトするために使用されたホストが ``example.com`` だった場合、
+生成される URL は ``http://example.com/foo/bar`` になります。任意の数の追加
+の要素を追加の位置引数として :meth:`~pyramid.request.Request.resource_url`
+に渡すことができます。追加の要素が渡された場合、それらはリソースの URL
 に追加されます。要素が渡された場合、最終セグメントにスラッシュは追加さ
 れません。
 
@@ -530,7 +540,7 @@ URL を付けます。さらに、生成された URL に影響を及ぼすた�
 .. ``example.com``, the URL generated would be ``http://example.com/?a=1``.
 
 上記の例で ``resource`` として参照されるリソースが root リソースで、
-サーバーにコンタクトするために使用されたホストが ``example.com`` だった場合、
+サーバにコンタクトするために使用されたホストが ``example.com`` だった場合、
 生成される URL は ``http://example.com/?a=1`` になります。
 
 
@@ -558,9 +568,11 @@ URL を付けます。さらに、生成された URL に影響を及ぼすた�
    pair: resource URL generation; overriding
 
 
+.. Overriding Resource URL Generation
+
 .. _overriding_resource_url_generation:
 
-Overriding Resource URL Generation
+リソース URL 生成のオーバーライド
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. If a resource object implements a ``__resource_url__`` method, this method
@@ -674,7 +686,9 @@ URL を上書きしてこのメソッドが呼ばれます。
    single: resource path generation
 
 
-Generating the Path To a Resource
+.. Generating the Path To a Resource
+
+リソースへのパスの生成
 ---------------------------------
 
 .. :func:`pyramid.traversal.resource_path` returns a string object representing
@@ -739,15 +753,26 @@ Generating the Path To a Resource
    pair: resource; finding by path
 
 
-Finding a Resource by Path
+.. Finding a Resource by Path
+
+パスからリソースを見つける
 --------------------------
 
-If you have a string path to a resource, you can grab the resource from
-that place in the application's resource tree using
-:func:`pyramid.traversal.find_resource`.
+.. If you have a string path to a resource, you can grab the resource from
+.. that place in the application's resource tree using
+.. :func:`pyramid.traversal.find_resource`.
 
-You can resolve an absolute path by passing a string prefixed with a ``/`` as
-the ``path`` argument:
+リソースへの文字列パスを持っていれば、
+:func:`pyramid.traversal.find_resource` を使ってアプリケーションの
+リソースツリー場所からリソースを取得することができます。
+
+
+.. You can resolve an absolute path by passing a string prefixed with a ``/`` as
+.. the ``path`` argument:
+
+``/`` プリフィックスを持った文字列を ``path`` 引数として渡すことによって、
+絶対パスを解決することができます:
+
 
 .. code-block:: python
    :linenos:
@@ -755,8 +780,13 @@ the ``path`` argument:
    from pyramid.traversal import find_resource
    url = find_resource(anyresource, '/path')
 
-Or you can resolve a path relative to the resource you pass in by passing a
-string that isn't prefixed by ``/``:
+
+.. Or you can resolve a path relative to the resource you pass in by passing a
+.. string that isn't prefixed by ``/``:
+
+あるいは、 ``/`` プリフィックスを持たない文字列を渡すことにより、
+指定したリソースからの相対パスを解決することができます:
+
 
 .. code-block:: python
    :linenos:
@@ -764,29 +794,58 @@ string that isn't prefixed by ``/``:
    from pyramid.traversal import find_resource
    url = find_resource(anyresource, 'path')
 
-Often the paths you pass to :func:`~pyramid.traversal.find_resource` are
-generated by the :func:`~pyramid.traversal.resource_path` API.  These APIs
-are "mirrors" of each other.
 
-If the path cannot be resolved when calling
-:func:`~pyramid.traversal.find_resource` (if the respective resource in the
-tree does not exist), a :exc:`KeyError` will be raised.
+.. Often the paths you pass to :func:`~pyramid.traversal.find_resource` are
+.. generated by the :func:`~pyramid.traversal.resource_path` API.  These APIs
+.. are "mirrors" of each other.
 
-See the :func:`pyramid.traversal.find_resource` documentation for more
-information about resolving a path to a resource.
+:func:`~pyramid.traversal.find_resource` に渡すパスはしばしば
+:func:`~pyramid.traversal.resource_path` API によって生成されます。
+これらの API は互いの「鏡」です。
+
+
+.. If the path cannot be resolved when calling
+.. :func:`~pyramid.traversal.find_resource` (if the respective resource in the
+.. tree does not exist), a :exc:`KeyError` will be raised.
+
+:func:`~pyramid.traversal.find_resource` を呼び出したときにパスを解決
+できなければ (ツリー上のそれぞれのリソースが存在しなければ) 、
+:exc:`KeyError` 例外が投げられます。
+
+
+.. See the :func:`pyramid.traversal.find_resource` documentation for more
+.. information about resolving a path to a resource.
+
+パスからリソースへの解決に関する詳細は
+:func:`pyramid.traversal.find_resource` ドキュメンテーションを参照して
+ください。
+
 
 .. index::
    pair: resource; lineage
 
-Obtaining the Lineage of a Resource
+
+.. Obtaining the Lineage of a Resource
+
+リソースの lineage の取得
 -----------------------------------
 
-:func:`pyramid.location.lineage` returns a generator representing the
-:term:`lineage` of the :term:`location` aware :term:`resource` object.
+.. :func:`pyramid.location.lineage` returns a generator representing the
+.. :term:`lineage` of the :term:`location` aware :term:`resource` object.
 
-The :func:`~pyramid.location.lineage` function returns the resource it is
-passed, then each parent of the resource, in order.  For example, if the
-resource tree is composed like so:
+:func:`pyramid.location.lineage` は、 :term:`location` aware な
+:term:`resource` オブジェクトの :term:`lineage` (系統, 血統) を表わす
+ジェネレータを返します。
+
+
+.. The :func:`~pyramid.location.lineage` function returns the resource it is
+.. passed, then each parent of the resource, in order.  For example, if the
+.. resource tree is composed like so:
+
+:func:`pyramid.location.lineage` 関数は渡されたリソースを返し、その後
+順番にリソースの親をそれぞれ返します。例えば、リソースツリーが以下の
+ように構成される場合:
+
 
 .. code-block:: python
    :linenos:
@@ -797,8 +856,13 @@ resource tree is composed like so:
    thing2 = Thing()
    thing2.__parent__ = thing1
 
-Calling ``lineage(thing2)`` will return a generator.  When we turn it into a
-list, we will get:
+
+.. Calling ``lineage(thing2)`` will return a generator.  When we turn it into a
+.. list, we will get:
+
+``lineage(thing2)`` の呼び出しはジェネレータを返します。それをリストに
+変換すると、次のような結果を得るでしょう:
+
 
 .. code-block:: python
    :linenos:
@@ -806,24 +870,47 @@ list, we will get:
    list(lineage(thing2))
    [ <Thing object at thing2>, <Thing object at thing1> ]
 
-The generator returned by :func:`~pyramid.location.lineage` first returns the
-resource it was passed unconditionally.  Then, if the resource supplied a
-``__parent__`` attribute, it returns the resource represented by
-``resource.__parent__``.  If *that* resource has a ``__parent__`` attribute,
-return that resource's parent, and so on, until the resource being inspected
-either has no ``__parent__`` attribute or has a ``__parent__`` attribute of
-``None``.
 
-See the documentation for :func:`pyramid.location.lineage` for more
-information.
+.. The generator returned by :func:`~pyramid.location.lineage` first returns the
+.. resource it was passed unconditionally.  Then, if the resource supplied a
+.. ``__parent__`` attribute, it returns the resource represented by
+.. ``resource.__parent__``.  If *that* resource has a ``__parent__`` attribute,
+.. return that resource's parent, and so on, until the resource being inspected
+.. either has no ``__parent__`` attribute or has a ``__parent__`` attribute of
+.. ``None``.
 
-Determining if a Resource is In The Lineage of Another Resource
+:func:`~pyramid.location.lineage` によって返されたジェネレータは、最初に
+渡されたリソースを無条件に返します。次に、そのリソースが
+``__parent__`` 属性を持っている場合、 ``resource.__parent__`` によって
+表わされるリソースを返します。もし *その* リソースが ``__parent__`` 属性
+を持っている場合、そのリソースの親を返します。検査されているリソースが
+``__parent__`` 属性を持たないか、 ``__parent__`` 属性が ``None`` になる
+までこれが続きます。
+
+
+.. See the documentation for :func:`pyramid.location.lineage` for more
+.. information.
+
+詳細は、 :func:`pyramid.location.lineage` のドキュメンテーションを参照
+してください。
+
+
+.. Determining if a Resource is In The Lineage of Another Resource
+
+リソースが別のリソースの lineage かどうかの判断
 ---------------------------------------------------------------
 
-Use the :func:`pyramid.location.inside` function to determine if one resource
-is in the :term:`lineage` of another resource.
+.. Use the :func:`pyramid.location.inside` function to determine if one resource
+.. is in the :term:`lineage` of another resource.
 
-For example, if the resource tree is:
+あるリソースが別のリソースの :term:`lineage` であるかどうかを判断するには、
+:func:`pyramid.location.inside` 関数を使用してください。
+
+
+.. For example, if the resource tree is:
+
+例えば、リソースツリーがこのような場合:
+
 
 .. code-block:: python
    :linenos:
@@ -834,30 +921,59 @@ For example, if the resource tree is:
    b = Thing()
    b.__parent__ = a
 
-Calling ``inside(b, a)`` will return ``True``, because ``b`` has a lineage
-that includes ``a``.  However, calling ``inside(a, b)`` will return ``False``
-because ``a`` does not have a lineage that includes ``b``.
 
-The argument list for :func:`~pyramid.location.inside` is ``(resource1,
-resource2)``.  ``resource1`` is 'inside' ``resource2`` if ``resource2`` is a
-:term:`lineage` ancestor of ``resource1``.  It is a lineage ancestor if its
-parent (or one of its parent's parents, etc.) is an ancestor.
+.. Calling ``inside(b, a)`` will return ``True``, because ``b`` has a lineage
+.. that includes ``a``.  However, calling ``inside(a, b)`` will return ``False``
+.. because ``a`` does not have a lineage that includes ``b``.
 
-See :func:`pyramid.location.inside` for more information.
+``b`` は ``a`` を含む lineage を持つので、 ``inside(b, a)`` の呼び出しは
+``True`` を返すでしょう。しかし、 ``a`` は ``b`` を含む lineage を持たない
+ので、 ``inside(a, b)`` の呼び出しは ``False`` を返すでしょう。
+
+
+.. The argument list for :func:`~pyramid.location.inside` is ``(resource1,
+.. resource2)``.  ``resource1`` is 'inside' ``resource2`` if ``resource2`` is a
+.. :term:`lineage` ancestor of ``resource1``.  It is a lineage ancestor if its
+.. parent (or one of its parent's parents, etc.) is an ancestor.
+
+:func:`~pyramid.location.inside` の引数リストは ``(resource1,
+resource2)`` です。 ``resource2`` が ``resource1`` の :term:`lineage`
+祖先である場合、 ``resource1`` は ``resource2`` の inside です。その親
+(あるいはその親の親などのうちの1つ) が祖先ならば、それは lineage 祖先です。
+
+
+.. See :func:`pyramid.location.inside` for more information.
+
+詳細は、 :func:`pyramid.location.inside` を参照してください。
+
 
 .. index::
    pair: resource; finding root
 
-Finding the Root Resource
+
+.. Finding the Root Resource
+
+root リソースを見つける
 -------------------------
 
-Use the :func:`pyramid.traversal.find_root` API to find the :term:`root`
-resource.  The root resource is the root resource of the :term:`resource
-tree`.  The API accepts a single argument: ``resource``.  This is a resource
-that is :term:`location` aware.  It can be any resource in the tree for which
-you want to find the root.
+.. Use the :func:`pyramid.traversal.find_root` API to find the :term:`root`
+.. resource.  The root resource is the root resource of the :term:`resource
+.. tree`.  The API accepts a single argument: ``resource``.  This is a resource
+.. that is :term:`location` aware.  It can be any resource in the tree for which
+.. you want to find the root.
 
-For example, if the resource tree is:
+:term:`root` リソースを見つけるためには
+:func:`pyramid.traversal.find_root` API を使用してください。この root
+リソースは :term:`resource tree` の root リソースです。この API は単一
+の引数 ``resource`` を受け取ります。 ``resource`` は ``location`` aware
+なリソースです。ツリー上で root を見つけたいと思う任意のリソースを渡す
+ことができます。
+
+
+.. For example, if the resource tree is:
+
+例えば、リソースツリーが次のような場合:
+
 
 .. code-block:: python
    :linenos:
@@ -868,37 +984,71 @@ For example, if the resource tree is:
    b = Thing()
    b.__parent__ = a
 
-Calling ``find_root(b)`` will return ``a``.
 
-The root resource is also available as ``request.root`` within :term:`view
-callable` code.
+.. Calling ``find_root(b)`` will return ``a``.
 
-The presence or absence of a :term:`virtual root` has no impact on the
-behavior of :func:`~pyramid.traversal.find_root`.  The root object returned
-is always the *physical* root object.
+``find_root(b)`` の呼び出しは ``a`` を返すでしょう。
+
+
+.. The root resource is also available as ``request.root`` within :term:`view
+.. callable` code.
+
+root リソースは :term:`view callable` コード内では ``request.root`` として
+もアクセス可能です。
+
+
+.. The presence or absence of a :term:`virtual root` has no impact on the
+.. behavior of :func:`~pyramid.traversal.find_root`.  The root object returned
+.. is always the *physical* root object.
+
+:term:`virtual root` の有無は :func:`pyramid.traversal.find_root` の
+振る舞いに影響を及ぼしません。返された root オブジェクトは常に
+*物理的な* root オブジェクトです。
+
 
 .. index::
    single: resource interfaces
 
+
+.. Resources Which Implement Interfaces
+
 .. _resources_which_implement_interfaces:
 
-Resources Which Implement Interfaces
+インタフェースを実装するリソース
 ------------------------------------
 
-Resources can optionally be made to implement an :term:`interface`.  An
-interface is used to tag a resource object with a "type" that can later be
-referred to within :term:`view configuration` and by
-:func:`pyramid.traversal.find_interface`.
+.. Resources can optionally be made to implement an :term:`interface`.  An
+.. interface is used to tag a resource object with a "type" that can later be
+.. referred to within :term:`view configuration` and by
+.. :func:`pyramid.traversal.find_interface`.
 
-Specifying an interface instead of a class as the ``context`` or
-``containment`` predicate arguments within :term:`view configuration`
-statements makes it possible to use a single view callable for more than one
-class of resource object.  If your application is simple enough that you see
-no reason to want to do this, you can skip reading this section of the
-chapter.
+リソースは任意で :term:`interface` を実装するように作ることができます。
+インタフェースはリソースオブジェクトに「型」を用いてタグ付けするために
+使用されます。型は、その後 :term:`view configuration` の内で参照することが
+でき、 :func:`pyramid.traversal.find_interface` によって参照されることがで
+きます。
 
-For example, here's some code which describes a blog entry which also
-declares that the blog entry implements an :term:`interface`.
+
+.. Specifying an interface instead of a class as the ``context`` or
+.. ``containment`` predicate arguments within :term:`view configuration`
+.. statements makes it possible to use a single view callable for more than one
+.. class of resource object.  If your application is simple enough that you see
+.. no reason to want to do this, you can skip reading this section of the
+.. chapter.
+
+:term:`view configuration` ステートメント内の ``context`` または
+``containment`` 述語引数としてクラスの代わりにインタフェースを指定する
+ことで、単一のビュー callable をリソースオブジェクトの複数のクラスに対して
+使用することができます。これをしたい理由が分からないくらいにあなたの
+アプリケーションが単純な場合、このセクションを読むのをスキップできます。
+
+
+.. For example, here's some code which describes a blog entry which also
+.. declares that the blog entry implements an :term:`interface`.
+
+例えば、これはブログエントリについて記述するコードで、ブログエントリが
+:term:`interface` を実装すると宣言しています。
+
 
 .. code-block:: python
    :linenos:
@@ -918,24 +1068,50 @@ declares that the blog entry implements an :term:`interface`.
            self.author = author
            self.created = datetime.datetime.now()
 
-This resource consists of two things: the class which defines the resource
-constructor as the class ``BlogEntry``, and an :term:`interface` attached to
-the class via an ``implementer`` class decorator using the ``IBlogEntry``
-interface as its sole argument.
 
-The interface object used must be an instance of a class that inherits from
-:class:`zope.interface.Interface`.
+.. This resource consists of two things: the class which defines the resource
+.. constructor as the class ``BlogEntry``, and an :term:`interface` attached to
+.. the class via an ``implementer`` class decorator using the ``IBlogEntry``
+.. interface as its sole argument.
 
-A resource class may implement zero or more interfaces.  You specify that a
-resource implements an interface by using the
-:func:`zope.interface.implementer` function as a class decorator.  The above
-``BlogEntry`` resource implements the ``IBlogEntry`` interface.
+このリソースは 2 つのものから構成されます: ``BlogEntry`` クラスという
+リソースコンストラクタを定義するクラスと、唯一の引数として
+``IBlogEntry`` インタフェースを用いてクラスデコレータ ``implementer``
+によってクラスに取り付けられた :term:`interface` です。
 
-You can also specify that a particular resource *instance* provides an
-interface, as opposed to its class.  When you declare that a class implements
-an interface, all instances of that class will also provide that interface.
-However, you can also just say that a single object provides the interface.
-To do so, use the :func:`zope.interface.directlyProvides` function:
+
+.. The interface object used must be an instance of a class that inherits from
+.. :class:`zope.interface.Interface`.
+
+使用されるインタフェースオブジェクトは :class:`zope.interface.Interface`
+から継承するクラスのインスタンスでなければなりません。
+
+
+.. A resource class may implement zero or more interfaces.  You specify that a
+.. resource implements an interface by using the
+.. :func:`zope.interface.implementer` function as a class decorator.  The above
+.. ``BlogEntry`` resource implements the ``IBlogEntry`` interface.
+
+リソースクラスは 0 個以上のインタフェースを実装することができます。
+クラスデコレータとして :func:`zope.interface.implementer` 関数を使用する
+ことにより、リソースがインタフェースを実装することを明示します。
+上記の ``BlogEntry`` リソースは ``IBlogEntry`` インタフェースを実装
+しています。
+
+
+.. You can also specify that a particular resource *instance* provides an
+.. interface, as opposed to its class.  When you declare that a class implements
+.. an interface, all instances of that class will also provide that interface.
+.. However, you can also just say that a single object provides the interface.
+.. To do so, use the :func:`zope.interface.directlyProvides` function:
+
+さらに、クラスではなく特定のリソース *インスタンス* がインタフェースを
+提供することを明示することもできます。クラスがインタフェースを実装する
+と宣言した場合、そのクラスのすべてのインスタンスもそのインタフェースを
+提供するようになります。しかし、単一のオブジェクトがインタフェースを
+提供すると単に言うこともできます。そのためには
+:func:`zope.interface.directlyProvides` 関数を使用してください:
+
 
 .. code-block:: python
    :linenos:
@@ -957,10 +1133,17 @@ To do so, use the :func:`zope.interface.directlyProvides` function:
    entry = BlogEntry('title', 'body', 'author')
    directlyProvides(entry, IBlogEntry)
 
-:func:`zope.interface.directlyProvides` will replace any existing interface
-that was previously provided by an instance.  If a resource object already
-has instance-level interface declarations that you don't want to replace, use
-the :func:`zope.interface.alsoProvides` function:
+
+.. :func:`zope.interface.directlyProvides` will replace any existing interface
+.. that was previously provided by an instance.  If a resource object already
+.. has instance-level interface declarations that you don't want to replace, use
+.. the :func:`zope.interface.alsoProvides` function:
+
+:func:`zope.interface.directlyProvides` は、それ以前にインスタンスによって
+提供されていた既存のあらゆるインタフェースを置き換えます。リソースオブジェクト
+が既にインスタンスレベルのインタフェース宣言をしていて置き換えたくない
+場合は、 :func:`zope.interface.alsoProvides` 関数を使用してください:
+
 
 .. code-block:: python
    :linenos:
@@ -987,23 +1170,44 @@ the :func:`zope.interface.alsoProvides` function:
    directlyProvides(entry, IBlogEntry1)
    alsoProvides(entry, IBlogEntry2)
 
-:func:`zope.interface.alsoProvides` will augment the set of interfaces
-directly provided by an instance instead of overwriting them like
-:func:`zope.interface.directlyProvides` does.
 
-For more information about how resource interfaces can be used by view
-configuration, see :ref:`using_resource_interfaces`.
+.. :func:`zope.interface.alsoProvides` will augment the set of interfaces
+.. directly provided by an instance instead of overwriting them like
+.. :func:`zope.interface.directlyProvides` does.
+
+:func:`zope.interface.alsoProvides` は、
+:func:`zope.interface.directlyProvides` のようにインスタンスによって
+直接提供されるインタフェースの集合を上書きする代わりに、追加します。
+
+
+.. For more information about how resource interfaces can be used by view
+.. configuration, see :ref:`using_resource_interfaces`.
+
+ビュー設定でリソースインタフェースがどのように使用されるかについての
+詳細は :ref:`using_resource_interfaces` を参照してください。
+
 
 .. index::
    pair: resource; finding by interface or class
 
-Finding a Resource With a Class or Interface in Lineage
--------------------------------------------------------
 
-Use the :func:`~pyramid.traversal.find_interface` API to locate a parent that
-is of a particular Python class, or which implements some :term:`interface`.
+.. Finding a Resource With a Class or Interface in Lineage
 
-For example, if your resource tree is composed as follows:
+クラスまたはインタフェースを使って lineage からリソースを見つける
+-----------------------------------------------------------------
+
+.. Use the :func:`~pyramid.traversal.find_interface` API to locate a parent that
+.. is of a particular Python class, or which implements some :term:`interface`.
+
+特定の Python クラスの、あるいは特定の :term:`interface` を実装する
+親を見つけるには :func:`~pyramid.traversal.find_interface` API を
+使用してください。
+
+
+.. For example, if your resource tree is composed as follows:
+
+例えば、リソースツリーが以下のように構成される場合:
+
 
 .. code-block:: python
    :linenos:
@@ -1015,45 +1219,94 @@ For example, if your resource tree is composed as follows:
    b = Thing2()
    b.__parent__ = a
 
-Calling ``find_interface(a, Thing1)`` will return the ``a`` resource because
-``a`` is of class ``Thing1`` (the resource passed as the first argument is
-considered first, and is returned if the class or interface spec matches).
 
-Calling ``find_interface(b, Thing1)`` will return the ``a`` resource because
-``a`` is of class ``Thing1`` and ``a`` is the first resource in ``b``'s
-lineage of this class.
+.. Calling ``find_interface(a, Thing1)`` will return the ``a`` resource because
+.. ``a`` is of class ``Thing1`` (the resource passed as the first argument is
+.. considered first, and is returned if the class or interface spec matches).
 
-Calling ``find_interface(b, Thing2)`` will return the ``b`` resource.
+``a`` がクラス ``Thing1`` なので、 ``find_interface(a, Thing1)`` の呼び
+出しは ``a`` リソースを返すでしょう (最初の引数として渡されたリソースが
+最初に考慮され、クラスまたはインタフェースのスペックが一致する場合それが
+返されます)。
 
-The second argument to find_interface may also be a :term:`interface` instead
-of a class.  If it is an interface, each resource in the lineage is checked
-to see if the resource implements the specificed interface (instead of seeing
-if the resource is of a class).  See also
-:ref:`resources_which_implement_interfaces`.
+
+.. Calling ``find_interface(b, Thing1)`` will return the ``a`` resource because
+.. ``a`` is of class ``Thing1`` and ``a`` is the first resource in ``b``'s
+.. lineage of this class.
+
+``a`` がクラス ``Thing1`` で、 ``b`` の lineage の中で ``a`` がこのクラス
+の最初のリソースなので、 ``find_interface(b, Thing1)`` の呼び出しは
+``a`` リソースを返すでしょう。
+
+
+.. Calling ``find_interface(b, Thing2)`` will return the ``b`` resource.
+
+``find_interface(b, Thing2)`` の呼び出しは ``b`` リソースを返すでしょう。
+
+
+.. The second argument to find_interface may also be a :term:`interface` instead
+.. of a class.  If it is an interface, each resource in the lineage is checked
+.. to see if the resource implements the specificed interface (instead of seeing
+.. if the resource is of a class).  See also
+.. :ref:`resources_which_implement_interfaces`.
+
+find_interface への第 2 引数は、クラスの代わりに :term:`interface` を
+使うことも可能です。これがインタフェースの場合、 lineage 中のそれぞれ
+のリソースが指定されたインタフェースを実装するかどうかチェックされます
+(リソースがあるクラスかどうか確かめる代わりに)。
+:ref:`resources_which_implement_interfaces` も参照してください。
+
 
 .. index::
    single: resource API functions
    single: url generation (traversal)
 
-:app:`Pyramid` API Functions That Act Against Resources
+
+.. :app:`Pyramid` API Functions That Act Against Resources
+
+リソースに対して動作する :app:`Pyramid` API 関数群
 -------------------------------------------------------
 
-A resource object is used as the :term:`context` provided to a view.  See
-:ref:`traversal_chapter` and :ref:`urldispatch_chapter` for more information
-about how a resource object becomes the context.
+.. A resource object is used as the :term:`context` provided to a view.  See
+.. :ref:`traversal_chapter` and :ref:`urldispatch_chapter` for more information
+.. about how a resource object becomes the context.
 
-The APIs provided by :ref:`traversal_module` are used against resource
-objects.  These functions can be used to find the "path" of a resource, the
-root resource in a resource tree, or to generate a URL for a resource.
+リソースオブジェクトはビューに提供される :term:`context` として使用され
+ます。リソースオブジェクトがどのようにしてコンテキストになるかについて
+の詳細は :ref:`traversal_chapter` と :ref:`urldispatch_chapter` を参照
+してください。
 
-The APIs provided by :ref:`location_module` are used against resources.
-These can be used to walk down a resource tree, or conveniently locate one
-resource "inside" another.
 
-Some APIs in :ref:`security_module` accept a resource object as a parameter.
-For example, the :func:`~pyramid.security.has_permission` API accepts a
-resource object as one of its arguments; the ACL is obtained from this
-resource or one of its ancestors.  Other APIs in the :mod:`pyramid.security`
-module also accept :term:`context` as an argument, and a context is always a
-resource.
+.. The APIs provided by :ref:`traversal_module` are used against resource
+.. objects.  These functions can be used to find the "path" of a resource, the
+.. root resource in a resource tree, or to generate a URL for a resource.
 
+:ref:`traversal_module` によって提供される API は、リソースオブジェクト
+に対して使用されます。これらの関数は、リソースの「パス」やリソースツリー
+の root リソースを見つけるために、あるいはリソース用の URL を生成するた
+めに使用することができます。
+
+
+.. The APIs provided by :ref:`location_module` are used against resources.
+.. These can be used to walk down a resource tree, or conveniently locate one
+.. resource "inside" another.
+
+:ref:`location_module` によって提供される API は、リソースに対して使用
+されます。これらは、リソースツリーを下へたどるか、あるいは別のリソース
+の「内部」のリソースを簡単に見つけるために使用することができます。
+
+
+.. Some APIs in :ref:`security_module` accept a resource object as a parameter.
+.. For example, the :func:`~pyramid.security.has_permission` API accepts a
+.. resource object as one of its arguments; the ACL is obtained from this
+.. resource or one of its ancestors.  Other APIs in the :mod:`pyramid.security`
+.. module also accept :term:`context` as an argument, and a context is always a
+.. resource.
+
+:ref:`security_module` 中のいくつかの API は、パラメータとしてリソース
+オブジェクトを受け取ります。例えば
+:func:`~pyramid.security.has_permission` API は引数の 1 つとしてリソース
+オブジェクトを受け取ります; ACL がこのリソースあるいはその先祖のうちの
+1 つから得られます。 :mod:`pyramid.security` モジュール中の他の API も
+引数として :term:`context` を受け取ります。そしてコンテキストは常に
+リソースです。
