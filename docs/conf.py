@@ -183,8 +183,12 @@ if 'sphinx-build' in ' '.join(sys.argv): # protect against dumb importers
         if item.endswith('.egg'):
             sys.path.append(os.path.join(parent, item))
 
-html_theme_path = ['_themes', 'customtheme']
-html_theme = 'doc-ja'
+html_theme_path = ['_themes']
+html_theme = 'pyramid-ja'
+html_theme_options = dict(
+    original_url='http://docs.pylonsproject.org/projects/pyramid/en/latest/',
+    our_github_url='https://github.com/pylonsproject-jp/pyramid',
+    )
 # html_theme_options = dict(
 #     github_url='https://github.com/Pylons/pyramid',
 #     in_progress='true'
