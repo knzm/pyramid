@@ -85,4 +85,4 @@ epub:
 	@echo "Build finished. The epub file is in _build/epub."
 
 _themes:
-	git submodule update --init
+	(cd ..; git submodule update --init)

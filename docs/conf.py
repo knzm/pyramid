@@ -93,8 +93,7 @@ else:
 ##     }
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = [os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                               '_templates')]
+templates_path = ['_templates']
 
 # The suffix of source filenames.
 source_suffix = '.rst'
@@ -165,10 +164,12 @@ if 'sphinx-build' in ' '.join(sys.argv): # protect against dumb importers
     _themes = os.path.join(cwd, '_themes')
     p = Popen('which git', shell=True, stdout=PIPE)
     git = p.stdout.read().strip()
+    parent = os.path.dirname(os.path.dirname(__file__))
+    call([git, 'submodule', 'sync'], cwd=parent)
     if not os.listdir(_themes):
-        call([git, 'submodule', '--init'])
+        call([git, 'submodule', 'update', '--init'], cwd=parent)
     else:
-        call([git, 'submodule', 'update'])
+        call([git, 'submodule', 'update'], cwd=parent)
 
     sys.path.append(os.path.abspath('_themes'))
 
@@ -193,6 +194,7 @@ html_theme_options = dict(
 #     github_url='https://github.com/Pylons/pyramid',
 #     in_progress='true'
 #     )
+
 # The style sheet to use for HTML and HTML Help pages. A file of that name
 # must exist either in Sphinx' static/ path, or in one of the custom paths
 # given in html_static_path.
