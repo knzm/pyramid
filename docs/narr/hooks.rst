@@ -30,7 +30,7 @@ Not Found ビューの変更
 :app:`Pyramid` は URL をビューコードにマッピングすることができない場合
 :term:`not found view` を起動します。それは :term:`view callable` です。
 デフォルトの not found ビューが存在します。デフォルトの not found ビュー
-は、アプリケーション設定によって上書きすることができます。
+は、アプリケーション設定によってオーバーライドすることができます。
 
 
 .. If your application uses :term:`imperative configuration`, you can replace
@@ -242,7 +242,7 @@ Forbidden View の変更
 の実行を認可することができない場合に :term:`forbidden view` を起動します。
 デフォルトの fobidden レスポンスは 403 ステータスコードを持ち、非常に
 簡素です。しかし、必要に応じて forbidden レスポンスを生成するビューを
-上書きすることができます。
+オーバーライドすることができます。
 
 
 .. The :term:`forbidden view` callable is a view callable like any other.  The
@@ -1333,7 +1333,7 @@ route マッチ辞書から取り出されたルーティングパラメータ�
 .. Pyramid itself).
 
 :meth:`pyramid.config.Configurator.set_view_mapper` メソッドは、
-(Pyramid 自体によって使用されるスーパーデフォルトビューマッパーを上書き
+(Pyramid 自体によって使用されるスーパーデフォルトビューマッパーをオーバーライド
 して) *デフォルト* ビューマッパーをセットするために使用することができます。
 
 
@@ -1917,9 +1917,9 @@ tween, 'someothertween2' tween, INGRESS のすべての下に置くことを要�
 それを得る唯一の方法は明示的な tween 順序を使用することです。
 デプロイを行うユーザは、 ``pyramid.tweens`` 設定値を使用することで
 :meth:`~pyramid.config.Configurator.add_tween` の呼び出しによって暗黙
-的に指定された tween の選択および順序を完全に上書きすることができます。
+的に指定された tween の選択および順序を完全にオーバーライドすることができます。
 この設定値が使われた場合、それは暗黙の tween チェイン中での tween
-ファクトリの順序 (または選択) を上書きするような Python dotted names の
+ファクトリの順序 (または選択) をオーバーライドするような Python dotted names の
 リストでなければなりません。例えば:
 
 

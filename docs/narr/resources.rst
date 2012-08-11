@@ -584,7 +584,7 @@ URL を付けます。さらに、生成された URL に影響を及ぼすた�
 このリソース用に URL を生成するために
 :meth:`~pyramid.request.Request.resource_url` が呼ばれる時、
 :meth:`~pyramid.request.Request.resource_url` によって返されるデフォルト
-URL を上書きしてこのメソッドが呼ばれます。
+URL をオーバーライドしてこのメソッドが呼ばれます。
 
 
 .. The ``__resource_url__`` hook is passed two arguments: ``request`` and
@@ -642,7 +642,7 @@ URL を上書きしてこのメソッドが呼ばれます。
 .. ``None``.  If it returns ``None``, the default URL will be returned.
 
 リソースの ``__resource_url__`` メソッドは、 URL を表わす文字列を返す
-必要があります。デフォルトを上書きできない場合 ``None`` を返すべきです。
+必要があります。デフォルトをオーバーライドできない場合 ``None`` を返すべきです。
 このメソッドが ``None`` を返せば、デフォルト URL が返されるでしょう。
 
 
