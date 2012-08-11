@@ -1,4 +1,5 @@
 import os
+import posixpath
 import sys
 import threading
 
@@ -36,16 +37,26 @@ class PkgResourceTemplateLookup(TemplateLookup):
         isabs = os.path.isabs(uri)
         if (not isabs) and (':' in uri):
             return uri
+        if not(isabs) and ('$' in uri):
+            return uri.replace('$', ':')
+        if relativeto is not None:
+            relativeto = relativeto.replace('$', ':')
+            if not(':' in uri) and (':' in relativeto):
+                pkg, relto = relativeto.split(':')
+                _uri = posixpath.join(posixpath.dirname(relto), uri)
+                return '{0}:{1}'.format(pkg, _uri)
+            if not(':' in uri) and not(':' in relativeto):
+                return posixpath.join(posixpath.dirname(relativeto), uri)
         return TemplateLookup.adjust_uri(self, uri, relativeto)
 
     def get_template(self, uri):
         """Fetch a template from the cache, or check the filesystem
         for it
-        
+
         In addition to the basic filesystem lookup, this subclass will
         use pkg_resource to load a file using the asset
         specification syntax.
-        
+
         """
         isabs = os.path.isabs(uri)
         if (not isabs) and (':' in uri):
@@ -69,7 +80,7 @@ class PkgResourceTemplateLookup(TemplateLookup):
         return TemplateLookup.get_template(self, uri)
 
 
-registry_lock = threading.Lock() 
+registry_lock = threading.Lock()
 
 class MakoRendererFactoryHelper(object):
     def __init__(self, settings_prefix=None):
@@ -136,7 +147,7 @@ class MakoRendererFactoryHelper(object):
 
             registry_lock.acquire()
             try:
-                registry.registerUtility(lookup, IMakoLookup, 
+                registry.registerUtility(lookup, IMakoLookup,
                                          name=settings_prefix)
             finally:
                 registry_lock.release()
@@ -159,7 +170,7 @@ class MakoLookupTemplateRenderer(object):
     def __init__(self, path, lookup):
         self.path = path
         self.lookup = lookup
- 
+
     def implementation(self):
         return self.lookup.get_template(self.path)
 
