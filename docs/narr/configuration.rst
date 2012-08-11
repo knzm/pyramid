@@ -210,7 +210,7 @@ scan 機構は、モジュール内に定義されたオブジェクトに取り
 一旦 scan が起動され、 :term:`configuration decoration` がスキャナに
 よって見つかれば、 :term:`Configurator` に対する一連の呼び出しが
 自動的に行われます: これらの呼び出しは、設定対象のコードから離れた
-場所に命令型の設定文を追加する必要性を置き換えます。
+場所に命令型の設定命令を追加する必要性を置き換えます。
 
 
 .. The combination of :term:`configuration decoration` and the invocation of a

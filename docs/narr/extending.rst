@@ -191,7 +191,7 @@ Pyramid は「プラグ可能なアプリケーション」を提供しません
 
 これによって、インテグレーターがあなたの作成した設定関数を「オーバーライド
 パッケージ」から取捨選択 (selectively include or disinclude) することで
-あなたのアプリケーションに関係する設定文を最大限に再利用できるようになります。
+あなたのアプリケーションに関係する設定命令を最大限に再利用できるようになります。
 
 
 .. Alternately, you can use :term:`ZCML` for the purpose of making configuration
@@ -385,7 +385,7 @@ scan を行なった後で :meth:`pyramid.config.Configurator.commit` を実行
 
 - 新しいパッケージの ``__init__.py`` 中の ``main`` 関数を変更して、
   :meth:`pyramid.config.Configurator.include` 文あるいは :term:`scan` に
-  よってオリジナルの :app:`Pyramid` アプリケーションの設定関数を取り込む。
+  よってオリジナルの :app:`Pyramid` アプリケーションの設定関数をインクルードする。
 
 
 .. - Wire the new views and assets created in the new package up using
@@ -398,7 +398,7 @@ scan を行なった後で :meth:`pyramid.config.Configurator.commit` を実行
 
 - 新しいアプリケーションの ``__init__.py`` ファイルの ``main`` 関数内で
   命令型の登録を使用して、新しいパッケージ内で作成された新しいビューおよび
-  asset を接続する。この接続は、古いアプリケーションの設定関数を取り込んだ
+  asset を接続する。この接続は、古いアプリケーションの設定関数をインクルードした
   *後で* 行う必要があります。これらの登録は、オリジナルアプリケーションに
   よって行なわれた任意の登録を拡張またはオーバーライドすることができます。
   :ref:`overriding_views`, :ref:`overriding_routes`, および
@@ -449,7 +449,7 @@ scan を行なった後で :meth:`pyramid.config.Configurator.commit` を実行
 .. ``configure_views`` within the override package, after loading the original
 .. configuration function:
 
-``configure_views`` によって行われた最初のビュー設定文を、オーバーライド
+``configure_views`` によって行われた最初のビュー設定命令を、オーバーライド
 パッケージ内でオリジナルの設定関数をロードした後にオーバーライドする
 ことができます:
 
@@ -506,10 +506,10 @@ route のセットアップは、現在典型的には
 :meth:`pyramid.config.Configurator.add_route` への順序付きの呼び出し
 シーケンスによって行なわれます。これらの呼び出しがお互いに相対的で、
 典型的にこの順序が重要なため、オーバーライドを行なう場合にはそれらの
-相対的な順序を保持する必要があります。通常、これは ``add_route`` 文を
+相対的な順序を保持する必要があります。通常、これは ``add_route`` 命令を
 オーバーライドパッケージのファイルにすべて *コピー* して、必要に応じて
 それらを変更することを意味します。そして、オリジナルアプリケーションから
-すべての ``add_route`` 文を除外します。
+すべての ``add_route`` 命令のインクルードを取り除きます。
 
 
 .. index::
