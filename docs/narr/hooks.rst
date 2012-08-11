@@ -1,6 +1,6 @@
-.. _hooks_chapter:
-
 .. Using Hooks
+
+.. _hooks_chapter:
 
 フックの使用
 ============
