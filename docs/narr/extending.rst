@@ -503,7 +503,7 @@ route のオーバーライド
 .. disinclude any ``add_route`` statements from the original application.
 
 route のセットアップは、現在典型的には
-:meth:`pyramid.config.Configurator.add_route` への順序付きの呼び出し
+:meth:`~pyramid.config.Configurator.add_route` への順序付きの呼び出し
 シーケンスによって行なわれます。これらの呼び出しがお互いに相対的で、
 典型的にこの順序が重要なため、オーバーライドを行なう場合にはそれらの
 相対的な順序を保持する必要があります。通常、これは ``add_route`` 命令を

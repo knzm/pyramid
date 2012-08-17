@@ -344,7 +344,7 @@ include された関数の設定をオーバーライドするので、自動的
 .. executes all pending configuration actions and leaves the configuration
 .. action list "clean".
 
-:meth:`pyramid.config.Configurator.commit` の呼び出しは常に安全です。
+:meth:`~pyramid.config.Configurator.commit` の呼び出しは常に安全です。
 それは、すべての待機中の設定アクションを実行して、設定アクションのリストを
 「クリーン」にします。
 
@@ -396,7 +396,7 @@ Configurator に渡された ``autocommit`` パラメーターが ``True`` の�
 .. is ``True``.
 
 ``autocommit`` が ``True`` の場合、
-:meth:`pyramid.config.Configurator.commit` は効果がありません。
+:meth:`~pyramid.config.Configurator.commit` は効果がありません。
 
 
 .. If you use a Configurator in code that performs unit testing, it's usually a
@@ -421,7 +421,7 @@ autocommitting Configurator を使用することは通常よい考えです。
 .. overridden by configuration statements that happen within the caller of
 .. the "include" method.
 
-あなたのコードが :meth:`pyramid.config.Configurator.include` メソッドを
+あなたのコードが :meth:`~pyramid.config.Configurator.include` メソッドを
 使用して外部設定をインクルードする場合、いくつかの衝突は自動的に解決されます。
 「インクルード」の結果作られる設定命令は、「インクルード」メソッドの
 呼び出し元で起こる設定命令によってオーバーライドされます。
@@ -551,7 +551,7 @@ autocommitting Configurator を使用することは通常よい考えです。
 .. :meth:`~pyramid.config.Configuration.include` can also accept a :term:`module`
 .. as an argument:
 
-:meth:`pyramid.config.Configuration.include` は、引数として :term:`module`
+:meth:`~pyramid.config.Configuration.include` は、引数として :term:`module`
 を受け取ることもできます:
 
 
@@ -575,7 +575,7 @@ autocommitting Configurator を使用することは通常よい考えです。
 .. :meth:`~pyramid.config.Configuration.include` can also accept a :term:`dotted
 .. Python name` to a function or a module.
 
-:meth:`pyramid.config.Configuration.include` はさらに、関数または
+:meth:`~pyramid.config.Configuration.include` はさらに、関数または
 モジュールに対する :term:`dotted Python name` を受け取ることもできます。
 
 

@@ -148,13 +148,13 @@ callable オブジェクトは、通常その最初の引数として configurat
 .. action system.
 
 カスタムディレクティブが (上記の
-:meth:`~pyramid.config.Configurator.add_subscriber` のように) 既存の
+:meth:`pyramid.config.Configurator.add_subscriber` のように) 既存の
 configurator メソッドだけで仕事を行うことができない場合、
 そのディレクティブは :meth:`pyramid.config.Configurator.action` メソッドを
 利用する必要があるかもしれません。このメソッドは、
 :meth:`pyramid.config.Configurator.commit` が呼ばれたときに
 Pyramid が処理を試みる「アクション」のリストにエントリを追加します。
-アクションは、 *識別子* (discriminator) と、任意のコールバック関数と、
+アクションは、 :term:`discriminator` (識別子) と、任意のコールバック関数と、
 Pyramid のアクションシステムによって使用される他の任意のメタデータを含む
 単なる辞書です。
 
@@ -186,7 +186,7 @@ Pyramid のアクションシステムによって使用される他の任意の
 
 なかなか手が込んでいますが、これは何を行うのでしょうか。アクションメソッド
 はいくつかの引数を受け取ります。上記の ``add_jammyjam`` という名前の
-ディレクティブでは、 :meth:`pyramid.config.Configurator.action` を 2 つの
+ディレクティブでは、 :meth:`~pyramid.config.Configurator.action` を 2 つの
 引数で呼び出しています: 文字列の ``jammyjam`` は ``discriminator`` という名前の
 最初の引数として渡されます。また、 ``register`` という名前のクロージャー
 関数は ``callable`` という名前の 2 番目の引数として渡されます。
@@ -384,8 +384,8 @@ callable は、 ``register`` クロージャー関数です。それは、単純
 .. :meth:`~pyramid.config.Configurator.action` method, which allows you to
 .. augment Pyramid's configuration introspection system.
 
-``introspectables`` は ``introspectable`` オブジェクトのシーケンスです。
-``introspectables`` のシーケンスを
+``introspectables`` は :term:`introspectable` オブジェクトのシーケンスです。
+introspectable のシーケンスを
 :meth:`~pyramid.config.Configurator.action` メソッドに渡すことができ、
 それにより Pyramid の設定 introspection システムを拡張することが可能です。
 

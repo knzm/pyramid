@@ -38,7 +38,7 @@ Not Found ビューの変更
 .. :meth:`pyramid.config.Configurator.add_notfound_view` method:
 
 アプリケーションが :term:`imperative configuration` を使用している場合、
-:meth:`Ppyramid.config.Configurator.add_notfound_view` メソッドを使って
+:meth:`pyramid.config.Configurator.add_notfound_view` メソッドを使って
 Not Found ビューを置き換えることができます:
 
 
@@ -140,7 +140,7 @@ Not Found ビューを交換することができます:
 
 他のビューのように、 notfound ビューは少なくとも ``request`` パラメータ、
 あるいは ``context`` および ``request`` の両方を受け取らなければなりません。
-``request`` は拒否されたアクションを表わす現在の ``request`` です。
+``request`` は拒否されたアクションを表わす現在の :term:`request` です。
 (呼び出し署名の中で使用されていれば) ``context`` はビューを呼び出した
 :exc:`~pyramid.httpexceptions.HTTPNotFound` 例外のインスタンスになるでしょう。
 
@@ -486,8 +486,8 @@ subscriber がレンダラーグローバル辞書に既に存在するキーを
 .. See the API documentation for the :class:`~pyramid.events.BeforeRender` event
 .. interface at :class:`pyramid.interfaces.IBeforeRender`.
 
-:class:`pyramid.events.BeforeRender` イベントインタフェースについては
-:class:`~pyramid.interfaces.IBeforeRender` の API ドキュメンテーションを
+:class:`~pyramid.events.BeforeRender` イベントインタフェースについては
+:class:`pyramid.interfaces.IBeforeRender` の API ドキュメンテーションを
 参照してください。
 
 
@@ -950,7 +950,7 @@ finished コールバックは、単一リクエストのライフタイムを�
 
 上記の例において、 ``resource_url`` に渡された :term:`resource` がクラス
 ``myapp.resources.MyRoot`` である場合は常に、
-:meth:`pyramid.request.Request.resource_url` にサービスを提供するために
+:meth:`~pyramid.request.Request.resource_url` にサービスを提供するために
 ``myapp.traversal.ResourceURLAdapter`` クラスが使用されます。
 ``resource_iface`` の引数 ``MyRoot`` は、見つかったリソース url ファクトリ
 に対してリソースによって所有されなければならないインタフェースの型を
@@ -985,7 +985,7 @@ url アダプターはすべてのリソースに使用されます。
 .. :term:`Pylons` GitHub Pyramid repository.
 
 デフォルトのコンテキスト URL ジェネレータを熟読したければ、
-:app:`Pylons` GitHub Pyramid リポジトリの `traversal module
+:term:`Pylons` GitHub Pyramid リポジトリの `traversal module
 <http://github.com/Pylons/pyramid/blob/master/pyramid/traversal.py>`_
 に含まれるクラス :class:`pyramid.traversal.ResourceURL` が利用可能です。
 
@@ -1050,7 +1050,7 @@ Pyramid は、ビュー callable が返したオブジェクトが「本物の�
 ように設定されていないビュー callable から非レスポンスオブジェクトを
 返す場合、そのユーザは、典型的にはルーターがエラーを発生させることを
 期待するでしょう。しかしながら、任意の戻り値から
-:class:`pyramid.interfaces.IResponse` を実装するオブジェクトに変換する
+:class:`~pyramid.interfaces.IResponse` を実装するオブジェクトに変換する
 アダプターを提供することにより、ユーザがビュー callable から任意の値を
 返せるように Pyramid をフックすることができます。
 
@@ -1192,7 +1192,7 @@ IResponse をネイティブに提供するからです。 ``webob.Response`` �
 .. until activated by a :term:`scan`.
 
 :term:`scan` によって活性化されるまで、
-:class:`pyramid.response.response_adapter` デコレータは効果がないでしょう。
+:class:`~pyramid.response.response_adapter` デコレータは効果がないでしょう。
 
 
 .. index::

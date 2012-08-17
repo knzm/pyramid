@@ -224,8 +224,8 @@ scan 機構は、モジュール内に定義されたオブジェクトに取り
 .. :class:`~pyramid.view.view_config` into a call to the
 .. :meth:`pyramid.config.Configurator.add_view` method, effectively:
 
-上記の例において、スキャナは実質的に :meth:`pyramid.view.view_config` に
-対する引数を :class:`~pyramid.config.Configurator.add_view` メソッドの
+上記の例において、スキャナは実質的に :class:`~pyramid.view.view_config` に
+対する引数を :meth:`pyramid.config.Configurator.add_view` メソッドの
 呼び出しに変換します:
 
 

@@ -80,7 +80,7 @@ URL をコードにマッピングするために :term:`traversal` を使用す
 ..   or resource :term:`interface`.
 
 - :meth:`~pyramid.config.Configurator.add_view`
-  (あるいは :meth:`~pyramid.view.view_config` デコレータ) に対する
+  (あるいは :func:`~pyramid.view.view_config` デコレータ) に対する
   ``context`` および ``containment`` 述語引数は、
   リソースクラスまたはリソース :term:`interface` を参照します。
 
@@ -336,7 +336,7 @@ root リソースの ``__getitem__`` メソッドから返されたリソース�
    空のタプル要素とは対照的に)。
 
 
-  .. Using :mod:`pyramid_traversalwrapper`
+.. Using :mod:`pyramid_traversalwrapper`
 
 .. sidebar:: \ :mod:`pyramid_traversalwrapper` を使う
 
@@ -486,7 +486,7 @@ URL を付けます。さらに、生成された URL に影響を及ぼすた�
 .. HTML pages rendered as the result of the default view of a resource are more
 .. apt to be relative to these resources than relative to their parent.
 
-:meth:`pyramid.request.Request.resource_url` を使用してこの単純な方法で
+:meth:`~pyramid.request.Request.resource_url` を使用してこの単純な方法で
 リソース URL を生成する場合、すべてのリソース URL にはスラッシュが追加
 されます。なぜなら、リソースは階層における「場所」であり、 URL はそこを
 訪れるためにクリックされるべきものだからです。リソースのデフォルトビュー
@@ -594,7 +594,7 @@ URL をオーバーライドしてこのメソッドが呼ばれます。
 
 ``__resource_url__`` フックには ``request`` と ``info`` という 2 つの引数
 が渡されます。 ``request`` は :meth:`~pyramid.request.Request.resource_url`
-に渡された ``request`` オブジェクトです。 ``info`` は 2 つのキーを持つ辞書です
+に渡された :term:`request` オブジェクトです。 ``info`` は 2 つのキーを持つ辞書です
 (訳注: 「3 つ」の間違い？):
 
 
@@ -739,14 +739,14 @@ URL をオーバーライドしてこのメソッドが呼ばれます。
 
 .. The resource passed in must be :term:`location`-aware.
 
-渡されたリソースは `location` aware でなければなりません。
+渡されたリソースは :term:`location` aware でなければなりません。
 
 
 .. The presence or absence of a :term:`virtual root` has no impact on the
 .. behavior of :func:`~pyramid.traversal.resource_path`.
 
 :term:`virtual root` が存在するかどうかは
-:func:`~*pyramid.traversal.resource_path` の振る舞いに影響を及ぼしません。
+:func:`~pyramid.traversal.resource_path` の振る舞いに影響を及ぼしません。
 
 
 .. index::
@@ -842,7 +842,7 @@ URL をオーバーライドしてこのメソッドが呼ばれます。
 .. passed, then each parent of the resource, in order.  For example, if the
 .. resource tree is composed like so:
 
-:func:`pyramid.location.lineage` 関数は渡されたリソースを返し、その後
+:func:`~pyramid.location.lineage` 関数は渡されたリソースを返し、その後
 順番にリソースの親をそれぞれ返します。例えば、リソースツリーが以下の
 ように構成される場合:
 
@@ -965,7 +965,7 @@ root リソースを見つける
 :term:`root` リソースを見つけるためには
 :func:`pyramid.traversal.find_root` API を使用してください。この root
 リソースは :term:`resource tree` の root リソースです。この API は単一
-の引数 ``resource`` を受け取ります。 ``resource`` は ``location`` aware
+の引数 ``resource`` を受け取ります。 ``resource`` は :term:`location` aware
 なリソースです。ツリー上で root を見つけたいと思う任意のリソースを渡す
 ことができます。
 
@@ -1001,7 +1001,7 @@ root リソースは :term:`view callable` コード内では ``request.root`` �
 .. behavior of :func:`~pyramid.traversal.find_root`.  The root object returned
 .. is always the *physical* root object.
 
-:term:`virtual root` の有無は :func:`pyramid.traversal.find_root` の
+:term:`virtual root` の有無は :func:`~pyramid.traversal.find_root` の
 振る舞いに影響を及ぼしません。返された root オブジェクトは常に
 *物理的な* root オブジェクトです。
 

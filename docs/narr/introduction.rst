@@ -1009,7 +1009,7 @@ Pyramid は、「シングルトン」データ構造を正確に一つも持た
 .. successfully, and all changes are committed, or it does not, and all changes
 .. are aborted.
 
-Pyramid の scaffold システムは、 Zope から取られた *トランザクション
+Pyramid の :term:`scaffold` システムは、 Zope から取られた *トランザクション
 管理* システムを含むプロジェクトを生成します。このトランザクション管理
 システムを使用すると、あなたはもはやデータをコミットすることに責任を
 持たなくなります。代わりに Pyramid がコミットの面倒を見ます:
