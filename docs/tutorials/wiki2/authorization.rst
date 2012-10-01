@@ -561,7 +561,7 @@ align-right">`` div 内にこれを追加します:
 
 .. Our ``edit.pt`` template will look something like this when we're done:
 
-変更後に ``edit.py`` テンプレートはこのようになるでしょう:
+変更後に ``edit.pt`` テンプレートはこのようになるでしょう:
 
 
 .. literalinclude:: src/authorization/tutorial/templates/edit.pt
@@ -576,7 +576,7 @@ align-right">`` div 内にこれを追加します:
 
 .. Our ``view.pt`` template will look something like this when we're done:
 
-変更後に ``view.py`` テンプレートはこのようになるでしょう:
+変更後に ``view.pt`` テンプレートはこのようになるでしょう:
 
 
 .. literalinclude:: src/authorization/tutorial/templates/view.pt
