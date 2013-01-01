@@ -306,18 +306,20 @@ forbidden ビューとしてマークするために
 
 
 .. Like any other view, the forbidden view must accept at least a ``request``
-.. parameter, or both ``context`` and ``request``.  The ``context`` (available
-.. as ``request.context`` if you're using the request-only view argument
-.. pattern) is the context found by the router when the view invocation was
-.. denied.  The ``request`` is the current :term:`request` representing the
-.. denied action.
+.. parameter, or both ``context`` and ``request``.  If a forbidden view
+.. callable accepts both ``context`` and ``request``, the HTTP Exception is passed
+.. as context. The ``context`` as found by the router when view was
+.. denied (that you normally would expect) is available as
+.. ``request.context``.  The ``request`` is the  current :term:`request`
+.. representing the denied action.
 
 他のビューと同じように、 forbidden ビューは少なくとも ``request``
 パラメータ、あるいは ``context`` および ``request`` の両方を受け取らなければ
-なりません。 ``context`` (request のみのビュー引数パターンを使用している場合
-``request.context`` として利用可能) は、ビューの起動が拒否された時に
-ルーター (router) によって見つかったコンテキストです。 ``request`` は
-拒否されたアクションを表わす現在の :term:`request` です。
+なりません。 forbidden ビュー callable が ``context`` と ``request``
+の両方を受け取る場合、 HTTP 例外がコンテキストとして渡されます。
+(通常期待するような) ルーター (router) によって見つかった ``context`` は、
+ビューが拒否された時には ``request.context`` として利用可能です。
+``request`` は拒否されたアクションを表わす現在の :term:`request` です。
 
 
 .. Here's some sample code that implements a minimal forbidden view:

@@ -579,23 +579,6 @@ Forbidden ヘルパー:
   なしにリソース URL アダプターを追加するための API を提供します。
 
 
-.. - The :meth:`pyramid.config.Configurator.scan` method can now be passed an
-..   ``ignore`` argument, which can be a string, a callable, or a list
-..   consisting of strings and/or callables.  This feature allows submodules,
-..   subpackages, and global objects from being scanned.  See
-..   http://readthedocs.org/docs/venusian/en/latest/#ignore-scan-argument for
-..   more information about how to use the ``ignore`` argument to ``scan``.
-
-- :meth:`pyramid.config.Configurator.scan` メソッドは ``ignore`` 引数
-  を渡すことができるようになりました。それは、文字列、 callable 、あるいは
-  文字列と callable からなるリストです。この機能は、スキャンからサブ
-  モジュール、サブパッケージおよびグローバルなオブジェクトを許可します。
-  スキャンに ``ignore`` 引数を使用する方法についての詳細は、
-  http://readthedocs.org/docs/venusian/en/latest/#ignore-scan-argument
-  を参照してください。
-  (訳注: この段落は3つ前の段落と重複してる?)
-
-
 .. - Better error messages when a view callable returns a value that cannot be
 ..   converted to a response (for example, when a view callable returns a
 ..   dictionary without a renderer defined, or doesn't return any value at all).
@@ -1004,6 +987,17 @@ Forbidden ヘルパー:
   で実現しようとしていたことを行うための代替の方法が存在します。
   この機能は「永久に」存在し続けるでしょうが、ドキュメントの中では推奨、
   または言及されません。
+
+
+.. - Remove references to do-nothing ``pyramid.debug_templates`` setting in all
+..   Pyramid-provided .ini files. This setting previously told Chameleon to render
+..   better exceptions; now Chameleon always renders nice exceptions regardless of
+..   the value of this setting.
+
+- Pyramid が提供するすべての .ini ファイルの中で、何もしない
+  ``pyramid.debug_templates`` 設定への言及が削除されました。この設定は、
+  以前は Chameleon がよりよい例外をレンダリングするように指定するものでした;
+  現在 Chameleon はこの設定値にかかわらず常によい例外をレンダリングします。
 
 
 .. Known Issues
