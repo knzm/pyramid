@@ -3,6 +3,7 @@ import venusian
 from zope.interface import providedBy
 from zope.deprecation import deprecated
 
+
 from pyramid.interfaces import (
     IRoutesMapper,
     IView,
@@ -93,8 +94,8 @@ def render_view_to_iterable(context, request, name='', secure=True):
     :exc:`ValueError` if a view function is found and called but the
     view function's result does not have an ``app_iter`` attribute.
 
-    You can usually get the string representation of the return value
-    of this function by calling ``''.join(iterable)``, or just use
+    You can usually get the bytestring representation of the return value of
+    this function by calling ``b''.join(iterable)``, or just use
     :func:`pyramid.view.render_view` instead.
 
     If ``secure`` is ``True``, and the view is protected by a permission, the
@@ -116,7 +117,7 @@ def render_view(context, request, name='', secure=True):
     configuration` that matches the :term:`view name` ``name``
     registered against the specified ``context`` and ``request``
     and unwind the view response's ``app_iter`` (see
-    :ref:`the_response`) into a single string.  This function will
+    :ref:`the_response`) into a single bytestring.  This function will
     return ``None`` if a corresponding :term:`view callable` cannot be
     found (when no :term:`view configuration` matches the combination
     of ``name`` / ``context`` / and ``request``).  Additionally, this
@@ -136,7 +137,7 @@ def render_view(context, request, name='', secure=True):
     iterable = render_view_to_iterable(context, request, name, secure)
     if iterable is None:
         return None
-    return ''.join(iterable)
+    return b''.join(iterable)
 
 class view_config(object):
     """ A function, class or method :term:`decorator` which allows a
@@ -170,14 +171,23 @@ class view_config(object):
     ``request_type``, ``route_name``, ``request_method``, ``request_param``,
     ``containment``, ``xhr``, ``accept``, ``header``, ``path_info``,
     ``custom_predicates``, ``decorator``, ``mapper``, ``http_cache``,
-    ``match_param``, ``csrf_token``, and ``predicates``.
+    ``match_param``, ``csrf_token``, ``physical_path``, and ``predicates``.
 
     The meanings of these arguments are the same as the arguments passed to
     :meth:`pyramid.config.Configurator.add_view`.  If any argument is left
     out, its default will be the equivalent ``add_view`` default.
 
+    An additional keyword argument named ``_depth`` is provided for people who
+    wish to reuse this class from another decorator.  The default value is
+    ``0`` and should be specified relative to the ``view_config`` invocation.
+    It will be passed in to the :term:`venusian` ``attach`` function as the
+    depth of the callstack when Venusian checks if the decorator is being used
+    in a class or module context.  It's not often used, but it can be useful
+    in this circumstance.  See the ``attach`` function in Venusian for more
+    information.
+
     See :ref:`mapping_views_using_a_decorator_section` for details about
-    using :class:`view_config`.
+    using :class:`pyramid.view.view_config`.
 
     """
     venusian = venusian # for testing injection
@@ -189,12 +199,14 @@ class view_config(object):
 
     def __call__(self, wrapped):
         settings = self.__dict__.copy()
+        depth = settings.pop('_depth', 0)
 
         def callback(context, name, ob):
             config = context.config.with_package(info.module)
             config.add_view(view=ob, **settings)
 
-        info = self.venusian.attach(wrapped, callback, category='pyramid')
+        info = self.venusian.attach(wrapped, callback, category='pyramid',
+                                    depth=depth + 1)
 
         if info.scope == 'class':
             # if the decorator was attached to a method in a class, or

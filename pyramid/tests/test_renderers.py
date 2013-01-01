@@ -295,6 +295,7 @@ class TestChameleonRendererLookup(unittest.TestCase):
         self.assertEqual(factory.kw, {'macro':None})
 
     def test___call__spec_withmacro(self):
+        from pyramid.interfaces import ITemplateRenderer
         import os
         from pyramid import tests
         module_name = tests.__name__
@@ -302,10 +303,11 @@ class TestChameleonRendererLookup(unittest.TestCase):
         renderer = {}
         factory = DummyFactory(renderer)
         spec = '%s:%s' % (module_name, relpath)
+        reg = self.config.registry
         info = DummyRendererInfo({
             'name':spec,
             'package':None,
-            'registry':self.config.registry,
+            'registry':reg,
             'settings':{},
             'type':'type',
             })
@@ -318,6 +320,9 @@ class TestChameleonRendererLookup(unittest.TestCase):
             'withmacro.pt')
         self.assertTrue(factory.path.startswith(path))
         self.assertEqual(factory.kw, {'macro':'foo'})
+        self.assertTrue(
+            reg.getUtility(ITemplateRenderer, name=spec) is renderer
+            )
 
     def test___call__reload_assets_true(self):
         import pyramid.tests
@@ -658,13 +663,23 @@ class TestRendererHelper(unittest.TestCase):
         response = helper._make_response(la.encode('utf-8'), request)
         self.assertEqual(response.body, la.encode('utf-8'))
 
-    def test__make_response_result_is_None(self):
+    def test__make_response_result_is_None_no_body(self):
         from pyramid.response import Response
         request = testing.DummyRequest()
         request.response = Response()
         helper = self._makeOne('loo.foo')
         response = helper._make_response(None, request)
         self.assertEqual(response.body, b'')
+
+    def test__make_response_result_is_None_existing_body_not_molested(self):
+        from pyramid.response import Response
+        request = testing.DummyRequest()
+        response = Response()
+        response.body = b'abc'
+        request.response = response
+        helper = self._makeOne('loo.foo')
+        response = helper._make_response(None, request)
+        self.assertEqual(response.body, b'abc')
         
     def test__make_response_with_content_type(self):
         from pyramid.response import Response

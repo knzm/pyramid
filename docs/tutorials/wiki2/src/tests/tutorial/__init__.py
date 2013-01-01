@@ -11,6 +11,7 @@ from .models import (
     Base,
     )
 
+
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
@@ -18,7 +19,7 @@ def main(global_config, **settings):
     DBSession.configure(bind=engine)
     Base.metadata.bind = engine
     authn_policy = AuthTktAuthenticationPolicy(
-        'sosecret', callback=groupfinder)
+        'sosecret', callback=groupfinder, hashalg='sha512')
     authz_policy = ACLAuthorizationPolicy()
     config = Configurator(settings=settings,
                           root_factory='tutorial.models.RootFactory')
@@ -33,4 +34,3 @@ def main(global_config, **settings):
     config.add_route('edit_page', '/{pagename}/edit_page')
     config.scan()
     return config.make_wsgi_app()
-

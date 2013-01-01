@@ -127,7 +127,7 @@ Mako と Chameleon の部分的なテンプレートレンダリング
 ..   of rendering the entire template.  An example asset spec:
 ..   ``package:path/to/template#macroname.pt``.  This will render the macro
 ..   defined as ``macroname`` within the ``template.pt`` template instead of the
-..   entire templae.
+..   entire template.
 
 - Chameleon ZPT レンダラーが asset spec 中でのマクロ名の使用をサポート
   するようになりました。 asset spec 中にマクロ名がある場合、システム
@@ -160,6 +160,17 @@ Mako と Chameleon の部分的なテンプレートレンダリング
 
 マイナー機能追加
 -----------------------
+
+.. - :class:`pyramid.authentication.AuthTktAuthenticationPolicy` has been updated
+..   to support newer hashing algorithms such as ``sha512``. Existing applications
+..   should consider updating if possible for improved security over the default
+..   md5 hashing.
+
+- :class:`pyramid.authentication.AuthTktAuthenticationPolicy` が
+  ``sha512`` のようなより新しいハッシュアルゴリズムをサポートするために
+  更新されました。既存のアプリケーションは、可能な場合にはデフォルトの
+  md5 ハッシュに対する改善されたセキュリティに更新することを検討すべきです。
+
 
 .. - :meth:`pyramid.config.Configurator.add_directive` now accepts arbitrary
 ..   callables like partials or objects implementing ``__call__`` which don't
@@ -234,7 +245,7 @@ Mako と Chameleon の部分的なテンプレートレンダリング
 .. - An :meth:`pyramid.config.Configurator.add_permission` directive method was
 ..   added to the Configurator.  This directive registers a free-standing
 ..   permission introspectable into the Pyramid introspection system.
-..   Frameworks built atop Pyramid can thus use the the ``permissions``
+..   Frameworks built atop Pyramid can thus use the ``permissions``
 ..   introspectable category data to build a comprehensive list of permissions
 ..   supported by a running system.  Before this method was added, permissions
 ..   were already registered in this introspectable category as a side effect of
@@ -358,6 +369,167 @@ Mako と Chameleon の部分的なテンプレートレンダリング
   ``Base.metadata.bind = engine`` が ``alchemy`` scaffold に追加されました。
 
 
+.. - Comments with references to documentation sections placed in scaffold
+..   ``.ini`` files.
+
+- scaffold の ``.ini`` ファイルにドキュメンテーションへの参照を含む
+  コメントが追加されました。
+
+
+.. - Allow multiple values to be specified to the ``request_param`` view/route
+..   predicate as a sequence.  Previously only a single string value was allowed.
+..   See https://github.com/Pylons/pyramid/pull/705
+
+- ``request_param`` ビュー/route 述語に複数の値をシーケンスとして指定
+  することが可能になりました。以前は、単一の文字列値だけが許されていました。
+  https://github.com/Pylons/pyramid/pull/705 を見てください。
+
+
+.. - Added an HTTP Basic authentication policy
+..   at :class:`pyramid.authentication.BasicAuthAuthenticationPolicy`.
+
+- :class:`pyramid.authentication.BasicAuthAuthenticationPolicy` に
+  HTTP BASIC 認証ポリシーが追加されました。 
+
+
+.. - The :meth:`pyramid.config.Configurator.testing_securitypolicy` method now
+..   returns the policy object it creates.
+
+- :meth:`pyramid.config.Configurator.testing_securitypolicy` メソッドが、
+  生成したポリシーオブジェクトを返すようになりました。
+
+
+.. - The DummySecurityPolicy created by
+..   :meth:`pyramid.config.testing_securitypolicy` now sets a ``forgotten`` value 
+..   on the policy (the value ``True``) when its ``forget`` method is called.
+
+- :meth:`pyramid.config.testing_securitypolicy` によって生成された
+  DummySecurityPolicy が、 ``forget`` メソッドが呼ばれた場合にそのポリシーの
+  ``forgotten`` 値を (値 ``True`` に) 設定するようになりました 。
+
+
+.. - The DummySecurityPolicy created by
+..   :meth:`pyramid.config.testing_securitypolicy` now sets a
+..   ``remembered`` value on the policy, which is the value of the ``principal``
+..   argument it's called with when its ``remember`` method is called.
+
+- :meth:`pyramid.config.testing_securitypolicy` によって生成された
+  DummySecurityPolicy が、そのポリシーの ``remembered`` 値を設定する
+  ようになりました。それは ``remember`` メソッドが呼ばれたときに渡される
+  ``principal`` 引数の値です。
+
+
+.. - New ``physical_path`` view predicate.  If specified, this value should be a
+..   string or a tuple representing the physical traversal path of the context
+..   found via traversal for this predicate to match as true.  For example:
+..   ``physical_path='/'`` or ``physical_path='/a/b/c'`` or ``physical_path=('',
+..   'a', 'b', 'c')``.  It's useful when you want to always potentially show a
+..   view when some object is traversed to, but you can't be sure about what kind
+..   of object it will be, so you can't use the ``context`` predicate.  
+
+- 新しい ``physical_path`` ビュー述語。もし指定された場合にはその値は文字列
+  またはタプルで、それらはこの述語がマッチする、トラバーサルによって見つかった
+  コンテキストの物理的なトラバーサルパスを表わします。例えば:
+  ``physical_path='/'`` や ``physical_path='/a/b/c'`` や
+  ``physical_path=('', 'a', 'b', 'c')`` です。これは、あるオブジェクトが
+  トラバーサルされる時に潜在的に常にあるビューを表示したいけれども、
+  それがどんな種類のオブジェクトになるかは分からず、したがって
+  ``context`` 述語を使用することができない場合に便利です。
+
+
+.. - Added an ``effective_principals`` route and view predicate.
+
+- ``effective_principals`` route/ビュー述語が追加されました。
+
+
+.. - Do not allow the userid returned from the
+..   :func:`pyramid.security.authenticated_userid` or the userid that is one of the
+..   list of principals returned by :func:`pyramid.security.effective_principals`
+..   to be either of the strings ``system.Everyone`` or ``system.Authenticated``
+..   when any of the built-in authorization policies that live in
+..   :mod:`pyramid.authentication` are in use.  These two strings are reserved for
+..   internal usage by Pyramid and they will no longer be accepted as valid
+..   userids.
+
+- :mod:`pyramid.authentication` に含まれる内蔵の認可ポリシーのどれかが
+  使用されている場合に、 :func:`pyramid.security.authenticated_userid`
+  から返された userid 、または
+  :func:`pyramid.security.effective_principals` から返された
+  principals リストに含まれる userid は、文字列 ``system.Everyone``
+  または ``system.Authenticated`` のどちらかになることはできません。
+  これらの 2 つの文字列は Pyramid が内部で使用するために予約されます。
+  また、それらはもはや有効な userid として認められません。
+
+
+.. - Allow a ``_depth`` argument to :class:`pyramid.view.view_config`, which will
+..   permit limited composition reuse of the decorator by other software that
+..   wants to provide custom decorators that are much like view_config.
+
+- :class:`pyramid.view.view_config` に ``_depth`` 引数を渡すことができる
+  ようになりました。それは、他のソフトウェアが view_config によく似た
+  カスタムデコレータを提供したい場合に、デコレータの制限された合成再使用
+  を可能にします。
+
+
+.. - Allow an iterable of decorators to be passed to
+..   :meth:`pyramid.config.Configurator.add_view`. This allows views to be wrapped
+..   by more than one decorator without requiring combining the decorators 
+..   yourself.
+
+- :meth:`pyramid.config.Configurator.add_view` にデコレータの iterable
+  を渡せるようになりました。これによって、ユーザ自身でデコレータを組み合わせる
+  ことを必要とせずに複数のデコレータによってビューをラップできるようになります。
+
+
+.. - :func:`pyramid.security.view_execution_permitted` used to return `True` if no
+..   view could be found. It now raises a :exc:`TypeError` exception in that case,
+..   as it doesn't make sense to assert that a nonexistent view is
+..   execution-permitted. See https://github.com/Pylons/pyramid/issues/299.
+
+- :func:`pyramid.security.view_execution_permitted` は、以前はビューを
+  見つけられない場合に *True* を返していました。存在しないビューが実行
+  を許可されると主張しても無意味なので、その場合は :exc:`TypeError` 例外を
+  送出するようになりました。
+  https://github.com/Pylons/pyramid/issues/299 を見てください。
+
+
+.. - Small microspeed enhancement which anticipates that a
+..   :class:`pyramid.response.Response` object is likely to be returned from a 
+..   view.  Some code is shortcut if the class of the object returned by a view is 
+..   this class.  A similar microoptimization was done to
+..   :func:`pyramid.request.Request.is_response`.
+
+- ほとんどの場合にビューから :class:`pyramid.response.Response` オブジェクト
+  が返されることを見越した、実行速度の小さな改善。ビューによって返された
+  オブジェクトのクラスがこのクラスである場合に、一部のコードがショートカット
+  されます。同様の小さな最適化が
+  :func:`pyramid.request.Request.is_response` に対して行われました。
+
+
+.. - Make it possible to use variable arguments on all ``p*`` commands
+..   (``pserve``, ``pshell``, ``pviews``, etc) in the form ``a=1 b=2`` so you can
+..   fill in values in parameterized ``.ini`` file, e.g. ``pshell
+..   etc/development.ini http_port=8080``.
+
+- すべての ``p*`` コマンド (``pserve``, ``pshell``, ``pviews`` など) で
+  ``a=1 b=2`` 形式で可変引数を使用することができるようになりました。
+  それによりパラメータ化された ``.ini`` ファイル中の値を埋めることが
+  できます (例えば ``pshell etc/development.ini http_port=8080``)。
+
+
+.. - In order to allow people to ignore unused arguments to subscriber callables
+..   and to normalize the relationship between event subscribers and subscriber
+..   predicates, we now allow both subscribers and subscriber predicates to accept
+..   only a single ``event`` argument even if they've been subscribed for
+..   notifications that involve multiple interfaces.
+
+- ユーザがサブスクライバ callable に対する未使用の引数を無視したり、
+  イベントサブスクライバとサブスクライバ述語の関係を標準化することが
+  できるように、複数のインタフェースを伴う通知に対して登録されたとしても
+  サブスクライバとサブスクライバ述語の両方が単一の ``event`` 引数だけを
+  受け取ることができるようになりました。
+
+
 .. Backwards Incompatibilities
 
 後方非互換性
@@ -367,14 +539,14 @@ Mako と Chameleon の部分的なテンプレートレンダリング
 ..   ``bfg.routes.matchdict`` to the request's WSGI environment dictionary.
 ..   These values were docs-deprecated in ``repoze.bfg`` 1.0 (effectively seven
 ..   minor releases ago).  If your code depended on these values, use
-..   request.matched_route and request.matchdict instead.
+..   ``request.matched_route`` and ``request.matchdict`` instead.
 
 - Pyramid ルーターは、リクエストの WSGI 環境辞書に値
   ``bfg.routes.route`` や ``bfg.routes.matchdict`` を追加しなくなりました。
   これらの値は ``repoze.bfg`` 1.0 (事実上マイナーリリース 7 つ前) で
   deprecated とドキュメント化されています。
   あなたのコードがこれらの値に依存している場合は、代わりに
-  request.matched_route と request.matchdict を使用してください。
+  ``request.matched_route`` と ``request.matchdict`` を使用してください。
 
 
 .. - It is no longer possible to pass an environ dictionary directly to
@@ -489,7 +661,7 @@ Mako と Chameleon の部分的なテンプレートレンダリング
     を使ってください。
 
 
-  .. * ``registerTemplateRenderer`` (aka `registerDummyRenderer``), use
+  .. * ``registerTemplateRenderer`` (aka ``registerDummyRenderer``), use
   ..   :meth:`pyramid.config.Configurator.testing_add_template` instead.
 
   * ``registerTemplateRenderer`` (別名 ``registerDummyRenderer``), 代わりに
@@ -573,6 +745,20 @@ Deprecations
   リクエストオブジェクトをメソッドによって拡張することができます)。
 
 
+.. - :class:`pyramid.authentication.AuthTktAuthenticationPolicy` will emit a
+..   deprecation warning if an application is using the policy without explicitly
+..   passing a ``hashalg`` argument. This is because the default is "md5" which is
+..   considered theoretically subject to collision attacks. If you really want
+..   "md5" then you must specify it explicitly to get rid of the warning.
+
+- アプリケーションが明示的に ``hashalg`` 引数を渡さずに
+  :class:`pyramid.authentication.AuthTktAuthenticationPolicy` ポリシー
+  を使用した場合、このポリシーは deprecation 警告を発するでしょう。これは、
+  デフォルトが理論上は衝突攻撃を受けると考えられる "md5" だからです。
+  本当に "md5" を望むなら、警告を取り除くためにそれを明示的に指定しなければ
+  なりません。
+
+
 .. Documentation Enhancements
 
 ドキュメントの強化
@@ -593,6 +779,15 @@ Deprecations
 
 - :ref:`subrequest_chapter` の章が narrative ドキュメンテーションに追加
   されました。
+
+
+.. - All of the tutorials that use
+..   :class:`pyramid.authentication.AuthTktAuthenticationPolicy` now explicitly 
+..   pass ``sha512`` as a ``hashalg`` argument.
+
+- :class:`pyramid.authentication.AuthTktAuthenticationPolicy` を使用する
+  すべてのチュートリアルは ``hashalg`` 引数として明示的に ``sha512``
+  を渡すようになりました。
 
 
 .. - Many cleanups and improvements to narrative and API docs.

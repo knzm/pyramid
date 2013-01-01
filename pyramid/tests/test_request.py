@@ -42,12 +42,16 @@ class TestRequest(unittest.TestCase):
         from zope.interface.verify import verifyClass
         from pyramid.interfaces import IRequest
         verifyClass(IRequest, self._getTargetClass())
-        klass = self._getTargetClass()
 
     def test_instance_conforms_to_IRequest(self):
         from zope.interface.verify import verifyObject
         from pyramid.interfaces import IRequest
         verifyObject(IRequest, self._makeOne())
+
+    def test_ResponseClass_is_pyramid_Response(self):
+        from pyramid.response import Response
+        cls = self._getTargetClass()
+        self.assertEqual(cls.ResponseClass, Response)
 
     def test_charset_defaults_to_utf8(self):
         r = self._makeOne({'PATH_INFO':'/'})
@@ -225,6 +229,13 @@ class TestRequest(unittest.TestCase):
         request = self._makeOne()
         request.registry = self.config.registry
         self.assertEqual(request.is_response('abc'), False)
+
+    def test_is_response_true_ob_is_pyramid_response(self):
+        from pyramid.response import Response
+        r = Response('hello')
+        request = self._makeOne()
+        request.registry = self.config.registry
+        self.assertEqual(request.is_response(r), True)
 
     def test_is_response_false_adapter_is_not_self(self):
         from pyramid.interfaces import IResponse

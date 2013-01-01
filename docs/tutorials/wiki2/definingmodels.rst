@@ -4,11 +4,11 @@
 ドメインモデルを定義する
 =========================
 
-.. The first change we'll make to our stock pcreate-generated application will
+.. The first change we'll make to our stock ``pcreate``-generated application will
 .. be to define a :term:`domain model` constructor representing a wiki page.
 .. We'll do this inside our ``models.py`` file.
 
-pcreate から生成したアプリケーションに対して最初に行う変更は、 wiki ページ
+``pcreate`` から生成したアプリケーションに対して最初に行う変更は、 wiki ページ
 を表す :term:`domain model` のコンストラクタを定義することです。これを
 ``models.py`` ファイルの中で行います。
 
@@ -29,7 +29,7 @@ pcreate から生成したアプリケーションに対して最初に行う変
 
 .. .. note::
 
-..   There is nothing automagically special about the filename ``models.py``.  A
+..   There is nothing special about the filename ``models.py``.  A
 ..   project may have many models throughout its codebase in arbitrarily-named
 ..   files.  Files implementing models often have ``model`` in their filenames
 ..   (or they may live in a Python subpackage of your application package named
@@ -37,7 +37,7 @@ pcreate から生成したアプリケーションに対して最初に行う変
 
 .. note::
 
-   ``models.py`` というファイル名は、自動的に何かが行われるような特別な
+   ``models.py`` というファイル名には特別な
    意味はありません。プロジェクトはそのコードベース全体で任意の名前の
    ファイル中に多くのモデルを持つことができます。モデルを実装するファイルは
    多くの場合 ``model`` というファイル名を持っています (もしくは
@@ -54,7 +54,7 @@ pcreate から生成したアプリケーションに対して最初に行う変
 .. literalinclude:: src/models/tutorial/models.py
    :linenos:
    :language: py
-   :emphasize-lines: 19-21,24,26,28
+   :emphasize-lines: 20-22,25,27,29
 
 
 .. (The highlighted lines are the ones that need to be changed.)
@@ -89,8 +89,8 @@ pcreate から生成したアプリケーションに対して最初に行う変
 
 .. As you can see, our ``Page`` class has a class level attribute
 .. ``__tablename__`` which equals the string ``'pages'``.  This means that
-.. SQLAlchemy will store our wiki data in a SQL table named ``pages``.  Our Page
-.. class will also have class-level attributes named ``id``, ``name`` and
+.. SQLAlchemy will store our wiki data in a SQL table named ``pages``.  Our
+.. ``Page`` class will also have class-level attributes named ``id``, ``name`` and
 .. ``data`` (all instances of :class:`sqlalchemy.Column`).  These will map to
 .. columns in the ``pages`` table.  The ``id`` attribute will be the primary key
 .. in the table.  The ``name`` attribute will be a text attribute, each value of
@@ -100,7 +100,7 @@ pcreate から生成したアプリケーションに対して最初に行う変
 ご覧の通り、 ``Page`` クラスはクラス属性 ``__tablename__`` を持っていて、
 その値は文字列 ``'pages'`` に等しいです。これが意味するのは、
 SQLAlchemy が wiki データを ``pages`` という名前の SQL テーブルに保存
-するということです。 Page クラスはまた、 ``id``, ``name``, ``data`` という
+するということです。 ``Page`` クラスはまた、 ``id``, ``name``, ``data`` という
 名前のクラス属性を持っています (全て :class:`sqlalchemy.Column` の
 インスタンスです)。これらは ``pages`` テーブルのカラムにマップされます。
 ``id`` 属性はテーブルのプライマリキーになります。 ``name`` 属性はテキスト
@@ -146,7 +146,7 @@ SQLAlchemy が wiki データを ``pages`` という名前の SQL テーブル�
 .. literalinclude:: src/models/tutorial/scripts/initializedb.py
    :linenos:
    :language: python
-   :emphasize-lines: 14,34
+   :emphasize-lines: 14,36
 
 
 .. (Only the highlighted lines need to be changed.)

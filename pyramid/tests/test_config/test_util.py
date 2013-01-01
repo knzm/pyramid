@@ -365,304 +365,192 @@ class TestPredicateList(unittest.TestCase):
         from pyramid.exceptions import ConfigurationError
         self.assertRaises(ConfigurationError, self._callFUT, unknown=1)
         
+class Test_takes_one_arg(unittest.TestCase):
+    def _callFUT(self, view, attr=None, argname=None):
+        from pyramid.config.util import takes_one_arg
+        return takes_one_arg(view, attr=attr, argname=argname)
 
-class TestActionInfo(unittest.TestCase):
-    def _getTargetClass(self):
-        from pyramid.config.util import ActionInfo
-        return ActionInfo
-        
-    def _makeOne(self, filename, lineno, function, linerepr):
-        return self._getTargetClass()(filename, lineno, function, linerepr)
+    def test_requestonly_newstyle_class_no_init(self):
+        class foo(object):
+            """ """
+        self.assertFalse(self._callFUT(foo))
 
-    def test_class_conforms(self):
-        from zope.interface.verify import verifyClass
-        from pyramid.interfaces import IActionInfo
-        verifyClass(IActionInfo, self._getTargetClass())
+    def test_requestonly_newstyle_class_init_toomanyargs(self):
+        class foo(object):
+            def __init__(self, context, request):
+                """ """
+        self.assertFalse(self._callFUT(foo))
 
-    def test_instance_conforms(self):
-        from zope.interface.verify import verifyObject
-        from pyramid.interfaces import IActionInfo
-        verifyObject(IActionInfo, self._makeOne('f', 0, 'f', 'f'))
+    def test_requestonly_newstyle_class_init_onearg_named_request(self):
+        class foo(object):
+            def __init__(self, request):
+                """ """
+        self.assertTrue(self._callFUT(foo))
 
-    def test_ctor(self):
-        inst = self._makeOne('filename', 10, 'function', 'src')
-        self.assertEqual(inst.file, 'filename')
-        self.assertEqual(inst.line, 10)
-        self.assertEqual(inst.function, 'function')
-        self.assertEqual(inst.src, 'src')
+    def test_newstyle_class_init_onearg_named_somethingelse(self):
+        class foo(object):
+            def __init__(self, req):
+                """ """
+        self.assertTrue(self._callFUT(foo))
 
-    def test___str__(self):
-        inst = self._makeOne('filename', 0, 'function', '   linerepr  ')
-        self.assertEqual(str(inst),
-                         "Line 0 of file filename:\n       linerepr  ")
+    def test_newstyle_class_init_defaultargs_firstname_not_request(self):
+        class foo(object):
+            def __init__(self, context, request=None):
+                """ """
+        self.assertFalse(self._callFUT(foo))
 
-class TestTopologicalSorter(unittest.TestCase):
-    def _makeOne(self, *arg, **kw):
-        from pyramid.config.util import TopologicalSorter
-        return TopologicalSorter(*arg, **kw)
+    def test_newstyle_class_init_defaultargs_firstname_request(self):
+        class foo(object):
+            def __init__(self, request, foo=1, bar=2):
+                """ """
+        self.assertTrue(self._callFUT(foo, argname='request'))
 
-    def test_remove(self):
-        inst = self._makeOne()
-        inst.names.append('name')
-        inst.name2val['name'] = 1
-        inst.req_after.add('name')
-        inst.req_before.add('name')
-        inst.name2after['name'] = ('bob',)
-        inst.name2before['name'] = ('fred',)
-        inst.order.append(('bob', 'name'))
-        inst.order.append(('name', 'fred'))
-        inst.remove('name')
-        self.assertFalse(inst.names)
-        self.assertFalse(inst.req_before)
-        self.assertFalse(inst.req_after)
-        self.assertFalse(inst.name2before)
-        self.assertFalse(inst.name2after)
-        self.assertFalse(inst.name2val)
-        self.assertFalse(inst.order)
+    def test_newstyle_class_init_firstname_request_with_secondname(self):
+        class foo(object):
+            def __init__(self, request, two):
+                """ """
+        self.assertFalse(self._callFUT(foo))
 
-    def test_add(self):
-        from pyramid.config.util import LAST
-        sorter = self._makeOne()
-        sorter.add('name', 'factory')
-        self.assertEqual(sorter.names, ['name'])
-        self.assertEqual(sorter.name2val,
-                         {'name':'factory'})
-        self.assertEqual(sorter.order, [('name', LAST)])
-        sorter.add('name2', 'factory2')
-        self.assertEqual(sorter.names, ['name',  'name2'])
-        self.assertEqual(sorter.name2val,
-                         {'name':'factory', 'name2':'factory2'})
-        self.assertEqual(sorter.order,
-                         [('name', LAST), ('name2', LAST)])
-        sorter.add('name3', 'factory3', before='name2')
-        self.assertEqual(sorter.names,
-                         ['name',  'name2', 'name3'])
-        self.assertEqual(sorter.name2val,
-                         {'name':'factory', 'name2':'factory2',
-                          'name3':'factory3'})
-        self.assertEqual(sorter.order,
-                         [('name', LAST), ('name2', LAST),
-                          ('name3', 'name2')])
+    def test_newstyle_class_init_noargs(self):
+        class foo(object):
+            def __init__():
+                """ """
+        self.assertFalse(self._callFUT(foo))
 
-    def test_sorted_ordering_1(self):
-        sorter = self._makeOne()
-        sorter.add('name1', 'factory1')
-        sorter.add('name2', 'factory2')
-        self.assertEqual(sorter.sorted(),
-                         [
-                             ('name1', 'factory1'),
-                             ('name2', 'factory2'),
-                             ])
+    def test_oldstyle_class_no_init(self):
+        class foo:
+            """ """
+        self.assertFalse(self._callFUT(foo))
 
-    def test_sorted_ordering_2(self):
-        from pyramid.config.util import FIRST
-        sorter = self._makeOne()
-        sorter.add('name1', 'factory1')
-        sorter.add('name2', 'factory2', after=FIRST)
-        self.assertEqual(sorter.sorted(),
-                         [
-                             ('name2', 'factory2'),
-                             ('name1', 'factory1'),
-                             ])
+    def test_oldstyle_class_init_toomanyargs(self):
+        class foo:
+            def __init__(self, context, request):
+                """ """
+        self.assertFalse(self._callFUT(foo))
 
-    def test_sorted_ordering_3(self):
-        from pyramid.config.util import FIRST
-        sorter = self._makeOne()
-        add = sorter.add
-        add('auth', 'auth_factory', after='browserid')
-        add('dbt', 'dbt_factory') 
-        add('retry', 'retry_factory', before='txnmgr', after='exceptionview')
-        add('browserid', 'browserid_factory')
-        add('txnmgr', 'txnmgr_factory', after='exceptionview')
-        add('exceptionview', 'excview_factory', after=FIRST)
-        self.assertEqual(sorter.sorted(),
-                         [
-                             ('exceptionview', 'excview_factory'),
-                             ('retry', 'retry_factory'),
-                             ('txnmgr', 'txnmgr_factory'),
-                             ('dbt', 'dbt_factory'),
-                             ('browserid', 'browserid_factory'),
-                             ('auth', 'auth_factory'),
-                             ])
+    def test_oldstyle_class_init_onearg_named_request(self):
+        class foo:
+            def __init__(self, request):
+                """ """
+        self.assertTrue(self._callFUT(foo))
 
-    def test_sorted_ordering_4(self):
-        from pyramid.config.util import FIRST
-        sorter = self._makeOne()
-        add = sorter.add
-        add('exceptionview', 'excview_factory', after=FIRST)
-        add('auth', 'auth_factory', after='browserid')
-        add('retry', 'retry_factory', before='txnmgr', after='exceptionview')
-        add('browserid', 'browserid_factory')
-        add('txnmgr', 'txnmgr_factory', after='exceptionview')
-        add('dbt', 'dbt_factory') 
-        self.assertEqual(sorter.sorted(),
-                         [
-                             ('exceptionview', 'excview_factory'),
-                             ('retry', 'retry_factory'),
-                             ('txnmgr', 'txnmgr_factory'),
-                             ('browserid', 'browserid_factory'),
-                             ('auth', 'auth_factory'),
-                             ('dbt', 'dbt_factory'),
-                             ])
+    def test_oldstyle_class_init_onearg_named_somethingelse(self):
+        class foo:
+            def __init__(self, req):
+                """ """
+        self.assertTrue(self._callFUT(foo))
 
-    def test_sorted_ordering_5(self):
-        from pyramid.config.util import LAST, FIRST
-        sorter = self._makeOne()
-        add = sorter.add
-        add('exceptionview', 'excview_factory')
-        add('auth', 'auth_factory', after=FIRST)
-        add('retry', 'retry_factory', before='txnmgr', after='exceptionview')
-        add('browserid', 'browserid_factory', after=FIRST)
-        add('txnmgr', 'txnmgr_factory', after='exceptionview', before=LAST)
-        add('dbt', 'dbt_factory') 
-        self.assertEqual(sorter.sorted(),
-                         [
-                             ('browserid', 'browserid_factory'),
-                             ('auth', 'auth_factory'),
-                             ('exceptionview', 'excview_factory'),
-                             ('retry', 'retry_factory'),
-                             ('txnmgr', 'txnmgr_factory'), 
-                             ('dbt', 'dbt_factory'),
-                             ])
+    def test_oldstyle_class_init_defaultargs_firstname_not_request(self):
+        class foo:
+            def __init__(self, context, request=None):
+                """ """
+        self.assertFalse(self._callFUT(foo))
 
-    def test_sorted_ordering_missing_before_partial(self):
-        from pyramid.exceptions import ConfigurationError
-        sorter = self._makeOne()
-        add = sorter.add
-        add('dbt', 'dbt_factory')
-        add('auth', 'auth_factory', after='browserid')
-        add('retry', 'retry_factory', before='txnmgr', after='exceptionview')
-        add('browserid', 'browserid_factory')
-        self.assertRaises(ConfigurationError, sorter.sorted)
+    def test_oldstyle_class_init_defaultargs_firstname_request(self):
+        class foo:
+            def __init__(self, request, foo=1, bar=2):
+                """ """
+        self.assertTrue(self._callFUT(foo, argname='request'), True)
 
-    def test_sorted_ordering_missing_after_partial(self):
-        from pyramid.exceptions import ConfigurationError
-        sorter = self._makeOne()
-        add = sorter.add
-        add('dbt', 'dbt_factory')
-        add('auth', 'auth_factory', after='txnmgr')
-        add('retry', 'retry_factory', before='dbt', after='exceptionview')
-        add('browserid', 'browserid_factory')
-        self.assertRaises(ConfigurationError, sorter.sorted)
+    def test_oldstyle_class_init_noargs(self):
+        class foo:
+            def __init__():
+                """ """
+        self.assertFalse(self._callFUT(foo))
 
-    def test_sorted_ordering_missing_before_and_after_partials(self):
-        from pyramid.exceptions import ConfigurationError
-        sorter = self._makeOne()
-        add = sorter.add
-        add('dbt', 'dbt_factory')
-        add('auth', 'auth_factory', after='browserid')
-        add('retry', 'retry_factory', before='foo', after='txnmgr')
-        add('browserid', 'browserid_factory')
-        self.assertRaises(ConfigurationError, sorter.sorted)
+    def test_function_toomanyargs(self):
+        def foo(context, request):
+            """ """
+        self.assertFalse(self._callFUT(foo))
 
-    def test_sorted_ordering_missing_before_partial_with_fallback(self):
-        from pyramid.config.util import LAST
-        sorter = self._makeOne()
-        add = sorter.add
-        add('exceptionview', 'excview_factory', before=LAST)
-        add('auth', 'auth_factory', after='browserid')
-        add('retry', 'retry_factory', before=('txnmgr', LAST),
-                                      after='exceptionview')
-        add('browserid', 'browserid_factory')
-        add('dbt', 'dbt_factory') 
-        self.assertEqual(sorter.sorted(),
-                         [
-                             ('exceptionview', 'excview_factory'),
-                             ('retry', 'retry_factory'),
-                             ('browserid', 'browserid_factory'),
-                             ('auth', 'auth_factory'),
-                             ('dbt', 'dbt_factory'),
-                             ])
+    def test_function_with_attr_false(self):
+        def bar(context, request):
+            """ """
+        def foo(context, request):
+            """ """
+        foo.bar = bar
+        self.assertFalse(self._callFUT(foo, 'bar'))
 
-    def test_sorted_ordering_missing_after_partial_with_fallback(self):
-        from pyramid.config.util import FIRST
-        sorter = self._makeOne()
-        add = sorter.add
-        add('exceptionview', 'excview_factory', after=FIRST)
-        add('auth', 'auth_factory', after=('txnmgr','browserid'))
-        add('retry', 'retry_factory', after='exceptionview')
-        add('browserid', 'browserid_factory')
-        add('dbt', 'dbt_factory')
-        self.assertEqual(sorter.sorted(),
-                         [
-                             ('exceptionview', 'excview_factory'),
-                             ('retry', 'retry_factory'),
-                             ('browserid', 'browserid_factory'),
-                             ('auth', 'auth_factory'),
-                             ('dbt', 'dbt_factory'),
-                             ])
+    def test_function_with_attr_true(self):
+        def bar(context, request):
+            """ """
+        def foo(request):
+            """ """
+        foo.bar = bar
+        self.assertTrue(self._callFUT(foo, 'bar'))
 
-    def test_sorted_ordering_with_partial_fallbacks(self):
-        from pyramid.config.util import LAST
-        sorter = self._makeOne()
-        add = sorter.add
-        add('exceptionview', 'excview_factory', before=('wontbethere', LAST))
-        add('retry', 'retry_factory', after='exceptionview')
-        add('browserid', 'browserid_factory', before=('wont2', 'exceptionview'))
-        self.assertEqual(sorter.sorted(),
-                         [
-                             ('browserid', 'browserid_factory'),
-                             ('exceptionview', 'excview_factory'),
-                             ('retry', 'retry_factory'),
-                             ])
+    def test_function_onearg_named_request(self):
+        def foo(request):
+            """ """
+        self.assertTrue(self._callFUT(foo))
 
-    def test_sorted_ordering_with_multiple_matching_fallbacks(self):
-        from pyramid.config.util import LAST
-        sorter = self._makeOne()
-        add = sorter.add
-        add('exceptionview', 'excview_factory', before=LAST)
-        add('retry', 'retry_factory', after='exceptionview')
-        add('browserid', 'browserid_factory', before=('retry', 'exceptionview'))
-        self.assertEqual(sorter.sorted(),
-                         [
-                             ('browserid', 'browserid_factory'),
-                             ('exceptionview', 'excview_factory'),
-                             ('retry', 'retry_factory'),
-                             ])
+    def test_function_onearg_named_somethingelse(self):
+        def foo(req):
+            """ """
+        self.assertTrue(self._callFUT(foo))
 
-    def test_sorted_ordering_with_missing_fallbacks(self):
-        from pyramid.exceptions import ConfigurationError
-        from pyramid.config.util import LAST
-        sorter = self._makeOne()
-        add = sorter.add
-        add('exceptionview', 'excview_factory', before=LAST)
-        add('retry', 'retry_factory', after='exceptionview')
-        add('browserid', 'browserid_factory', before=('txnmgr', 'auth'))
-        self.assertRaises(ConfigurationError, sorter.sorted)
+    def test_function_defaultargs_firstname_not_request(self):
+        def foo(context, request=None):
+            """ """
+        self.assertFalse(self._callFUT(foo))
 
-    def test_sorted_ordering_conflict_direct(self):
-        from pyramid.config.util import CyclicDependencyError
-        sorter = self._makeOne()
-        add = sorter.add
-        add('browserid', 'browserid_factory')
-        add('auth', 'auth_factory', before='browserid', after='browserid')
-        self.assertRaises(CyclicDependencyError, sorter.sorted)
+    def test_function_defaultargs_firstname_request(self):
+        def foo(request, foo=1, bar=2):
+            """ """
+        self.assertTrue(self._callFUT(foo, argname='request'))
 
-    def test_sorted_ordering_conflict_indirect(self):
-        from pyramid.config.util import CyclicDependencyError
-        sorter = self._makeOne()
-        add = sorter.add
-        add('browserid', 'browserid_factory')
-        add('auth', 'auth_factory', before='browserid')
-        add('dbt', 'dbt_factory', after='browserid', before='auth')
-        self.assertRaises(CyclicDependencyError, sorter.sorted)
+    def test_function_noargs(self):
+        def foo():
+            """ """
+        self.assertFalse(self._callFUT(foo))
 
-class TestSingleton(unittest.TestCase):
-    def test_repr(self):
-        from pyramid.config.util import Singleton
-        r = repr(Singleton('ABC'))
-        self.assertEqual(r, 'ABC')
+    def test_instance_toomanyargs(self):
+        class Foo:
+            def __call__(self, context, request):
+                """ """
+        foo = Foo()
+        self.assertFalse(self._callFUT(foo))
 
-class TestCyclicDependencyError(unittest.TestCase):
-    def _makeOne(self, cycles):
-        from pyramid.config.util import CyclicDependencyError
-        return CyclicDependencyError(cycles)
+    def test_instance_defaultargs_onearg_named_request(self):
+        class Foo:
+            def __call__(self, request):
+                """ """
+        foo = Foo()
+        self.assertTrue(self._callFUT(foo))
 
-    def test___str__(self):
-        exc = self._makeOne({'a':['c', 'd'], 'c':['a']})
-        result = str(exc)
-        self.assertTrue("'a' sorts before ['c', 'd']" in result)
-        self.assertTrue("'c' sorts before ['a']" in result)
+    def test_instance_defaultargs_onearg_named_somethingelse(self):
+        class Foo:
+            def __call__(self, req):
+                """ """
+        foo = Foo()
+        self.assertTrue(self._callFUT(foo))
+
+    def test_instance_defaultargs_firstname_not_request(self):
+        class Foo:
+            def __call__(self, context, request=None):
+                """ """
+        foo = Foo()
+        self.assertFalse(self._callFUT(foo))
+
+    def test_instance_defaultargs_firstname_request(self):
+        class Foo:
+            def __call__(self, request, foo=1, bar=2):
+                """ """
+        foo = Foo()
+        self.assertTrue(self._callFUT(foo, argname='request'), True)
+
+    def test_instance_nocall(self):
+        class Foo: pass
+        foo = Foo()
+        self.assertFalse(self._callFUT(foo))
+    
+    def test_method_onearg_named_request(self):
+        class Foo:
+            def method(self, request):
+                """ """
+        foo = Foo()
+        self.assertTrue(self._callFUT(foo.method))
+
 
 class DummyCustomPredicate(object):
     def __init__(self):

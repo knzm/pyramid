@@ -309,7 +309,7 @@ Guardia と Lukasz Fidosz による「アイデア競争」アプリケーショ
 
 .. To find out how to become a contributor to :app:`Pyramid`, please see the
 .. `contributor's section of the documentation
-.. <http://docs.pylonsproject.org/index.html#contributing>`_.
+.. <http://docs.pylonsproject.org/en/latest/#contributing>`_.
 
 Pyramid の貢献者になる方法を理解するためには、 `ドキュメントの貢献者の
 セクション <http://docs.pylonsproject.jp/en/latest/index.html#id5>`_ を

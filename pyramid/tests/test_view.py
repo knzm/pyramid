@@ -224,12 +224,29 @@ class RenderViewToIterableTests(BaseTest, unittest.TestCase):
         response = DummyResponse()
         view = make_view(response)
         def anotherview(context, request):
-            return DummyResponse('anotherview')
+            return DummyResponse(b'anotherview')
         view.__call_permissive__ = anotherview
         self._registerView(request.registry, view, 'registered')
         iterable = self._callFUT(context, request, name='registered',
                                  secure=False)
-        self.assertEqual(iterable, ['anotherview'])
+        self.assertEqual(iterable, [b'anotherview'])
+
+    def test_verify_output_bytestring(self):
+        from pyramid.request import Request
+        from pyramid.config import Configurator
+        from pyramid.view import render_view
+        from webob.compat import text_type
+        config = Configurator(settings={})
+        def view(request):
+            request.response.text = text_type('<body></body>')
+            return request.response
+
+        config.add_view(name='test', view=view)
+        config.commit()
+
+        r = Request({})
+        r.registry = config.registry
+        self.assertEqual(render_view(object(), r, 'test'), b'<body></body>')
 
     def test_call_request_has_no_registry(self):
         request = self._makeRequest()
@@ -261,7 +278,7 @@ class RenderViewTests(BaseTest, unittest.TestCase):
         view = make_view(response)
         self._registerView(request.registry, view, 'registered')
         s = self._callFUT(context, request, name='registered', secure=True)
-        self.assertEqual(s, '')
+        self.assertEqual(s, b'')
 
     def test_call_view_registered_insecure_no_call_permissive(self):
         context = self._makeContext()
@@ -270,7 +287,7 @@ class RenderViewTests(BaseTest, unittest.TestCase):
         view = make_view(response)
         self._registerView(request.registry, view, 'registered')
         s = self._callFUT(context, request, name='registered', secure=False)
-        self.assertEqual(s, '')
+        self.assertEqual(s, b'')
 
     def test_call_view_registered_insecure_with_call_permissive(self):
         context = self._makeContext()
@@ -278,11 +295,11 @@ class RenderViewTests(BaseTest, unittest.TestCase):
         response = DummyResponse()
         view = make_view(response)
         def anotherview(context, request):
-            return DummyResponse('anotherview')
+            return DummyResponse(b'anotherview')
         view.__call_permissive__ = anotherview
         self._registerView(request.registry, view, 'registered')
         s = self._callFUT(context, request, name='registered', secure=False)
-        self.assertEqual(s, 'anotherview')
+        self.assertEqual(s, b'anotherview')
 
 class TestIsResponse(unittest.TestCase):
     def setUp(self):
@@ -372,6 +389,10 @@ class TestViewConfigDecorator(unittest.TestCase):
     def test_create_with_other_predicates(self):
         decorator = self._makeOne(foo=1)
         self.assertEqual(decorator.foo, 1)
+
+    def test_create_decorator_tuple(self):
+        decorator = self._makeOne(decorator=('decorator1', 'decorator2'))
+        self.assertEqual(decorator.decorator, ('decorator1', 'decorator2'))
         
     def test_call_function(self):
         decorator = self._makeOne()
@@ -518,6 +539,14 @@ class TestViewConfigDecorator(unittest.TestCase):
         renderer = settings[0]['renderer']
         self.assertTrue(renderer is renderer_helper)
         self.assertEqual(config.pkg, pyramid.tests)
+
+    def test_call_withdepth(self):
+        decorator = self._makeOne(_depth=1)
+        venusian = DummyVenusian()
+        decorator.venusian = venusian
+        def foo(): pass
+        decorator(foo)
+        self.assertEqual(venusian.depth, 2)
 
 class Test_append_slash_notfound_view(BaseTest, unittest.TestCase):
     def _callFUT(self, context, request):
@@ -746,8 +775,9 @@ class DummyVenusian(object):
         self.info = info
         self.attachments = []
 
-    def attach(self, wrapped, callback, category=None):
+    def attach(self, wrapped, callback, category=None, depth=1):
         self.attachments.append((wrapped, callback, category))
+        self.depth = depth
         return self.info
 
 class DummyRegistry(object):
