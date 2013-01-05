@@ -131,7 +131,7 @@ SQLAlchemy が wiki データを ``pages`` という名前の SQL テーブル�
 .. rather than a ``MyModel`` and add it to our ``DBSession``.
 
 モデルを変更したので、 ``initializedb.py`` スクリプトに変更を加える必要が
-あります。特に、 ``MyModel`` のインポートを ``Page`` のうちの1つに置き換え
+あります。特に、 ``MyModel`` のインポートを ``Page`` のインポートに置き換え
 ます。また、 ``MyModel`` ではなく ``Page`` を作成し、かつ ``DBSession``
 にそれを加えるためにスクリプトの最終行を変更します。
 
