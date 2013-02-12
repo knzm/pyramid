@@ -86,8 +86,8 @@ setup code.  However, the above :term:`scan` execution
 ``config.scan('mypackage')`` will pick up all :term:`configuration
 decoration`, including any objects decorated with the
 :class:`pyramid.view.view_config` decorator in the ``mypackage`` Python
-pakage.  For example, if you have a ``views.py`` in your package, a scan will
-pick up any of its configuration decorators, so we can add one there that
+package.  For example, if you have a ``views.py`` in your package, a scan will
+pick up any of its configuration decorators, so we can add one there
 that references ``myroute`` as a ``route_name`` parameter:
 
 .. code-block:: python
@@ -860,7 +860,7 @@ exactly the same job:
    request into a ``GET``, losing any ``POST`` data in the original
    request.
 
-See :ref:`view_module` and :ref:`changing_the_notfound_view` for for a more
+See :ref:`view_module` and :ref:`changing_the_notfound_view` for a more
 general description of how to configure a view and/or a not found view.
 
 .. index::

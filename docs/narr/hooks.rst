@@ -1786,7 +1786,7 @@ tween) をそのリクエストハンドラ関数として使用します。例�
 .. :meth:`pyramid.config.Configurator.add_tween`.  However, the caller of
 .. add_tween can provide an optional hint that can influence the implicit tween
 .. chain ordering by supplying ``under`` or ``over`` (or both) arguments to
-.. :meth:`~pyramid.config.Configurator.add_tween`.  These hints are only used
+.. :meth:`~pyramid.config.Configurator.add_tween`.  These hints are only
 .. used when an explicit tween ordering is not used. See
 .. :ref:`explicit_tween_ordering` for a description of how to set an explicit
 .. tween ordering.

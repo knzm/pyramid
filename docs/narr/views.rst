@@ -314,7 +314,7 @@ HTTP 例外
 .. as inheriting from the :class:`pyramid.httpexceptions.HTTPException` are
 .. :term:`http exception` objects.  Instances of an HTTP exception object may
 .. either be *returned* or *raised* from within view code.  In either case
-.. (return or raise) the instance will be used as as the view's response.
+.. (return or raise) the instance will be used as the view's response.
 
 :mod:`pyramid.httpexceptions` モジュールの中で
 :class:`pyramid.httpexceptions.HTTPException` から継承すると文書化

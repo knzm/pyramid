@@ -4,27 +4,16 @@
 インストール
 ============
 
-.. This tutorial assumes that Python and :term:`virtualenv` are already installed
-.. and working in your system. If you need help setting this up, you should
-.. refer to the chapters on :ref:`installing_chapter`.
-
-このチュートリアルは、あなたのシステムに Python と :term:`virtualenv` が
-既にインストールされて動作する状態になっていることを想定しています。
-もしこの環境構築に助けが必要な場合、 :ref:`installing_chapter` の章を
-参照してください。
-
-
 .. Preparation
 
 準備
 ===========
 
-.. Please take the following steps to prepare for the tutorial.  The
-.. steps are slightly different depending on whether you're using UNIX or
-.. Windows.
+.. Follow the steps in :ref:`installing_chapter`, but name the virtualenv
+.. directory ``pyramidtut``.
 
-チュートリアルの準備をするには次の手順を実行します。
-UNIX または Windows のどちらを使っているかによって、手順は若干異なります。
+:ref:`installing_chapter` の手順に従ってください。ただし virtualenv
+ディレクトリの名前は ``pyramidtut`` にしてください。
 
 
 .. Preparation, UNIX
@@ -34,60 +23,16 @@ UNIX または Windows のどちらを使っているかによって、手順は
 
 .. #. Install SQLite3 and its development packages if you don't already
 ..    have them installed.  Usually this is via your system's package
-..    manager.  For example, on a Debian Linux system, do ``sudo apt-get
-..    install libsqlite3-dev``.
+..    manager.  On a Debian system, this would be:
 
 1. まだインストールしていなければ SQLite3 とその開発用パッケージの
    インストール。通常これはシステムのパッケージマネージャーを介して行います。
-   例えば Debian Linuxシステムでは ``sudo apt-get install
-   libsqlite3-dev`` を実行します。
-
-
-.. #. Use your Python's virtualenv to make a workspace:
-
-2. virtualenv を使ってワークスペースを作成します:
+   Debian Linuxシステムでは、以下のようになります:
 
 
    .. code-block:: text
 
-      $ path/to/my/Python-2.6/bin/virtualenv --no-site-packages pyramidtut
-
-
-.. #. Switch to the ``pyramidtut`` directory:
-
-3. ``pyramidtut`` ディレクトリに移動します:
-
-
-   .. code-block:: text
-
-      $ cd pyramidtut
-
-
-.. #. Use ``easy_install`` to get :app:`Pyramid` and its direct
-..    dependencies installed:
-
-4. ``easy_install`` を使って :app:`Pyramid` と直接の依存関係を
-   インストールします:
-
-
-   .. code-block:: text
-
-      $ bin/easy_install pyramid
-
-
-.. Preparation, Windows
-
-準備 (Windows)
---------------------
-
-.. #. Use your Python's virtualenv to make a workspace:
-
-1. virtualenv を使ってワークスペースを作成します:
-
-
-   .. code-block:: text
-
-      c:\> c:\Python26\Scripts\virtualenv --no-site-packages pyramidtut
+      $ sudo apt-get install libsqlite3-dev
 
 
 .. #. Switch to the ``pyramidtut`` directory:
@@ -97,19 +42,22 @@ UNIX または Windows のどちらを使っているかによって、手順は
 
    .. code-block:: text
 
-      c:\> cd pyramidtut
+      $ cd pyramidtut
 
 
-.. #. Use ``easy_install`` to get :app:`Pyramid` and its direct
-..    dependencies installed:
+.. Preparation, Windows
 
-3. ``easy_install`` を使って :app:`Pyramid` と直接の依存関係を
-   インストールします:
+準備 (Windows)
+--------------------
+
+.. #. Switch to the ``pyramidtut`` directory:
+
+1. ``pyramidtut`` ディレクトリに移動します:
 
 
    .. code-block:: text
 
-      c:\pyramidtut> Scripts\easy_install pyramid
+      c:\> cd pyramidtut
 
 
 .. Making a Project
@@ -535,6 +483,13 @@ Windows の場合:
 .. - you are willing to use :term:`url dispatch` to map URLs to code.
 
 - URLからコードへのマッピング方法に :term:`url dispatch` を使用する
+
+
+.. - you want to use ``ZopeTransactionExtension`` and ``pyramid_tm`` to scope
+..   sessions to requests
+
+- セッションをリクエストスコープにするために
+  ``ZopeTransactionExtension`` と ``pyramid_tm`` を使用する
 
 
 .. .. note::

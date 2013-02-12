@@ -283,7 +283,7 @@ Windows の場合:
 .. each WikiWord match found in the content.  If the wiki already contains a
 .. page with the matched WikiWord name, ``check()`` generates a view
 .. link to be used as the substitution value and returns it.  If the wiki does
-.. not already contain a page with with the matched WikiWord name, ``check()``
+.. not already contain a page with the matched WikiWord name, ``check()``
 .. generates an "add" link as the substitution value and returns it.
 
 ``check()`` 関数は ``wikiwords.sub`` の最初の引数として使用されます。
@@ -719,10 +719,10 @@ page オブジェクトと、生成されたフォームのアクションとし
 
 
 .. - ``http://localhost:6543/FrontPage`` in a browser invokes
-..   the ``view_page`` view of the front page page object.
+..   the ``view_page`` view of the front page object.
 
 - ``http://localhost:6543/FrontPage`` にブラウザでアクセスすると、
-  フロントページ page オブジェクトの ``view_page`` ビューが呼び出されます。
+  フロントページオブジェクトの ``view_page`` ビューが呼び出されます。
 
 
 .. - ``http://localhost:6543/FrontPage/edit_page`` in a browser

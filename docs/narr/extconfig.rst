@@ -512,7 +512,7 @@ introspection 値がセットされます。これは、 introspectable を使�
 
 
 .. The ``type_name`` is a value that can be used to subtype this introspectable
-.. within its category for for sorting and presentation purposes.  It can be any
+.. within its category for sorting and presentation purposes.  It can be any
 .. value.
 
 ``type_name`` は、ソートと表示を目的としてこの introspectable をカテゴリ
