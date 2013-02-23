@@ -748,119 +748,6 @@ Conclusion
 少し読み込めば、基本的に理解することができます。
 
 
-Pyramid Uses Interfaces Too Liberally
--------------------------------------
-
-.. In this `TOPP Engineering blog entry
-.. <http://www.coactivate.org/projects/topp-engineering/blog/2008/10/20/what-bothers-me-about-the-component-architecture/>`_,
-.. Ian Bicking asserts that the way :mod:`repoze.bfg` used a Zope interface to
-.. represent an HTTP request method added too much indirection for not enough
-.. gain.  We agreed in general, and for this reason, :mod:`repoze.bfg` version
-.. 1.1 (and subsequent versions including :app:`Pyramid` 1.0+) added :term:`view
-.. predicate` and :term:`route predicate` modifiers to view configuration.
-.. Predicates are request-specific (or :term:`context` -specific) matching
-.. narrowers which don't use interfaces.  Instead, each predicate uses a
-.. domain-specific string as a match value.
-
-`TOPP Engineering blog entry
-<http://www.coactivate.org/projects/topp-engineering/blog/2008/10/20/what-bothers-me-about-the-component-architecture/>`_
-で Ian Bicking は、 HTTP リクエストメソッドを表わすのに
-:mod:`repoze.bfg` が Zope インタフェースを使用する方法は、十分な見返り
-もなくあまりにも多くの間接性を加えたと主張しています。私たちはこれに
-大筋で同意し、この理由で :mod:`repoze.bfg` バージョン1.1 (そして
-:app:`Pyramid` 1.0+ を含む後のバージョン) はビュー設定に :term:`view
-predicate` と :term:`route predicate` 修飾子を追加しました。 predicate
-は、リクエスト固有の (あるいは :term:`context` 固有の) matching
-narrowers で、インタフェースを使いません。代わりに、それぞれの
-predicate は match value としてドメイン固有の文字列を使用します。
-
-
-.. For example, to write a view configuration which matches only requests with
-.. the ``POST`` HTTP request method, you might write a ``@view_config``
-.. decorator which mentioned the ``request_method`` predicate:
-
-例えば、 ``POST`` HTTP リクエストメソッドを用いたリクエストだけに一致さ
-せたいビュー設定を書くために、 ``request_method`` predicate に mention
-した ``@view_config`` デコレータを書くことができます:
-
-
-.. code-block:: python
-   :linenos:
-
-   from pyramid.view import view_config
-   @view_config(name='post_view', request_method='POST', renderer='json')
-   def post_view(request):
-       return 'POSTed'
-
-
-.. You might further narrow the matching scenario by adding an ``accept``
-.. predicate that narrows matching to something that accepts a JSON response:
-
-JSON レスポンスを受理するものにマッチを狭める ``accept`` predicate を
-加えることで、マッチシナリオをさらに狭めることができます。
-
-
-.. code-block:: python
-   :linenos:
-
-   from pyramid.view import view_config
-   @view_config(name='post_view', request_method='POST', 
-                accept='application/json', renderer='json')
-   def post_view(request):
-       return 'POSTed'
-
-
-.. Such a view would only match when the request indicated that HTTP request
-.. method was ``POST`` and that the remote user agent passed
-.. ``application/json`` (or, for that matter, ``application/*``) in its
-.. ``Accept`` request header.
-
-このようなビューは、 HTTP リクエストメソッドが POST で、リモートユーザー
-エージェントが ``Accept`` リクエストヘッダーに ``application/json`` (あ
-るいはさらに言えば ``application/*``) を渡したことをリクエストが示す時
-だけ一致するでしょう。
-
-
-.. Under the hood, these features make no use of interfaces.
-
-内部では、これらの機能はインタフェースを利用しません。
-
-
-.. Many prebaked predicates exist.  However, use of only prebaked predicates,
-.. however, doesn't entirely meet Ian's criterion.  He would like to be able to
-.. match a request using a lambda or another function which interrogates the
-.. request imperatively.  In :mod:`repoze.bfg` version 1.2, we acommodate this
-.. by allowing people to define custom view predicates:
-
-事前準備された多くの predicate が存在しています。しかしながら、事前準備
-された predicate を使用することは、しかしながら Ian の基準を完全に満た
-すわけではありません。彼はリクエストを命令的に interrogate する lambda
-か他の関数を使用してリクエストとマッチできるようにしたいと思っています。
-:mod:`repoze.bfg` バージョン 1.2 では、これに対応するためにカスタムビュー
-predicate が定義できるようになります:
-
-
-.. code-block:: python
-   :linenos:
-
-   from pyramid.view import view_config
-   from pyramid.response import Response
-
-   def subpath(context, request):
-       return request.subpath and request.subpath[0] == 'abc'
-
-   @view_config(custom_predicates=(subpath,))
-   def aview(request):
-       return Response('OK')
-
-
-.. The above view will only match when the first element of the request's
-.. :term:`subpath` is ``abc``.
-
-上記のビューは、リクエストの :term:`subpath` の最初の要素が ``abc``
-だった場合にだけマッチします。
-
-
 .. _zcml_encouragement:
 
 Pyramid "Encourages Use of ZCML"
@@ -888,31 +775,6 @@ Pyramid "Encourages Use of ZCML"
 使用するために　ZCML や他の種類のフレームワーク的なアプリケーション設定
 に対する宣言的なフロント・エンドは全く必要ありません。
 
-
-.. _model_traversal_confusion:
-
-Pyramid Uses "Model" To Represent A Node In The Graph of Objects Traversed
---------------------------------------------------------------------------
-
-.. The ``repoze.bfg`` documentation used to refer to the graph being traversed
-.. when :term:`traversal` is used as a "model graph".  A terminology overlap
-.. confused people who wrote applications that always use ORM packages such as
-.. SQLAlchemy, which has a different notion of the definition of a "model".  As
-.. a result, in Pyramid 1.0a7, the tree of objects traversed is now renamed to
-.. :term:`resource tree` and its components are now named :term:`resource`
-.. objects.  Associated APIs have been changed.  This hopefully alleviates the
-.. terminology confusion caused by overriding the term "model".
-
-``repoze.bfg`` のドキュメンテーションでは、以前は :term:`traversal` が
-使用される場合にトラバーサルされているグラフのことを「モデルグラフ」と
-呼んでいました。用語のオーバーラップは、 SQLAlchemy のような ORM パッケージ
-を常に使用するアプリケーションを書いている人々を混乱させました(ORM
-にはモデルの定義についての異なる概念があります)。その結果、トラバースさ
-れたオブジェクトのツリーは、 Pyramid 1.0a7 で :term:`resource tree` に
-改名され、そのコンポーネントは :term:`resource` オブジェクトという名前
-になりました。関連する API が変更されました。これにより、用語「モデル」
-のオーバーライドによって引き起こされた用語上の混乱が軽減されることが
-期待されます。
 
 Pyramid Does Traversal, And I Don't Like Traversal
 --------------------------------------------------
@@ -1366,13 +1228,13 @@ pyramid/paster_templates/
 
   804KB
 
+
 .. pyramid/ (except for ``pyramd/tests and pyramid/paster_templates``)
 
 pyramid/ (``pyramd/tests`` と ``pyramid/paster_templates`` を除いて)
 
 
   539K
-
 
 .. The actual :app:`Pyramid` runtime code is about 10% of the total size of the
 .. tarball omitting docs, helper templates used for package generation, and test
@@ -1394,65 +1256,43 @@ paster テンプレート Python ファイルを除いて Python コードのお
 Pyramid Has Too Many Dependencies
 ---------------------------------
 
-.. This is true.  At the time of this writing, the total number of Python
-.. package distributions that :app:`Pyramid` depends upon transitively is 15 if
-.. you use Python 2.7, or 17 if you use Python 2.5 or 2.6.  This is a lot more
-.. than zero package distribution dependencies: a metric which various Python
-.. microframeworks and Django boast.
+.. This is true.  At the time of this writing (Pyramid 1.3), the total number of
+.. Python package distributions that :app:`Pyramid` depends upon transitively is
+.. if you use Python 3.2 or Python 2.7 is 10.  If you use Python 2.6, Pyramid
+.. will pull in 12 package distributions.  This is a lot more than zero package
+.. distribution dependencies: a metric which various Python microframeworks and
+.. Django boast.
 
-それは真実です。これを書いている時点で、 :app:`Pyramid` が推移的に依存
-する Python パッケージ配布物の総数は、 Python 2.7 を使用していれば 15
-で、 Python 2.5 あるいは 2.6 を使用すれば 17 になります。これは 0 より
-はるかに多いパッケージ依存性です: 様々な Python のマイクロフレームワーク
-や Django が誇るメトリック。
-
-
-.. The :mod:`zope.component`, package on which :app:`Pyramid` depends has
-.. transitive dependencies on several other packages (:mod:`zope.event`, and
-.. :mod:`zope.interface`).  :app:`Pyramid` also has its own direct dependencies,
-.. such as :term:`PasteDeploy`, :term:`Chameleon`, :term:`Mako`, :term:`WebOb`,
-.. :mod:`zope.deprecation` and some of these in turn have their own transitive
-.. dependencies.
-
-:app:`Pyramid` が依存するパッケージである :mod:`zope.component` は、
-他のいくつかのパッケージに対して推移的な依存性を持っています
-(:mod:`zope.event` と :mod:`zope.interface`)。 :app:`Pyramid` は
-さらに :term:`PasteDeploy`, :term:`Chameleon`, :term:`Mako`,
-:term:`WebOb`, :mod:`zope.deprecation` といった直接の依存性を持ち、
-これらのうちのいくつかはさらにそれ自身の推移的な依存性を持っています。
+それは真実です。これを書いている時点 (Pyramid 1.3) で、 :app:`Pyramid`
+が推移的に依存する Python パッケージ配布物の総数は、 Python 3.2 あるいは
+Python 2.7 を使用していれば 10 です。 Python 2.6 を使用していれば
+Pyramid は 12 のパッケージ配布物を取得します。これは 0 よりはるかに多い
+パッケージ依存性です: 様々な Python のマイクロフレームワークや Django
+が誇るメトリック。
 
 
-.. We try not to reinvent too many wheels (at least the ones that don't need
-.. reinventing), and this comes at the cost of some number of dependencies.
-.. However, "number of package distributions" is just not a terribly great
-.. metric to measure complexity.  For example, the :mod:`zope.event`
-.. distribution on which :app:`Pyramid` depends has a grand total of four lines
-.. of runtime code.
+.. However, Pyramid 1.2 relied on 15 packages under Python 2.7 and 17 packages
+.. under Python 2.6, so we've made progress here.  A port to Python 3 completed
+.. in Pyramid 1.3 helped us shed a good number of dependencies by forcing us to
+.. make better packaging decisions.
 
-私たちはあまり車輪の再発明をしないようにしています (少なくとも徹底的に
-再構築する必要のないものに関しては)。そしてこれは依存性に関して若干の
-犠牲を伴います。しかしながら「パッケージ配布物の数」は、複雑さを測定
-するためにはあまり優れたメトリックではありません。例えば、 :app:`Pyramid`
-が依存する :mod:`zope.event` パッケージには、合計で 4 行のランタイム
-コードしかありません。
+しかし、 Pyramid 1.2 は Python 2.7 で 15 のパッケージに、Python 2.6 で
+17 パッケージに依存していました。したがって、現時点で進歩しています。
+Pyramid 1.3 で完了した Python 3 への移植は、よりよいパッケージング上の
+決断を強いることによって、かなりの数の依存性を削ぎ落とすことを助けました。
 
 
-.. In the meantime, :app:`Pyramid` has a number of package distribution
-.. dependencies comparable to similarly-targeted frameworks such as Pylons 1.X.
-.. It may be in the future that we shed more dependencies as the result of a
-.. port to Python 3 (the less code we need to port, the better).  In the future,
-.. we may also move templating system dependencies out of the core and place
-.. them in add-on packages, to be included by developers instead of by the
-.. framework.  This would reduce the number of core dependencies by about five.
+.. In the future, we may also move templating system dependencies out of the
+.. core and place them in add-on packages, to be included by developers instead
+.. of by the framework.  This would reduce the number of core dependencies by
+.. about five, leaving us with only five remaining core dependencies.
 
-当面の間、 :app:`Pyramid` は Pylons 1.X のような同様のターゲットを持った
-フレームワークと comparable に多くのパッケージ依存性を持ちます。
-Python 3 への移植の結果、将来はより多くの依存性を減らせるかもしれません
-(なぜなら移植する必要のあるコードがより少ない方が良いからです)。今後私たちは、
-さらにテンプレートシステムへの依存性を中核コードから移動させて、アドオン
-パッケージに置くことを検討しています。それらはフレームワークによってではなく、
-開発者によって含められるようになります。これにより、中核コードの依存性の数は
-約 5 減るでしょう。
+将来的に、さらにテンプレートシステムへの依存性をコアから外部に移動させて、
+アドオンパッケージにしようとしています。これによって、インクルードするか
+どうかをフレームワークではなく開発者が決められるようになります。
+これは、コアの依存性の数を約 5 まで減らすでしょう。残されたのは 5 つの
+コア依存性だけです。
+
 
 
 Pyramid "Cheats" To Obtain Speed
@@ -1923,7 +1763,7 @@ Zope 3 はコンテキストオブジェクトを `security proxy
 
 .. #) When I use the security proxy machinery, I can have a view that
 ..    conditionally displays certain HTML elements (like form fields) or
-..    prevents certain attributes from being modified depending on the the
+..    prevents certain attributes from being modified depending on the
 ..    permissions that the accessing user possesses with respect to a context
 ..    object.
 
@@ -3174,13 +3014,13 @@ Pyramid Doesn't Offer Pluggable Apps
 ------------------------------------
 
 .. It is "Pyramidic" to compose multiple external sources into the same
-.. configuration using :meth:`~pyramid.config.Configuration.include`.  Any
+.. configuration using :meth:`~pyramid.config.Configurator.include`.  Any
 .. number of includes can be done to compose an application; includes can even
 .. be done from within other includes.  Any directive can be used within an
 .. include that can be used outside of one (such as
 .. :meth:`~pyramid.config.Configurator.add_view`, etc).
 
-:meth:`~pyramid.config.Configuration.include` を使用して一つの同じ設定に
+:meth:`~pyramid.config.Configurator.include` を使用して一つの同じ設定に
 多数の外部ソースを結合するのが「Pyramid 流」です。アプリケーションを構成
 するために任意の数の include が行えます; include はさらに他の include の
 内部からも行えます。 include の内部では、その外部で使用できる任意の

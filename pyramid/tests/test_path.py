@@ -138,9 +138,9 @@ class TestPackageOf(unittest.TestCase):
         self.assertEqual(result, tests)
 
     def test_it_module(self):
-        import pyramid.tests.test_configuration
+        import pyramid.tests.test_path
         from pyramid import tests
-        package = DummyPackageOrModule(pyramid.tests.test_configuration)
+        package = DummyPackageOrModule(pyramid.tests.test_path)
         result = self._callFUT(package)
         self.assertEqual(result, tests)
 
@@ -259,17 +259,15 @@ class TestPkgResourcesAssetDescriptor(unittest.TestCase):
     def _makeOne(self, pkg='pyramid.tests', path='test_asset.py'):
         return self._getTargetClass()(pkg, path)
 
-    def test_class_implements(self):
+    def test_class_conforms_to_IAssetDescriptor(self):
         from pyramid.interfaces import IAssetDescriptor
         from zope.interface.verify import verifyClass
-        klass = self._getTargetClass()
-        verifyClass(IAssetDescriptor, klass)
+        verifyClass(IAssetDescriptor, self._getTargetClass())
         
-    def test_instance_implements(self):
+    def test_instance_conforms_to_IAssetDescriptor(self):
         from pyramid.interfaces import IAssetDescriptor
         from zope.interface.verify import verifyObject
-        inst = self._makeOne()
-        verifyObject(IAssetDescriptor, inst)
+        verifyObject(IAssetDescriptor, self._makeOne())
 
     def test_absspec(self):
         inst = self._makeOne()
@@ -316,17 +314,15 @@ class TestFSAssetDescriptor(unittest.TestCase):
     def _makeOne(self, path=os.path.join(here, 'test_asset.py')):
         return self._getTargetClass()(path)
 
-    def test_class_implements(self):
+    def test_class_conforms_to_IAssetDescriptor(self):
         from pyramid.interfaces import IAssetDescriptor
         from zope.interface.verify import verifyClass
-        klass = self._getTargetClass()
-        verifyClass(IAssetDescriptor, klass)
+        verifyClass(IAssetDescriptor, self._getTargetClass())
         
-    def test_instance_implements(self):
+    def test_instance_conforms_to_IAssetDescriptor(self):
         from pyramid.interfaces import IAssetDescriptor
         from zope.interface.verify import verifyObject
-        inst = self._makeOne()
-        verifyObject(IAssetDescriptor, inst)
+        verifyObject(IAssetDescriptor, self._makeOne())
 
     def test_absspec(self):
         inst = self._makeOne()
@@ -399,7 +395,7 @@ class TestDottedNameResolver(unittest.TestCase):
         self.assertEqual(result, self.__class__)
 
     def test__zope_dottedname_style_resolve_relative_leading_dots(self):
-        import pyramid.tests.test_configuration
+        import pyramid.tests.test_path
         typ = self._makeOne()
         result = typ._zope_dottedname_style(
             '..tests.test_path.TestDottedNameResolver', pyramid.tests)

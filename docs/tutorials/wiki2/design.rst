@@ -17,12 +17,12 @@ wiki アプリケーションの設計の簡単な概要です。
 概要
 -------
 
-.. We choose to use ``reStructuredText`` markup in the wiki text.  Translation
+.. We choose to use :term:`reStructuredText` markup in the wiki text.  Translation
 .. from reStructuredText to HTML is provided by the widely used ``docutils``
 .. Python module.  We will add this module in the dependency list on the project
 .. ``setup.py`` file.
 
-wiki テキストの中で ``reStructuredText`` マークアップを使用することを
+wiki テキストの中で :term:`reStructuredText` マークアップを使用することを
 選択します。 reStructuredText から HTML への変換は、広く用いられている
 docutils Python モジュールによって提供されます。このモジュールを
 プロジェクトの ``setup.py`` ファイルの依存リストに加えます。
@@ -40,10 +40,10 @@ wiki データを保持するために SQLite データベースを使用しま�
 このデータベース中のデータにアクセスするために SQLAlchemy を使用します。
 
 
-.. Within the database, we define a single table named `tables`, whose elements
+.. Within the database, we define a single table named `pages`, whose elements
 .. will store the wiki pages.  There are two columns: `name` and `data`.
 
-データベース内では、 `tables` という名の単一のテーブルを定義します。
+データベース内では、 `pages` という名前の単一のテーブルを定義します。
 その要素は wiki ページを格納します。このテーブルには 2 つのカラムあります:
 `name` と `data` です。
 
@@ -58,7 +58,7 @@ wiki データを保持するために SQLite データベースを使用しま�
 .. To add a page to the wiki, a new row is created and the text
 .. is stored in `data`.
 
-wiki にページを追加するために、新しい列が作成され、テキストが `data` に
+wiki にページを追加するために、新しいレコードが作成され、テキストが `data` に
 格納されます。
 
 
@@ -76,13 +76,28 @@ wiki にページを追加するために、新しい列が作成され、テキ
 ビュー
 ------
 
-.. There will be four views to handle the normal operations of adding and
-.. editing wiki pages, and viewing pages and the wiki front page.  Two
-.. additional views will handle the login and logout tasks related to security.
+.. There will be three views to handle the normal operations of adding,
+.. editing and viewing wiki pages, plus one view for the wiki front page.
+.. Two templates will be used, one for viewing, and one for both for adding
+.. and editing wiki pages.
 
-ページの追加と編集、ページの閲覧、および wiki フロントページ
-という通常動作を扱う4つのビューがあるでしょう。2つの追加のビューが、
-セキュリティに関係するログインとログアウトのタスクを扱うでしょう。
+ページの追加、編集、表示という通常動作を扱う3つのビューに加えて wiki
+フロントページのためのビューがあるでしょう。2つのテンプレートが使用
+されるでしょう。一つは wiki ページの表示のため、もう一つは追加と編集の
+両方のためです。
+
+
+.. The default templating systems in :app:`Pyramid` are
+.. :term:`Chameleon` and :term:`Mako`.  Chameleon is a variant of
+.. :term:`ZPT`, which is an XML-based templating language.  Mako is a
+.. non-XML-based templating language.  Because we had to pick one,
+.. we chose Chameleon for this tutorial.
+
+:app:`Pyramid` におけるデフォルトのテンプレートシステムは
+:term:`Chameleon` と :term:`Mako` です。 Chameleon は :term:`ZPT` の
+変種で、 XML ベースのテンプレート言語です。 Mako は非 XML ベースの
+テンプレート言語です。1つを選ばなければならなかったので、この
+チュートリアルでは Chameleon を選びました。
 
 
 .. Security
@@ -130,7 +145,7 @@ wiki にページを追加するために、新しい列が作成され、テキ
   .. +----------+----------------+----------------+
 
   +------------+----------------+----------------+
-  | アクション | Principal      | Permission     |
+  | アクション | Principal      | パーミッション |
   +============+================+================+
   | 許可       | Everyone       | View           |
   +------------+----------------+----------------+
@@ -143,6 +158,13 @@ wiki にページを追加するために、新しい列が作成され、テキ
 
 - それぞれのリクエストが扱われる度にセキュリティポリシーを検査するために、
   パーミッション宣言がビューに追加されます。
+
+
+.. Two additional views and one template will handle the login and
+.. logout tasks.
+
+2つの追加のビューと1つのテンプレートが、ログインとログアウトのタスク
+を扱うでしょう。
 
 
 .. Summary
@@ -170,7 +192,7 @@ wiki にページを追加するために、新しい列が作成され、テキ
 .. |                      |                       |             |            |            |
 .. |                      |                       |             |            |            |
 .. +----------------------+-----------------------+-------------+------------+------------+
-.. | /edit_page/PageName  |  Display edit form    |  edit_page  |  edit.pt   |  edit      |
+.. | /PageName/edit_page  |  Display edit form    |  edit_page  |  edit.pt   |  edit      |
 .. |                      |  with existing        |             |            |            |
 .. |                      |  content.             |             |            |            |
 .. |                      |                       |             |            |            |
@@ -189,7 +211,8 @@ wiki にページを追加するために、新しい列が作成され、テキ
 .. |                      |  redirect to          |             |            |            |
 .. |                      |  /PageName            |             |            |            |
 .. +----------------------+-----------------------+-------------+------------+------------+
-.. | /login               |  Display login form.  |  login      |  login.pt  |            |
+.. | /login               |  Display login form,  |  login      |  login.pt  |            |
+.. |                      |   Forbidden [3]_      |             |            |            |
 .. |                      |                       |             |            |            |
 .. |                      |  If the form was      |             |            |            |
 .. |                      |  submitted,           |             |            |            |
@@ -225,7 +248,7 @@ wiki にページを追加するために、新しい列が作成され、テキ
 |                      |                       |             |              |                |
 |                      |                       |             |              |                |
 +----------------------+-----------------------+-------------+--------------+----------------+
-| /edit_page/PageName  |  既存の内容で         |  edit_page  |  edit.pt     |  edit          |
+| /PageName/edit_page  |  既存の内容で         |  edit_page  |  edit.pt     |  edit          |
 |                      |  編集フォームを       |             |              |                |
 |                      |  表示。               |             |              |                |
 |                      |                       |             |              |                |
@@ -245,6 +268,7 @@ wiki にページを追加するために、新しい列が作成され、テキ
 +----------------------+-----------------------+-------------+--------------+----------------+
 | /login               |  ログインフォームを   |  login      |  login.pt    |                |
 |                      |  表示。               |             |              |                |
+|                      |  Forbidden [3]_       |             |              |                |
 |                      |                       |             |              |                |
 |                      |  フォームが送信       |             |              |                |
 |                      |  されたら認証。       |             |              |                |
@@ -263,6 +287,7 @@ wiki にページを追加するために、新しい列が作成され、テキ
 | /logout              |  /FrontPage に        |  logout     |              |                |
 |                      |  リダイレクト         |             |              |                |
 +----------------------+-----------------------+-------------+--------------+----------------+
+
 
 .. .. [1] This is the default view for a Page context
 ..        when there is no view name.

@@ -8,14 +8,16 @@ from pyramid.interfaces import (
     )
 
 from pyramid.exceptions import ConfigurationError
+from pyramid.registry import predvalseq
 from pyramid.request import route_request_iface
 from pyramid.urldispatch import RoutesMapper
 
 from pyramid.config.util import (
     action_method,
-    make_predicates,
     as_sorted_tuple,
     )
+
+import pyramid.config.predicates
 
 class RoutesConfiguratorMixin(object):
     @action_method
@@ -28,7 +30,7 @@ class RoutesConfiguratorMixin(object):
                   factory=None,
                   for_=None,
                   header=None,
-                  xhr=False,
+                  xhr=None,
                   accept=None,
                   path_info=None,
                   request_method=None,
@@ -44,7 +46,7 @@ class RoutesConfiguratorMixin(object):
                   path=None,
                   pregenerator=None,
                   static=False,
-                  ):
+                  **predicates):
         """ Add a :term:`route configuration` to the current
         configuration state, as well as possibly a :term:`view
         configuration` to be used to specify a :term:`view callable`
@@ -107,7 +109,7 @@ class RoutesConfiguratorMixin(object):
           remainder marker in its pattern (see
           :ref:`using_traverse_in_a_route_pattern`).  The ``traverse``
           argument to add_route allows you to associate route patterns
-          with an arbitrary traversal path without using a a
+          with an arbitrary traversal path without using a
           ``*traverse`` remainder marker; instead you can use other
           match information.
 
@@ -236,6 +238,19 @@ class RoutesConfiguratorMixin(object):
           request, this predicate will be true.  If this predicate
           returns ``False``, route matching continues.
 
+        effective_principals
+
+          If specified, this value should be a :term:`principal` identifier or
+          a sequence of principal identifiers.  If the
+          :func:`pyramid.security.effective_principals` method indicates that
+          every principal named in the argument list is present in the current
+          request, this predicate will return True; otherwise it will return
+          False.  For example:
+          ``effective_principals=pyramid.security.Authenticated`` or
+          ``effective_principals=('fred', 'group:admins')``.
+
+          .. versionadded:: 1.4a4
+
         custom_predicates
 
           This value should be a sequence of references to custom
@@ -254,6 +269,15 @@ class RoutesConfiguratorMixin(object):
           :ref:`custom_route_predicates` for more information about
           ``info``.
 
+        predicates
+
+          Pass a key/value pair here to use a third-party predicate
+          registered via
+          :meth:`pyramid.config.Configurator.add_view_predicate`.  More than
+          one key/value pair can be used at the same time.  See
+          :ref:`view_and_route_predicates` for more information about
+          third-party predicates.  This argument is new as of Pyramid 1.4.
+          
         View-Related Arguments
 
         .. warning::
@@ -351,17 +375,6 @@ class RoutesConfiguratorMixin(object):
         if request_method is not None:
             request_method = as_sorted_tuple(request_method)
 
-        ignored, predicates, ignored = make_predicates(
-            xhr=xhr,
-            request_method=request_method,
-            path_info=path_info,
-            request_param=request_param,
-            header=header,
-            accept=accept,
-            traverse=traverse,
-            custom=custom_predicates
-            )
-
         factory = self.maybe_dotted(factory)
         if pattern is None:
             pattern = path
@@ -417,8 +430,24 @@ class RoutesConfiguratorMixin(object):
                     request_iface, IRouteRequest, name=name)
 
         def register_connect():
+            pvals = predicates.copy()
+            pvals.update(
+                dict(
+                    xhr=xhr,
+                    request_method=request_method,
+                    path_info=path_info,
+                    request_param=request_param,
+                    header=header,
+                    accept=accept,
+                    traverse=traverse,
+                    custom=predvalseq(custom_predicates),
+                    )
+                )
+
+            predlist = self.get_predlist('route')
+            _, preds, _ = predlist.make(self, **pvals)
             route = mapper.connect(
-                name, pattern, factory, predicates=predicates,
+                name, pattern, factory, predicates=preds,
                 pregenerator=pregenerator, static=static
                 )
             intr['object'] = route
@@ -447,6 +476,48 @@ class RoutesConfiguratorMixin(object):
                 attr=view_attr,
             )
 
+    @action_method
+    def add_route_predicate(self, name, factory, weighs_more_than=None,
+                           weighs_less_than=None):
+        """ Adds a route predicate factory.  The view predicate can later be
+        named as a keyword argument to
+        :meth:`pyramid.config.Configurator.add_route`.
+
+        ``name`` should be the name of the predicate.  It must be a valid
+        Python identifier (it will be used as a keyword argument to
+        ``add_view``).
+
+        ``factory`` should be a :term:`predicate factory`.
+
+        See :ref:`view_and_route_predicates` for more information.
+
+        .. note::
+
+           This method is new as of Pyramid 1.4.
+        """
+        self._add_predicate(
+            'route',
+            name,
+            factory,
+            weighs_more_than=weighs_more_than,
+            weighs_less_than=weighs_less_than
+            )
+
+    def add_default_route_predicates(self):
+        p = pyramid.config.predicates
+        for (name, factory) in (
+            ('xhr', p.XHRPredicate),
+            ('request_method', p.RequestMethodPredicate),
+            ('path_info', p.PathInfoPredicate),
+            ('request_param', p.RequestParamPredicate),
+            ('header', p.HeaderPredicate),
+            ('accept', p.AcceptPredicate),
+            ('effective_principals', p.EffectivePrincipalsPredicate),
+            ('custom', p.CustomPredicate),
+            ('traverse', p.TraversePredicate),
+            ):
+            self.add_route_predicate(name, factory)
+    
     def get_routes_mapper(self):
         """ Return the :term:`routes mapper` object associated with
         this configurator's :term:`registry`."""

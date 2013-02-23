@@ -87,32 +87,53 @@ Python パッケージとしてディレクトリをマークします。私た�
 :ref:`startup_chapter` を参照してください)。
 
 
-.. The main function first creates a SQLAlchemy database engine using
+.. The main function first creates a :term:`SQLAlchemy` database engine using
 .. ``engine_from_config`` from the ``sqlalchemy.`` prefixed settings in the
 .. ``development.ini`` file's ``[app:main]`` section.  This will be a URI
 .. (something like ``sqlite://``):
 
 main 関数は最初に ``engine_from_config`` を使用して ``development.ini``
 ファイルの ``[app:main]`` セクション中の ``sqlalchemy.`` 接頭辞のついた
-設定から SQLAlchemy データベースエンジンを作成します。これは
+設定から :term:`SQLAlchemy` データベースエンジンを作成します。これは
 (``sqlite://`` のような) URI になります:
 
 
    .. literalinclude:: src/basiclayout/tutorial/__init__.py
-      :lines: 9
-      :linenos:
+      :lines: 13
       :language: py
 
 
-.. ``main`` then initializes our SQL database using SQLAlchemy, passing it the
+.. ``main`` then initializes our SQLAlchemy session object, passing it the
 .. engine:
 
-``main`` はその後、エンジンを渡すことで SQLAlchemy を使って SQL データ
-ベースを初期化します:
+``main`` はその後、 engine を渡すことで SQLAlchemy セッションオブジェクト
+を初期化します:
 
 
    .. literalinclude:: src/basiclayout/tutorial/__init__.py
-      :lines: 10
+      :lines: 14
+      :language: py
+
+
+.. ``main`` subsequently initializes our SQLAlchemy declarative ``Base`` object,
+.. assigning the engine we created to the ``bind`` attribute of it's
+.. ``metadata`` object.  This allows table definitions done imperatively
+.. (instead of declaratively, via a class statement) to work.  We won't use any
+.. such tables in our application, but if you add one later, long after you've
+.. forgotten about this tutorial, you won't be left scratching your head when it
+.. doesn't work.
+
+``main`` は続いて SQLAlchemy の declarative (宣言的) ``Base`` オブジェクトを
+初期化します (作成した engine を ``metadata`` オブジェクトの ``bind`` 属性に
+割り当てます)。これは、 (クラス構文によって宣言的に行う代わりに) 命令的に
+行われたテーブル定義が動作するようにします。このアプリケーションの中では
+そのようなテーブルを使用しませんが、後で (それもこのチュートリアルのこと
+なんか忘れてしまうくらいかなり後になって) そのようなテーブルを追加したなら、
+それが動作しないことにずっと悩むことになるでしょう。
+
+
+   .. literalinclude:: src/basiclayout/tutorial/__init__.py
+      :lines: 15
       :language: py
 
 
@@ -122,7 +143,7 @@ main 関数は最初に ``engine_from_config`` を使用して ``development.ini
 
 
    .. literalinclude:: src/basiclayout/tutorial/__init__.py
-      :lines: 11
+      :lines: 16
       :language: py
 
 
@@ -147,14 +168,14 @@ main 関数は最初に ``engine_from_config`` を使用して ``development.ini
 
 
    .. literalinclude:: src/basiclayout/tutorial/__init__.py
-      :lines: 12
+      :lines: 17
       :language: py
 
 
 .. This registers a static resource view which will match any URL that starts
-.. with the prefix ``/static`` (by virtue of the first argument to add_static
-.. view).  This will serve up static resources for us from within the ``static``
-.. directory of our ``tutorial`` package, in this case, via
+.. with the prefix ``/static`` (by virtue of the first argument to
+.. ``add_static_view``).  This will serve up static resources for us from within
+.. the ``static`` directory of our ``tutorial`` package, in this case, via
 .. ``http://localhost:6543/static/`` and below (by virtue of the second argument
 .. to add_static_view).  With this declaration, we're saying that any URL that
 .. starts with ``/static`` should go to the static view; any remainder of its
@@ -162,7 +183,7 @@ main 関数は最初に ``engine_from_config`` を使用して ``development.ini
 .. a static file resource, such as a CSS file.
 
 これは ``/static`` 接頭辞から始まる全ての URL に一致する静的リソースの
-ビューを登録します (add_static_view への最初の引数によって)。これによって
+ビューを登録します (``add_static_view`` への最初の引数によって)。これによって
 ``tutorial`` パッケージの中の ``static`` ディレクトリにある静的リソースが、
 この場合は ``http://localhost:6543/static/`` 以下を経由して返されるように
 なります (add_static_view への2番目の引数によって)。この宣言によって、
@@ -177,28 +198,30 @@ main 関数は最初に ``engine_from_config`` を使用して ``development.ini
 
 また、 ``main`` は configurator を使用して URL が ``/`` の場合に使用される
 :term:`route configuration` を
-:meth:`pyramid.config.Configurator.add_route` メソッド経由で登録します。
+:meth:`pyramid.config.Configurator.add_route` メソッド経由で登録します:
 
 
    .. literalinclude:: src/basiclayout/tutorial/__init__.py
-      :lines: 13
+      :lines: 18
       :language: py
 
 
 .. Since this route has a ``pattern`` equalling ``/`` it is the route that will
-.. be matched when the URL ``/`` is visted, e.g. ``http://localhost:6543/``.
+.. be matched when the URL ``/`` is visited, e.g. ``http://localhost:6543/``.
 
 このルートは ``/`` に一致する ``パターン`` を持っているので、 URL ``/`` 、
 例えば ``http://localhost:6543/`` を閲覧した場合にマッチします。
 
 
-.. ``main`` next calls the ``scan`` method of the configurator, which will
-.. recursively scan our ``tutorial`` package, looking for ``@view_config`` (and
+.. ``main`` next calls the ``scan`` method of the configurator
+.. (:meth:`pyramid.config.Configurator.scan`), which will recursively scan our
+.. ``tutorial`` package, looking for ``@view_config`` (and
 .. other special) decorators.  When it finds a ``@view_config`` decorator, a
 .. view configuration will be registered, which will allow one of our
 .. application URLs to be mapped to some code.
 
-``main`` は、次に configurator の ``scan`` メソッドを呼び出します。
+``main`` は、次に configurator の ``scan`` メソッド
+(:meth:`pyramid.config.Configurator.scan`) を呼び出します。
 これは ``@view_config`` (また他の特別な) デコレータを探して ``tutorial``
 パッケージを再帰的に走査します。 ``@view_config`` デコレータが見つかったら、
 ビュー設定が登録されます。それはアプリケーション URL の 1 つをあるコード
@@ -206,7 +229,7 @@ main 関数は最初に ``engine_from_config`` を使用して ``development.ini
 
 
    .. literalinclude:: src/basiclayout/tutorial/__init__.py
-      :lines: 14
+      :lines: 19
       :language: py
 
 
@@ -220,7 +243,7 @@ main 関数は最初に ``engine_from_config`` を使用して ``development.ini
 
 
    .. literalinclude:: src/basiclayout/tutorial/__init__.py
-      :lines: 15
+      :lines: 20
       :language: py
 
 
@@ -306,6 +329,19 @@ scan メソッドを呼ぶ目的は、アプリケーション内のビュー設
 :term:`scan` によって検知されなければ、 ``@view_config`` は不活発です。
 
 
+.. The sample ``my_view()`` created by the scaffold uses a ``try:`` and ``except:``
+.. clause, to detect if there is a problem accessing the project database and
+.. provide an alternate error response.  That response will include the text
+.. shown at the end of the file, which will be displayed in the browser to
+.. inform the user about possible actions to take to solve the problem.
+
+scaffold によって作成されたサンプルの ``my_view()`` は、 ``try:`` と
+``except:`` 節を使用して、プロジェクトデータベースへのアクセスに問題が
+あるかどうかを検出し、代替エラーレスポンスを提供します。そのレスポンスは、
+ファイルの最後に示されたテキストを含み、問題を解決するためにユーザが
+取ることのできるアクションについて通知するためブラウザに表示されます。
+
+
 .. Content Models with ``models.py``
 
 ``models.py`` とコンテンツのモデル
@@ -344,14 +380,13 @@ SQLAlchemy ベースのアプリケーションの中で、 *model* オブジェ
       :language: py
 
 
-.. Next we set up a SQLAlchemy "DBSession" object:
+.. Next we set up a SQLAlchemy ``DBSession`` object:
 
-次に SQLAlchemy の "DBSession" オブジェクトをセットアップします:
+次に SQLAlchemy の ``DBSession`` オブジェクトをセットアップします:
 
 
    .. literalinclude:: src/basiclayout/tutorial/models.py
       :lines: 16
-      :linenos:
       :language: py
 
 
@@ -359,7 +394,7 @@ SQLAlchemy ベースのアプリケーションの中で、 *model* オブジェ
 .. ``scoped_session`` allows us to access our database connection globally.
 .. ``sessionmaker`` creates a database session object.  We pass to
 .. ``sessionmaker`` the ``extension=ZopeTransactionExtension()`` extension
-.. option in order to allow the system to automatically manage datbase
+.. option in order to allow the system to automatically manage database
 .. transactions.  With ``ZopeTransactionExtension`` activated, our application
 .. will automatically issue a transaction commit after every request unless an
 .. exception is raised, in which case the transaction will be aborted.
@@ -406,13 +441,15 @@ SQLAlchemy ベースのアプリケーションの中で、 *model* オブジェ
       :language: py
 
 
-.. Our example model has an ``__init__`` that takes a two arguments (``name``,
-.. and ``value``).  It stores these values as ``self.name`` and ``self.value``
+.. Our example model has an ``__init__`` method that takes a two arguments
+.. (``name``, and ``value``).  It stores these values as ``self.name`` and
+.. ``self.value``
 .. within the ``__init__`` function itself.  The ``MyModel`` class also has a
 .. ``__tablename__`` attribute.  This informs SQLAlchemy which table to use to
 .. store the data representing instances of this class.
 
-サンプルモデルの ``__init__`` は 2 つの引数を取ります (``name`` と ``value``)。
+サンプルモデルの ``__init__`` メソッドは 2 つの引数を取ります
+(``name`` と ``value``)。
 これらの値は ``__init__`` 関数自身の中で ``self.name`` および
 ``self.value`` として保存されます。 ``MyModel`` クラスはまた、
 ``__tablename__`` 属性を持っています。これは、このクラスのインスタンス

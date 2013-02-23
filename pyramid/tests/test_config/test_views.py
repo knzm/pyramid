@@ -118,7 +118,8 @@ class TestViewsConfigurationMixin(unittest.TestCase):
         self.assertEqual(wrapper.__module__, view.__module__)
         self.assertEqual(wrapper.__name__, view.__name__)
         self.assertEqual(wrapper.__doc__, view.__doc__)
-        self.assertEqual(wrapper.__discriminator__(None, None)[0], 'view')
+        self.assertEqual(wrapper.__discriminator__(None, None).resolve()[0],
+                         'view')
 
     def test_add_view_view_callable_dottedname(self):
         from pyramid.renderers import null_renderer
@@ -183,6 +184,28 @@ class TestViewsConfigurationMixin(unittest.TestCase):
         self.assertEqual(wrapper.__doc__, view.__doc__)
         result = wrapper(None, None)
         self.assertEqual(result, 'OK')
+
+    def test_add_view_with_decorator_tuple(self):
+        from pyramid.renderers import null_renderer
+        def view(request):
+            """ ABC """
+            return 'OK'
+        def view_wrapper1(fn):
+            def inner(context, request):
+                return 'wrapped1' + fn(context, request)
+            return inner
+        def view_wrapper2(fn):
+            def inner(context, request):
+                return 'wrapped2' + fn(context, request)
+            return inner
+        config = self._makeOne(autocommit=True)
+        config.add_view(view=view, decorator=(view_wrapper2, view_wrapper1),
+                        renderer=null_renderer)
+        wrapper = self._getViewCallable(config)
+        self.assertFalse(wrapper is view)
+        self.assertEqual(wrapper.__doc__, view.__doc__)
+        result = wrapper(None, None)
+        self.assertEqual(result, 'wrapped2wrapped1OK')
 
     def test_add_view_with_http_cache(self):
         import datetime
@@ -400,7 +423,7 @@ class TestViewsConfigurationMixin(unittest.TestCase):
         from pyramid.interfaces import IViewClassifier
         from pyramid.interfaces import IMultiView
         phash = md5()
-        phash.update(b'xhr:True')
+        phash.update(b'xhr = True')
         view = lambda *arg: 'NOT OK'
         view.__phash__ = phash.hexdigest()
         config = self._makeOne(autocommit=True)
@@ -424,7 +447,7 @@ class TestViewsConfigurationMixin(unittest.TestCase):
         from pyramid.interfaces import IExceptionViewClassifier
         from pyramid.interfaces import IMultiView
         phash = md5()
-        phash.update(b'xhr:True')
+        phash.update(b'xhr = True')
         view = lambda *arg: 'NOT OK'
         view.__phash__ = phash.hexdigest()
         config = self._makeOne(autocommit=True)
@@ -644,6 +667,24 @@ class TestViewsConfigurationMixin(unittest.TestCase):
         request = DummyRequest()
         request.accept = DummyAccept('text/html', 'text/html')
         self.assertEqual(wrapper(None, request), 'OK2')
+
+    def test_add_view_mixed_case_replaces_existing_view(self):
+        from pyramid.renderers import null_renderer
+        def view(context, request): return 'OK'
+        def view2(context, request): return 'OK2'
+        def view3(context, request): return 'OK3'
+        config = self._makeOne(autocommit=True)
+        config.add_view(view=view, renderer=null_renderer)
+        config.add_view(view=view2, accept='text/html', renderer=null_renderer)
+        config.add_view(view=view3, accept='text/HTML', renderer=null_renderer)
+        wrapper = self._getViewCallable(config)
+        self.assertTrue(IMultiView.providedBy(wrapper))
+        self.assertEqual(len(wrapper.media_views.items()),1)
+        self.assertFalse('text/HTML' in wrapper.media_views)
+        self.assertEqual(wrapper(None, None), 'OK')
+        request = DummyRequest()
+        request.accept = DummyAccept('text/html', 'text/html')
+        self.assertEqual(wrapper(None, request), 'OK3')
 
     def test_add_views_with_accept_multiview_replaces_existing(self):
         from pyramid.renderers import null_renderer
@@ -970,8 +1011,10 @@ class TestViewsConfigurationMixin(unittest.TestCase):
         wrapper = self._getViewCallable(config)
         self.assertTrue(IMultiView.providedBy(wrapper))
         request = self._makeRequest(config)
-        self.assertEqual(wrapper.__discriminator__(foo, request)[5], IFoo)
-        self.assertEqual(wrapper.__discriminator__(bar, request)[5], IBar)
+        self.assertNotEqual(
+            wrapper.__discriminator__(foo, request),
+            wrapper.__discriminator__(bar, request),
+            )
 
     def test_add_view_with_template_renderer(self):
         from pyramid.tests import test_config
@@ -1146,6 +1189,16 @@ class TestViewsConfigurationMixin(unittest.TestCase):
         request.method = 'GET'
         self._assertNotFound(wrapper, None, request)
 
+    def test_add_view_with_request_method_get_implies_head(self):
+        from pyramid.renderers import null_renderer
+        view = lambda *arg: 'OK'
+        config = self._makeOne(autocommit=True)
+        config.add_view(view=view, request_method='GET', renderer=null_renderer)
+        wrapper = self._getViewCallable(config)
+        request = self._makeRequest(config)
+        request.method = 'HEAD'
+        self.assertEqual(wrapper(None, request), 'OK')
+        
     def test_add_view_with_request_param_noval_true(self):
         from pyramid.renderers import null_renderer
         view = lambda *arg: 'OK'
@@ -1207,8 +1260,8 @@ class TestViewsConfigurationMixin(unittest.TestCase):
     def test_add_view_with_header_badregex(self):
         view = lambda *arg: 'OK'
         config = self._makeOne()
-        self.assertRaises(ConfigurationError,
-                          config.add_view, view=view, header='Host:a\\')
+        config.add_view(view, header='Host:a\\')
+        self.assertRaises(ConfigurationError, config.commit)
 
     def test_add_view_with_header_noval_match(self):
         from pyramid.renderers import null_renderer
@@ -1313,8 +1366,8 @@ class TestViewsConfigurationMixin(unittest.TestCase):
     def test_add_view_with_path_info_badregex(self):
         view = lambda *arg: 'OK'
         config = self._makeOne()
-        self.assertRaises(ConfigurationError,
-                          config.add_view, view=view, path_info='\\')
+        config.add_view(view, path_info='\\')
+        self.assertRaises(ConfigurationError, config.commit)
 
     def test_add_view_with_path_info_match(self):
         from pyramid.renderers import null_renderer
@@ -1688,6 +1741,38 @@ class TestViewsConfigurationMixin(unittest.TestCase):
         result = view(None, request)
         self.assertEqual(result, 'OK')
 
+    def test_add_forbidden_view_allows_other_predicates(self):
+        from pyramid.renderers import null_renderer
+        config = self._makeOne(autocommit=True)
+        # doesnt blow up
+        config.add_view_predicate('dummy', DummyPredicate)
+        config.add_forbidden_view(renderer=null_renderer, dummy='abc')
+
+    def test_add_forbidden_view_disallows_name(self):
+        config = self._makeOne(autocommit=True)
+        self.assertRaises(ConfigurationError,
+                          config.add_forbidden_view, name='foo')
+
+    def test_add_forbidden_view_disallows_permission(self):
+        config = self._makeOne(autocommit=True)
+        self.assertRaises(ConfigurationError,
+                          config.add_forbidden_view, permission='foo')
+
+    def test_add_forbidden_view_disallows_context(self):
+        config = self._makeOne(autocommit=True)
+        self.assertRaises(ConfigurationError,
+                          config.add_forbidden_view, context='foo')
+
+    def test_add_forbidden_view_disallows_for_(self):
+        config = self._makeOne(autocommit=True)
+        self.assertRaises(ConfigurationError,
+                          config.add_forbidden_view, for_='foo')
+
+    def test_add_forbidden_view_disallows_http_cache(self):
+        config = self._makeOne(autocommit=True)
+        self.assertRaises(ConfigurationError,
+                          config.add_forbidden_view, http_cache='foo')
+
     def test_add_notfound_view(self):
         from pyramid.renderers import null_renderer
         from zope.interface import implementedBy
@@ -1703,6 +1788,38 @@ class TestViewsConfigurationMixin(unittest.TestCase):
         result = view(None, request)
         self.assertEqual(result, (None, request))
 
+    def test_add_notfound_view_allows_other_predicates(self):
+        from pyramid.renderers import null_renderer
+        config = self._makeOne(autocommit=True)
+        # doesnt blow up
+        config.add_view_predicate('dummy', DummyPredicate)
+        config.add_notfound_view(renderer=null_renderer, dummy='abc')
+
+    def test_add_notfound_view_disallows_name(self):
+        config = self._makeOne(autocommit=True)
+        self.assertRaises(ConfigurationError,
+                          config.add_notfound_view, name='foo')
+
+    def test_add_notfound_view_disallows_permission(self):
+        config = self._makeOne(autocommit=True)
+        self.assertRaises(ConfigurationError,
+                          config.add_notfound_view, permission='foo')
+
+    def test_add_notfound_view_disallows_context(self):
+        config = self._makeOne(autocommit=True)
+        self.assertRaises(ConfigurationError,
+                          config.add_notfound_view, context='foo')
+
+    def test_add_notfound_view_disallows_for_(self):
+        config = self._makeOne(autocommit=True)
+        self.assertRaises(ConfigurationError,
+                          config.add_notfound_view, for_='foo')
+
+    def test_add_notfound_view_disallows_http_cache(self):
+        config = self._makeOne(autocommit=True)
+        self.assertRaises(ConfigurationError,
+                          config.add_notfound_view, http_cache='foo')
+        
     def test_add_notfound_view_append_slash(self):
         from pyramid.response import Response
         from pyramid.renderers import null_renderer
@@ -1779,192 +1896,20 @@ class TestViewsConfigurationMixin(unittest.TestCase):
         from pyramid.tests import test_config
         self.assertEqual(result, test_config)
 
-
 class Test_requestonly(unittest.TestCase):
     def _callFUT(self, view, attr=None):
         from pyramid.config.views import requestonly
-        return requestonly(view, attr)
+        return requestonly(view, attr=attr)
 
-    def test_requestonly_newstyle_class_no_init(self):
-        class foo(object):
-            """ """
-        self.assertFalse(self._callFUT(foo))
+    def test_defaults(self):
+        def aview(request, a=1, b=2): pass
+        self.assertTrue(self._callFUT(aview))
 
-    def test_requestonly_newstyle_class_init_toomanyargs(self):
-        class foo(object):
-            def __init__(self, context, request):
-                """ """
-        self.assertFalse(self._callFUT(foo))
-
-    def test_requestonly_newstyle_class_init_onearg_named_request(self):
-        class foo(object):
-            def __init__(self, request):
-                """ """
-        self.assertTrue(self._callFUT(foo))
-
-    def test_newstyle_class_init_onearg_named_somethingelse(self):
-        class foo(object):
-            def __init__(self, req):
-                """ """
-        self.assertTrue(self._callFUT(foo))
-
-    def test_newstyle_class_init_defaultargs_firstname_not_request(self):
-        class foo(object):
-            def __init__(self, context, request=None):
-                """ """
-        self.assertFalse(self._callFUT(foo))
-
-    def test_newstyle_class_init_defaultargs_firstname_request(self):
-        class foo(object):
-            def __init__(self, request, foo=1, bar=2):
-                """ """
-        self.assertTrue(self._callFUT(foo))
-
-    def test_newstyle_class_init_firstname_request_with_secondname(self):
-        class foo(object):
-            def __init__(self, request, two):
-                """ """
-        self.assertFalse(self._callFUT(foo))
-
-    def test_newstyle_class_init_noargs(self):
-        class foo(object):
-            def __init__():
-                """ """
-        self.assertFalse(self._callFUT(foo))
-
-    def test_oldstyle_class_no_init(self):
-        class foo:
-            """ """
-        self.assertFalse(self._callFUT(foo))
-
-    def test_oldstyle_class_init_toomanyargs(self):
-        class foo:
-            def __init__(self, context, request):
-                """ """
-        self.assertFalse(self._callFUT(foo))
-
-    def test_oldstyle_class_init_onearg_named_request(self):
-        class foo:
-            def __init__(self, request):
-                """ """
-        self.assertTrue(self._callFUT(foo))
-
-    def test_oldstyle_class_init_onearg_named_somethingelse(self):
-        class foo:
-            def __init__(self, req):
-                """ """
-        self.assertTrue(self._callFUT(foo))
-
-    def test_oldstyle_class_init_defaultargs_firstname_not_request(self):
-        class foo:
-            def __init__(self, context, request=None):
-                """ """
-        self.assertFalse(self._callFUT(foo))
-
-    def test_oldstyle_class_init_defaultargs_firstname_request(self):
-        class foo:
-            def __init__(self, request, foo=1, bar=2):
-                """ """
-        self.assertTrue(self._callFUT(foo), True)
-
-    def test_oldstyle_class_init_noargs(self):
-        class foo:
-            def __init__():
-                """ """
-        self.assertFalse(self._callFUT(foo))
-
-    def test_function_toomanyargs(self):
-        def foo(context, request):
-            """ """
-        self.assertFalse(self._callFUT(foo))
-
-    def test_function_with_attr_false(self):
-        def bar(context, request):
-            """ """
-        def foo(context, request):
-            """ """
-        foo.bar = bar
-        self.assertFalse(self._callFUT(foo, 'bar'))
-
-    def test_function_with_attr_true(self):
-        def bar(context, request):
-            """ """
-        def foo(request):
-            """ """
-        foo.bar = bar
-        self.assertTrue(self._callFUT(foo, 'bar'))
-
-    def test_function_onearg_named_request(self):
-        def foo(request):
-            """ """
-        self.assertTrue(self._callFUT(foo))
-
-    def test_function_onearg_named_somethingelse(self):
-        def foo(req):
-            """ """
-        self.assertTrue(self._callFUT(foo))
-
-    def test_function_defaultargs_firstname_not_request(self):
-        def foo(context, request=None):
-            """ """
-        self.assertFalse(self._callFUT(foo))
-
-    def test_function_defaultargs_firstname_request(self):
-        def foo(request, foo=1, bar=2):
-            """ """
-        self.assertTrue(self._callFUT(foo))
-
-    def test_function_noargs(self):
-        def foo():
-            """ """
-        self.assertFalse(self._callFUT(foo))
-
-    def test_instance_toomanyargs(self):
-        class Foo:
-            def __call__(self, context, request):
-                """ """
-        foo = Foo()
-        self.assertFalse(self._callFUT(foo))
-
-    def test_instance_defaultargs_onearg_named_request(self):
-        class Foo:
-            def __call__(self, request):
-                """ """
-        foo = Foo()
-        self.assertTrue(self._callFUT(foo))
-
-    def test_instance_defaultargs_onearg_named_somethingelse(self):
-        class Foo:
-            def __call__(self, req):
-                """ """
-        foo = Foo()
-        self.assertTrue(self._callFUT(foo))
-
-    def test_instance_defaultargs_firstname_not_request(self):
-        class Foo:
-            def __call__(self, context, request=None):
-                """ """
-        foo = Foo()
-        self.assertFalse(self._callFUT(foo))
-
-    def test_instance_defaultargs_firstname_request(self):
-        class Foo:
-            def __call__(self, request, foo=1, bar=2):
-                """ """
-        foo = Foo()
-        self.assertTrue(self._callFUT(foo), True)
-
-    def test_instance_nocall(self):
-        class Foo: pass
-        foo = Foo()
-        self.assertFalse(self._callFUT(foo))
-    
-    def test_method_onearg_named_request(self):
-        class Foo:
-            def method(self, request):
-                """ """
-        foo = Foo()
-        self.assertTrue(self._callFUT(foo.method))
+    def test_otherattr(self):
+        class AView(object):
+            def __init__(self, request, a=1, b=2): pass
+            def bleh(self): pass
+        self.assertTrue(self._callFUT(AView, 'bleh'))
 
 class Test_isexception(unittest.TestCase):
     def _callFUT(self, ob):
@@ -2045,11 +1990,28 @@ class TestMultiView(unittest.TestCase):
 
     def test_add_with_phash_override_accept(self):
         mv = self._makeOne()
-        mv.add('view2', 100, accept='text/html', phash='abc')
-        mv.add('view3', 100, accept='text/html', phash='abc')
-        mv.add('view4', 99, accept='text/html', phash='def')
+        def view1(): pass
+        def view2(): pass
+        def view3(): pass
+        mv.add(view1, 100, accept='text/html', phash='abc')
+        mv.add(view2, 100, accept='text/html', phash='abc')
+        mv.add(view3, 99, accept='text/html', phash='def')
         self.assertEqual(mv.media_views['text/html'],
-                         [(99, 'view4', 'def'), (100, 'view3', 'abc')])
+                         [(99, view3, 'def'), (100, view2, 'abc')])
+
+    def test_add_with_phash_override_accept2(self):
+        mv = self._makeOne()
+        def view1(): pass
+        def view2(): pass
+        def view3(): pass
+        mv.add(view1, 100, accept='text/html', phash='abc')
+        mv.add(view2, 100, accept='text/html', phash='def')
+        mv.add(view3, 99, accept='text/html', phash='ghi')
+        self.assertEqual(mv.media_views['text/html'],
+                         [(99, view3, 'ghi'),
+                          (100, view1, 'abc'),
+                          (100, view2, 'def')]
+                         )
 
     def test_multiple_with_functions_as_views(self):
         # this failed on py3 at one point, because functions aren't orderable
@@ -2342,12 +2304,35 @@ class TestViewDeriver(unittest.TestCase):
             msg = e.args[0]
             self.assertTrue(msg.startswith(
                 'Could not convert return value of the view callable object '
-                '<pyramid.tests.test_config.test_views.AView object at'))
+                '<pyramid.tests.test_config.test_views.'))
             self.assertTrue(msg.endswith(
                 '> into a response object. The value returned was None. You '
                 'may have forgotten to return a value from the view callable.'))
         else: # pragma: no cover
             raise AssertionError
+
+    def test_function_returns_true_Response_no_renderer(self):
+        from pyramid.response import Response
+        r = Response('Hello')
+        def view(request):
+            return r
+        deriver = self._makeOne()
+        result = deriver(view)
+        self.assertFalse(result is view)
+        response = result(None, None)
+        self.assertEqual(response, r)
+
+    def test_function_returns_true_Response_with_renderer(self):
+        from pyramid.response import Response
+        r = Response('Hello')
+        def view(request):
+            return r
+        renderer = object()
+        deriver = self._makeOne(renderer=renderer)
+        result = deriver(view)
+        self.assertFalse(result is view)
+        response = result(None, None)
+        self.assertEqual(response, r)
 
     def test_requestonly_default_method_returns_non_adaptable(self):
         request = DummyRequest()
@@ -2895,6 +2880,7 @@ class TestViewDeriver(unittest.TestCase):
         view = lambda *arg: response
         def predicate1(context, request):
             return False
+        predicate1.text = lambda *arg: 'text'
         deriver = self._makeOne(predicates=[predicate1])
         result = deriver(view)
         request = self._makeRequest()
@@ -2902,7 +2888,8 @@ class TestViewDeriver(unittest.TestCase):
         try:
             result(None, None)
         except PredicateMismatch as e:
-            self.assertEqual(e.detail, 'predicate mismatch for view <lambda>')
+            self.assertEqual(e.detail,
+                             'predicate mismatch for view <lambda> (text)')
         else: # pragma: no cover
             raise AssertionError
 
@@ -2911,6 +2898,7 @@ class TestViewDeriver(unittest.TestCase):
         def myview(request): pass
         def predicate1(context, request):
             return False
+        predicate1.text = lambda *arg: 'text'
         deriver = self._makeOne(predicates=[predicate1])
         result = deriver(myview)
         request = self._makeRequest()
@@ -2918,7 +2906,29 @@ class TestViewDeriver(unittest.TestCase):
         try:
             result(None, None)
         except PredicateMismatch as e:
-            self.assertEqual(e.detail, 'predicate mismatch for view myview')
+            self.assertEqual(e.detail,
+                             'predicate mismatch for view myview (text)')
+        else: # pragma: no cover
+            raise AssertionError
+
+    def test_predicate_mismatch_exception_has_text_in_detail(self):
+        from pyramid.exceptions import PredicateMismatch
+        def myview(request): pass
+        def predicate1(context, request):
+            return True
+        predicate1.text = lambda *arg: 'pred1'
+        def predicate2(context, request):
+            return False
+        predicate2.text = lambda *arg: 'pred2'
+        deriver = self._makeOne(predicates=[predicate1, predicate2])
+        result = deriver(myview)
+        request = self._makeRequest()
+        request.method = 'POST'
+        try:
+            result(None, None)
+        except PredicateMismatch as e:
+            self.assertEqual(e.detail,
+                             'predicate mismatch for view myview (pred2)')
         else: # pragma: no cover
             raise AssertionError
             
@@ -2964,9 +2974,11 @@ class TestViewDeriver(unittest.TestCase):
         def predicate1(context, request):
             predicates.append(True)
             return True
+        predicate1.text = lambda *arg: 'text'
         def predicate2(context, request):
             predicates.append(True)
             return False
+        predicate2.text = lambda *arg: 'text'
         deriver = self._makeOne(predicates=[predicate1, predicate2])
         result = deriver(view)
         request = self._makeRequest()
@@ -3933,3 +3945,13 @@ class DummyViewDefaultsClass(object):
         pass
     def __call__(self):
         return 'OK'
+
+class DummyPredicate(object):
+    def __init__(self, val, config):
+        self.val = val
+
+    def text(self):
+        return 'dummy'
+
+    phash = text
+

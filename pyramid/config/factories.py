@@ -1,15 +1,19 @@
-from pyramid.config.util import action_method
+from zope.interface import implementer
 
 from pyramid.interfaces import (
     IDefaultRootFactory,
-    INewRequest,
     IRequestFactory,
-    IRequestProperties,
+    IRequestExtensions,
     IRootFactory,
     ISessionFactory,
     )
 
 from pyramid.traversal import DefaultRootFactory
+
+from pyramid.util import (
+    action_method,
+    InstancePropertyMixin,
+    )
 
 class FactoriesConfiguratorMixin(object):
     @action_method
@@ -72,9 +76,9 @@ class FactoriesConfiguratorMixin(object):
         :class:`pyramid.request.Request` class (particularly
         ``__call__``, and ``blank``).
 
-        See :meth:`pyramid.config.Configurator.set_request_property`
+        See :meth:`pyramid.config.Configurator.add_request_method`
         for a less intrusive way to extend the request objects with
-        custom properties.
+        custom methods and properties.
 
         .. note::
 
@@ -92,57 +96,106 @@ class FactoriesConfiguratorMixin(object):
         self.action(IRequestFactory, register, introspectables=(intr,))
 
     @action_method
-    def set_request_property(self, callable, name=None, reify=False):
-        """ Add a property to the request object.
+    def add_request_method(self,
+                           callable=None,
+                           name=None,
+                           property=False,
+                           reify=False):
+        """ Add a property or method to the request object.
 
-        ``callable`` can either be a callable that accepts the request
-        as its single positional parameter, or it can be a property
-        descriptor. It may also be a :term:`dotted Python name` which
-        refers to either a callable or a property descriptor.
+        When adding a method to the request, ``callable`` may be any
+        function that receives the request object as the first
+        parameter. If ``name`` is ``None`` then it will be computed
+        from the name of the ``callable``.
+
+        When adding a property to the request, ``callable`` can either
+        be a callable that accepts the request as its single positional
+        parameter, or it can be a property descriptor. If ``name`` is
+        ``None``, the name of the property will be computed from the
+        name of the ``callable``.
 
         If the ``callable`` is a property descriptor a ``ValueError``
         will be raised if ``name`` is ``None`` or ``reify`` is ``True``.
 
-        If ``name`` is None, the name of the property will be computed
-        from the name of the ``callable``.
-
         See :meth:`pyramid.request.Request.set_property` for more
-        information on its usage.
+        details on ``property`` vs ``reify``. When ``reify`` is
+        ``True``, the value of ``property`` is assumed to also be
+        ``True``.
+
+        In all cases, ``callable`` may also be a
+        :term:`dotted Python name` which refers to either a callable or
+        a property descriptor.
+
+        If ``callable`` is ``None`` then the method is only used to
+        assist in conflict detection between different addons requesting
+        the same attribute on the request object.
 
         This is the recommended method for extending the request object
         and should be used in favor of providing a custom request
         factory via
         :meth:`pyramid.config.Configurator.set_request_factory`.
 
-        .. versionadded:: 1.3
+        .. versionadded:: 1.4
         """
-        callable = self.maybe_dotted(callable)
+        if callable is not None:
+            callable = self.maybe_dotted(callable)
 
-        if name is None:
+        property = property or reify
+        if property:
+            name, callable = InstancePropertyMixin._make_property(
+                callable, name=name, reify=reify)
+        elif name is None:
             name = callable.__name__
 
         def register():
-            plist = self.registry.queryUtility(IRequestProperties)
+            exts = self.registry.queryUtility(IRequestExtensions)
 
-            if plist is None:
-                plist = []
-                self.registry.registerUtility(plist, IRequestProperties)
-                self.registry.registerHandler(_set_request_properties,
-                                              (INewRequest,))
+            if exts is None:
+                exts = _RequestExtensions()
+                self.registry.registerUtility(exts, IRequestExtensions)
 
-            plist.append((name, callable, reify))
+            plist = exts.descriptors if property else exts.methods
+            plist[name] = callable
 
-        intr = self.introspectable('request properties', name,
-                                   self.object_description(callable),
-                                   'request property')
-        intr['callable'] = callable
-        intr['reify'] = reify
-        self.action(('request properties', name), register,
-                    introspectables=(intr,))
+        if callable is None:
+            self.action(('request extensions', name), None)
+        elif property:
+            intr = self.introspectable('request extensions', name,
+                                       self.object_description(callable),
+                                       'request property')
+            intr['callable'] = callable
+            intr['property'] = True
+            intr['reify'] = reify
+            self.action(('request extensions', name), register,
+                        introspectables=(intr,))
+        else:
+            intr = self.introspectable('request extensions', name,
+                                       self.object_description(callable),
+                                       'request method')
+            intr['callable'] = callable
+            intr['property'] = False
+            intr['reify'] = False
+            self.action(('request extensions', name), register,
+                        introspectables=(intr,))
 
-def _set_request_properties(event):
-    request = event.request
-    plist = request.registry.queryUtility(IRequestProperties)
-    for prop in plist:
-        name, callable, reify = prop
-        request.set_property(callable, name=name, reify=reify)
+    @action_method
+    def set_request_property(self, callable, name=None, reify=False):
+        """ Add a property to the request object.
+
+        .. warning::
+
+           This method has been docs-deprecated as of Pyramid 1.4.
+           :meth:`pyramid.config.Configurator.add_request_method` should be
+           used instead.
+
+        .. versionadded:: 1.3
+        """
+        self.add_request_method(
+            callable, name=name, property=not reify, reify=reify)
+
+@implementer(IRequestExtensions)
+class _RequestExtensions(object):
+    def __init__(self):
+        self.descriptors = {}
+        self.methods = {}
+

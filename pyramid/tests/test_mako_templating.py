@@ -1,7 +1,11 @@
 ## come on python gimme some of that sweet, sweet -*- coding: utf-8 -*-
 
+import shutil
+import tempfile
 import unittest
+
 from pyramid import testing
+
 from pyramid.compat import (
     text_,
     text_type,
@@ -26,6 +30,20 @@ class Test_renderer_factory(Base, unittest.TestCase):
     def _getLookup(self, name='mako.'):
         from pyramid.mako_templating import IMakoLookup
         return self.config.registry.getUtility(IMakoLookup, name=name)
+
+    def test_hyphen_filenames(self):
+        from pyramid.mako_templating import renderer_factory
+
+        info = DummyRendererInfo({
+            'name':'app:moon-and-world.mak',
+            'package':None,
+            'registry':self.config.registry,
+            'settings':{},
+            'type': ''
+        })
+
+        result = renderer_factory(info)
+        self.assertEqual(result.path, 'app:moon-and-world.mak')
 
     def test_no_directories(self):
         info = DummyRendererInfo({
@@ -131,7 +149,7 @@ class Test_renderer_factory(Base, unittest.TestCase):
         self._callFUT(info)
         lookup = self._getLookup()
         self.assertEqual(lookup.template_args['input_encoding'], 'utf-16')
-        
+
     def test_with_error_handler(self):
         settings = {'mako.directories':self.templates_dir,
                     'mako.error_handler':'pyramid.tests'}
@@ -311,7 +329,7 @@ class MakoLookupTemplateRendererTests(Base, unittest.TestCase):
     def test_instance_implements_ITemplate(self):
         from zope.interface.verify import verifyObject
         from pyramid.interfaces import ITemplateRenderer
-        verifyObject(ITemplateRenderer, self._makeOne(None, None))
+        verifyObject(ITemplateRenderer, self._makeOne(None, None, None))
 
     def test_class_implements_ITemplate(self):
         from zope.interface.verify import verifyClass
@@ -320,7 +338,7 @@ class MakoLookupTemplateRendererTests(Base, unittest.TestCase):
 
     def test_call(self):
         lookup = DummyLookup()
-        instance = self._makeOne('path', lookup)
+        instance = self._makeOne('path', None, lookup)
         result = instance({}, {'system':1})
         self.assertTrue(isinstance(result, text_type))
         self.assertEqual(result, text_('result'))
@@ -328,7 +346,7 @@ class MakoLookupTemplateRendererTests(Base, unittest.TestCase):
     def test_call_with_system_context(self):
         # lame
         lookup = DummyLookup()
-        instance = self._makeOne('path', lookup)
+        instance = self._makeOne('path', None, lookup)
         result = instance({}, {'context':1})
         self.assertTrue(isinstance(result, text_type))
         self.assertEqual(result, text_('result'))
@@ -336,21 +354,36 @@ class MakoLookupTemplateRendererTests(Base, unittest.TestCase):
 
     def test_call_with_tuple_value(self):
         lookup = DummyLookup()
-        instance = self._makeOne('path', lookup)
+        instance = self._makeOne('path', None, lookup)
         result = instance(('fub', {}), {'context':1})
         self.assertEqual(lookup.deffed, 'fub')
         self.assertEqual(result, text_('result'))
         self.assertEqual(lookup.values, {'_context':1})
 
+    def test_call_with_defname(self):
+        lookup = DummyLookup()
+        instance = self._makeOne('path', 'defname', lookup)
+        result = instance({}, {'system':1})
+        self.assertTrue(isinstance(result, text_type))
+        self.assertEqual(result, text_('result'))
+
+    def test_call_with_defname_with_tuple_value(self):
+        lookup = DummyLookup()
+        instance = self._makeOne('path', 'defname', lookup)
+        result = instance(('defname', {}), {'context':1})
+        self.assertEqual(lookup.deffed, 'defname')
+        self.assertEqual(result, text_('result'))
+        self.assertEqual(lookup.values, {'_context':1})
+
     def test_call_with_nondict_value(self):
         lookup = DummyLookup()
-        instance = self._makeOne('path', lookup)
+        instance = self._makeOne('path', None, lookup)
         self.assertRaises(ValueError, instance, None, {})
 
     def test_call_render_raises(self):
         from pyramid.mako_templating import MakoRenderingException
         lookup = DummyLookup(exc=NotImplementedError)
-        instance = self._makeOne('path', lookup)
+        instance = self._makeOne('path', None, lookup)
         try:
             instance({}, {})
         except MakoRenderingException as e:
@@ -360,11 +393,11 @@ class MakoLookupTemplateRendererTests(Base, unittest.TestCase):
 
     def test_implementation(self):
         lookup = DummyLookup()
-        instance = self._makeOne('path', lookup)
+        instance = self._makeOne('path', None, lookup)
         result = instance.implementation().render_unicode()
         self.assertTrue(isinstance(result, text_type))
         self.assertEqual(result, text_('result'))
-        
+
 class TestIntegration(unittest.TestCase):
     def setUp(self):
         import pyramid.mako_templating
@@ -387,7 +420,7 @@ class TestIntegration(unittest.TestCase):
         self.config.add_settings({'reload_templates': True})
         result = render('helloworld.mak', {'a':1}).replace('\r','')
         self.assertEqual(result, text_('\nHello föö\n', 'utf-8'))
-    
+
     def test_render_inheritance(self):
         from pyramid.renderers import render
         result = render('helloinherit.mak', {}).replace('\r','')
@@ -397,6 +430,11 @@ class TestIntegration(unittest.TestCase):
         from pyramid.renderers import render
         result = render('hello_inherit_pkg.mak', {}).replace('\r','')
         self.assertEqual(result, text_('Layout\nHello World!\n'))
+
+    def test_render_namespace(self):
+        from pyramid.renderers import render
+        result = render('hellocompo.mak', {}).replace('\r','')
+        self.assertEqual(result, text_('\nNamespace\nHello \nWorld!\n'))
 
     def test_render_to_response(self):
         from pyramid.renderers import render_to_response
@@ -410,7 +448,7 @@ class TestIntegration(unittest.TestCase):
                                     {'a':1})
         self.assertEqual(result.ubody.replace('\r', ''),
                          text_('\nHello föö\n', 'utf-8'))
-    
+
     def test_render_with_abs_path(self):
         from pyramid.renderers import render
         result = render('/helloworld.mak', {'a':1}).replace('\r','')
@@ -422,7 +460,7 @@ class TestIntegration(unittest.TestCase):
         self.assertEqual(
             result.implementation().render_unicode().replace('\r',''),
             text_('\nHello föö\n', 'utf-8'))
-    
+
     def test_template_not_found(self):
         from pyramid.renderers import render
         from mako.exceptions import TemplateLookupException
@@ -455,16 +493,55 @@ class TestPkgResourceTemplateLookup(unittest.TestCase):
         result = inst.adjust_uri('a:b', None)
         self.assertEqual(result, 'a:b')
 
+    def test_adjust_uri_asset_spec_with_modified_asset_spec(self):
+        inst = self._makeOne()
+        result = inst.adjust_uri('a$b', None)
+        self.assertEqual(result, 'a:b')
+
+    def test_adjust_uri_not_asset_spec_with_relativeto_asset_spec(self):
+        inst = self._makeOne()
+        result = inst.adjust_uri('c', 'a:b')
+        self.assertEqual(result, 'a:c')
+
+    def test_adjust_uri_not_asset_spec_with_relativeto_modified_asset_spec(self):
+        inst = self._makeOne()
+        result = inst.adjust_uri('c', 'a$b')
+        self.assertEqual(result, 'a:c')
+
+    def test_adjust_uri_not_asset_spec_with_relativeto_not_asset_spec(self):
+        inst = self._makeOne()
+        result = inst.adjust_uri('b', '../a')
+        self.assertEqual(result, '../b')
+
+    def test_adjust_uri_not_asset_spec_abs_with_relativeto_asset_spec(self):
+        inst = self._makeOne()
+        result = inst.adjust_uri('/c', 'a:b')
+        self.assertEqual(result, '/c')
+
+    def test_adjust_uri_asset_spec_with_relativeto_not_asset_spec_abs(self):
+        inst = self._makeOne()
+        result = inst.adjust_uri('a:b', '/c')
+        self.assertEqual(result, 'a:b')
+
     def test_get_template_not_asset_spec(self):
         fixturedir = self.get_fixturedir()
         inst = self._makeOne(directories=[fixturedir])
         result = inst.get_template('helloworld.mak')
         self.assertFalse(result is None)
-        
+
     def test_get_template_asset_spec_with_filesystem_checks(self):
         inst = self._makeOne(filesystem_checks=True)
         result = inst.get_template('pyramid.tests:fixtures/helloworld.mak')
         self.assertFalse(result is None)
+
+    def test_get_template_asset_spec_with_module_dir(self):
+        tmpdir = tempfile.mkdtemp()
+        try:
+            inst = self._makeOne(module_directory=tmpdir)
+            result = inst.get_template('pyramid.tests:fixtures/helloworld.mak')
+            self.assertFalse(result is None)
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
 
     def test_get_template_asset_spec_missing(self):
         from mako.exceptions import TopLevelLookupException
@@ -477,7 +554,7 @@ class TestMakoRenderingException(unittest.TestCase):
     def _makeOne(self, text):
         from pyramid.mako_templating import MakoRenderingException
         return MakoRenderingException(text)
-    
+
     def test_repr_and_str(self):
         exc = self._makeOne('text')
         self.assertEqual(str(exc), 'text')
@@ -486,7 +563,7 @@ class TestMakoRenderingException(unittest.TestCase):
 class DummyLookup(object):
     def __init__(self, exc=None):
         self.exc = exc
-        
+
     def get_template(self, path):
         self.path = path
         return self
@@ -500,8 +577,8 @@ class DummyLookup(object):
             raise self.exc
         self.values = values
         return text_('result')
-        
+
 class DummyRendererInfo(object):
     def __init__(self, kw):
         self.__dict__.update(kw)
-        
+

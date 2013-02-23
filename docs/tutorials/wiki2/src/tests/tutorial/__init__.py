@@ -6,15 +6,20 @@ from sqlalchemy import engine_from_config
 
 from tutorial.security import groupfinder
 
-from .models import DBSession
+from .models import (
+    DBSession,
+    Base,
+    )
+
 
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
     engine = engine_from_config(settings, 'sqlalchemy.')
     DBSession.configure(bind=engine)
+    Base.metadata.bind = engine
     authn_policy = AuthTktAuthenticationPolicy(
-        'sosecret', callback=groupfinder)
+        'sosecret', callback=groupfinder, hashalg='sha512')
     authz_policy = ACLAuthorizationPolicy()
     config = Configurator(settings=settings,
                           root_factory='tutorial.models.RootFactory')
@@ -29,4 +34,3 @@ def main(global_config, **settings):
     config.add_route('edit_page', '/{pagename}/edit_page')
     config.scan()
     return config.make_wsgi_app()
-

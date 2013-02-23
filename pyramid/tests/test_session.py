@@ -205,6 +205,48 @@ class TestUnencryptedCookieSession(unittest.TestCase):
         self.assertTrue(token)
         self.assertTrue('_csrft_' in session)
 
+    def test_serialize_option(self):
+        from pyramid.response import Response
+        secret = 'secret'
+        request = testing.DummyRequest()
+        session = self._makeOne(request,
+            signed_serialize=dummy_signed_serialize)
+        session['key'] = 'value'
+        response = Response()
+        self.assertEqual(session._set_cookie(response), True)
+        cookie = response.headerlist[-1][1]
+        expected_cookieval = dummy_signed_serialize(
+            (session.accessed, session.created, {'key': 'value'}), secret)
+        response = Response()
+        response.set_cookie('session', expected_cookieval)
+        expected_cookie = response.headerlist[-1][1]
+        self.assertEqual(cookie, expected_cookie)
+
+    def test_deserialize_option(self):
+        import time
+        secret = 'secret'
+        request = testing.DummyRequest()
+        accessed = time.time()
+        state = {'key': 'value'}
+        cookieval = dummy_signed_serialize((accessed, accessed, state), secret)
+        request.cookies['session'] = cookieval
+        session = self._makeOne(request,
+            signed_deserialize=dummy_signed_deserialize)
+        self.assertEqual(dict(session), state)
+
+def dummy_signed_serialize(data, secret):
+    import base64
+    from pyramid.compat import pickle, bytes_
+    pickled = pickle.dumps(data)
+    return base64.b64encode(bytes_(secret)) + base64.b64encode(pickled)
+
+def dummy_signed_deserialize(serialized, secret):
+    import base64
+    from pyramid.compat import pickle, bytes_
+    serialized_data = base64.b64decode(
+        serialized[len(base64.b64encode(bytes_(secret))):])
+    return pickle.loads(serialized_data)
+
 class Test_manage_accessed(unittest.TestCase):
     def _makeOne(self, wrapped):
         from pyramid.session import manage_accessed
@@ -313,6 +355,31 @@ class Test_signed_deserialize(unittest.TestCase):
         serialized = 'bad' + serialize('123', 'secret')
         self.assertRaises(ValueError, self._callFUT, serialized, 'secret')
         
+class Test_check_csrf_token(unittest.TestCase):
+    def _callFUT(self, request, token, raises=True):
+        from ..session import check_csrf_token
+        return check_csrf_token(request, token, raises=raises)
+
+    def test_success(self):
+        request = testing.DummyRequest()
+        request.params['csrf_token'] = request.session.get_csrf_token()
+        self.assertEqual(self._callFUT(request, 'csrf_token'), True)
+
+    def test_success_default_token(self):
+        from ..session import check_csrf_token
+        request = testing.DummyRequest()
+        request.params['csrf_token'] = request.session.get_csrf_token()
+        self.assertEqual(check_csrf_token(request), True)
+
+    def test_failure_raises(self):
+        from pyramid.httpexceptions import HTTPBadRequest
+        request = testing.DummyRequest()
+        self.assertRaises(HTTPBadRequest, self._callFUT, request, 'csrf_token')
+
+    def test_failure_no_raises(self):
+        request = testing.DummyRequest()
+        result = self._callFUT(request, 'csrf_token', raises=False)
+        self.assertEqual(result, False)
 
 class DummySessionFactory(dict):
     _dirty = False

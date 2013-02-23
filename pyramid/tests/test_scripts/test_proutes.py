@@ -12,6 +12,28 @@ class TestPRoutesCommand(unittest.TestCase):
         cmd.args = ('/foo/bar/myapp.ini#myapp',)
         return cmd
 
+    def test_good_args(self):
+        cmd = self._getTargetClass()([])
+        cmd.bootstrap = (dummy.DummyBootstrap(),)
+        cmd.args = ('/foo/bar/myapp.ini#myapp', 'a=1')
+        route = dummy.DummyRoute('a', '/a')
+        mapper = dummy.DummyMapper(route)
+        cmd._get_mapper = lambda *arg: mapper
+        L = []
+        cmd.out = lambda msg: L.append(msg)
+        cmd.run()
+        self.assertTrue('<unknown>' in ''.join(L))
+
+    def test_bad_args(self):
+        cmd = self._getTargetClass()([])
+        cmd.bootstrap = (dummy.DummyBootstrap(),)
+        cmd.args = ('/foo/bar/myapp.ini#myapp', 'a')
+        route = dummy.DummyRoute('a', '/a')
+        mapper = dummy.DummyMapper(route)
+        cmd._get_mapper = lambda *arg: mapper
+
+        self.assertRaises(ValueError, cmd.run)
+
     def test_no_routes(self):
         command = self._makeOne()
         mapper = dummy.DummyMapper()
@@ -100,7 +122,8 @@ class TestPRoutesCommand(unittest.TestCase):
         result = command.run()
         self.assertEqual(result, 0)
         self.assertEqual(len(L), 3)
-        self.assertEqual(L[-1].split()[:4], ['a', '/a', '<function', 'view'])
+        compare_to = L[-1].split()[:3]
+        self.assertEqual(compare_to, ['a', '/a', '<function'])
         
     def test_single_route_one_view_registered_with_factory(self):
         from zope.interface import Interface

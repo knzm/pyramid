@@ -86,8 +86,8 @@ setup code.  However, the above :term:`scan` execution
 ``config.scan('mypackage')`` will pick up all :term:`configuration
 decoration`, including any objects decorated with the
 :class:`pyramid.view.view_config` decorator in the ``mypackage`` Python
-pakage.  For example, if you have a ``views.py`` in your package, a scan will
-pick up any of its configuration decorators, so we can add one there that
+package.  For example, if you have a ``views.py`` in your package, a scan will
+pick up any of its configuration decorators, so we can add one there
 that references ``myroute`` as a ``route_name`` parameter:
 
 .. code-block:: python
@@ -547,7 +547,7 @@ add to your application:
 
    config.add_route('idea', 'ideas/{idea}')
    config.add_route('user', 'users/{user}')
-   config.add_route('tag', 'tags/{tags}')
+   config.add_route('tag', 'tags/{tag}')
 
    config.add_view('mypackage.views.idea_view', route_name='idea')
    config.add_view('mypackage.views.user_view', route_name='user')
@@ -860,7 +860,7 @@ exactly the same job:
    request into a ``GET``, losing any ``POST`` data in the original
    request.
 
-See :ref:`view_module` and :ref:`changing_the_notfound_view` for for a more
+See :ref:`view_module` and :ref:`changing_the_notfound_view` for a more
 general description of how to configure a view and/or a not found view.
 
 .. index::
@@ -954,7 +954,7 @@ will be prepended with the first:
    from pyramid.config import Configurator
 
    def timing_include(config):
-       config.add_route('show_times', /times')
+       config.add_route('show_times', '/times')
 
    def users_include(config):
        config.add_route('show_users', '/show')
@@ -966,7 +966,7 @@ will be prepended with the first:
 
 In the above configuration, the ``show_users`` route will still have an
 effective route pattern of ``/users/show``.  The ``show_times`` route
-however, will have an effective pattern of ``/users/timing/show_times``.
+however, will have an effective pattern of ``/users/timing/times``.
 
 Route prefixes have no impact on the requirement that the set of route
 *names* in any given Pyramid configuration must be entirely unique.  If you
@@ -981,7 +981,7 @@ that may be added in the future.  For example:
    from pyramid.config import Configurator
 
    def timing_include(config):
-       config.add_route('timing.show_times', /times')
+       config.add_route('timing.show_times', '/times')
 
    def users_include(config):
        config.add_route('users.show_users', '/show')

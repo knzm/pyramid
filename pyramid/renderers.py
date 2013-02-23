@@ -1,13 +1,19 @@
 import json
 import os
+import re
 import pkg_resources
 import threading
 
-from zope.interface import implementer
+from zope.interface import (
+    implementer,
+    providedBy,
+    )
+from zope.interface.registry import Components
 
 from pyramid.interfaces import (
     IChameleonLookup,
     IChameleonTranslate,
+    IJSONAdapter,
     IRendererGlobalsFactory,
     IRendererFactory,
     IResponseFactory,
@@ -60,10 +66,11 @@ def render(renderer_name, value, request=None, package=None):
     dictionary.  For other renderers, this will need to be whatever
     sort of value the renderer expects.
 
-    The 'system' values supplied to the renderer will include a basic
-    set of top-level system names, such as ``request``, ``context``,
-    and ``renderer_name``.  If :term:`renderer globals` have been
-    specified, these will also be used to agument the value.
+    The 'system' values supplied to the renderer will include a basic set of
+    top-level system names, such as ``request``, ``context``,
+    ``renderer_name``, and ``view``.  See :ref:`renderer_system_values` for
+    the full list.  If :term:`renderer globals` have been specified, these
+    will also be used to agument the value.
 
     Supply a ``request`` parameter in order to provide the renderer
     with the most correct 'system' values (``request`` and ``context``
@@ -103,10 +110,11 @@ def render_to_response(renderer_name, value, request=None, package=None):
     dictionary.  For other renderers, this will need to be whatever
     sort of value the renderer expects.
 
-    The 'system' values supplied to the renderer will include a basic
-    set of top-level system names, such as ``request``, ``context``,
-    and ``renderer_name``.  If :term:`renderer globals` have been
-    specified, these will also be used to agument the value.
+    The 'system' values supplied to the renderer will include a basic set of
+    top-level system names, such as ``request``, ``context``,
+    ``renderer_name``, and ``view``.  See :ref:`renderer_system_values` for
+    the full list.  If :term:`renderer globals` have been specified, these
+    will also be used to agument the value.
 
     Supply a ``request`` parameter in order to provide the renderer
     with the most correct 'system' values (``request`` and ``context``
@@ -144,17 +152,6 @@ def get_renderer(renderer_name, package=None):
 
 # concrete renderer factory implementations (also API)
 
-def json_renderer_factory(info):
-    def _render(value, system):
-        request = system.get('request')
-        if request is not None:
-            response = request.response
-            ct = response.content_type
-            if ct == response.default_content_type:
-                response.content_type = 'application/json'
-        return json.dumps(value)
-    return _render
-
 def string_renderer_factory(info):
     def _render(value, system):
         if not isinstance(value, string_types):
@@ -168,10 +165,121 @@ def string_renderer_factory(info):
         return value
     return _render
 
-class JSONP(object):
+_marker = object()
+
+class JSON(object):
+    """ Renderer that returns a JSON-encoded string.
+
+    Configure a custom JSON renderer using the
+    :meth:`~pyramid.config.Configurator.add_renderer` API at application
+    startup time:
+
+    .. code-block:: python
+
+       from pyramid.config import Configurator
+
+       config = Configurator()
+       config.add_renderer('myjson', JSON(indent=4))
+
+    Once this renderer is registered as above, you can use
+    ``myjson`` as the ``renderer=`` parameter to ``@view_config`` or
+    :meth:`~pyramid.config.Configurator.add_view``:
+
+    .. code-block:: python
+
+       from pyramid.view import view_config
+
+       @view_config(renderer='myjson')
+       def myview(request):
+           return {'greeting':'Hello world'}
+
+    Custom objects can be serialized using the renderer by either
+    implementing the ``__json__`` magic method, or by registering
+    adapters with the renderer.  See
+    :ref:`json_serializing_custom_objects` for more information.
+
+    The default serializer uses ``json.JSONEncoder``. A different
+    serializer can be specified via the ``serializer`` argument.
+    Custom serializers should accept the object, a callback
+    ``default``, and any extra ``kw`` keyword argments passed during
+    renderer construction.
+
+    .. note::
+
+       This feature is new in Pyramid 1.4. Prior to 1.4 there was
+       no public API for supplying options to the underlying
+       serializer without defining a custom renderer.
+    """
+
+    def __init__(self, serializer=json.dumps, adapters=(), **kw):
+        """ Any keyword arguments will be passed to the ``serializer``
+        function."""
+        self.serializer = serializer
+        self.kw = kw
+        self.components = Components()
+        for type, adapter in adapters:
+            self.add_adapter(type, adapter)
+
+    def add_adapter(self, type_or_iface, adapter):
+        """ When an object of the type (or interface) ``type_or_iface`` fails
+        to automatically encode using the serializer, the renderer will use
+        the adapter ``adapter`` to convert it into a JSON-serializable
+        object.  The adapter must accept two arguments: the object and the
+        currently active request.
+
+        .. code-block:: python
+
+           class Foo(object):
+               x = 5
+
+           def foo_adapter(obj, request):
+               return obj.x
+
+           renderer = JSON(indent=4)
+           renderer.add_adapter(Foo, foo_adapter)
+
+        When you've done this, the JSON renderer will be able to serialize
+        instances of the ``Foo`` class when they're encountered in your view
+        results."""
+        
+        self.components.registerAdapter(adapter, (type_or_iface,),
+                                        IJSONAdapter)
+
+    def __call__(self, info):
+        """ Returns a plain JSON-encoded string with content-type
+        ``application/json``. The content-type may be overridden by
+        setting ``request.response.content_type``."""
+        def _render(value, system):
+            request = system.get('request')
+            if request is not None:
+                response = request.response
+                ct = response.content_type
+                if ct == response.default_content_type:
+                    response.content_type = 'application/json'
+            default = self._make_default(request)
+            return self.serializer(value, default=default, **self.kw)
+        
+        return _render
+
+    def _make_default(self, request):
+        def default(obj):
+            if hasattr(obj, '__json__'):
+                return obj.__json__(request)
+            obj_iface = providedBy(obj)
+            adapters = self.components.adapters
+            result = adapters.lookup((obj_iface,), IJSONAdapter,
+                                     default=_marker)
+            if result is _marker:
+                raise TypeError('%r is not JSON serializable' % (obj,))
+            return result(obj, request)
+        return default
+
+json_renderer_factory = JSON() # bw compat
+
+class JSONP(JSON):
     """ `JSONP <http://en.wikipedia.org/wiki/JSONP>`_ renderer factory helper
     which implements a hybrid json/jsonp renderer.  JSONP is useful for
-    making cross-domain AJAX requests.
+    making cross-domain AJAX requests.  
 
     Configure a JSONP renderer using the
     :meth:`pyramid.config.Configurator.add_renderer` API at application
@@ -183,6 +291,24 @@ class JSONP(object):
 
        config = Configurator()
        config.add_renderer('jsonp', JSONP(param_name='callback'))
+
+    The class' constructor also accepts arbitrary keyword arguments.  All
+    keyword arguments except ``param_name`` are passed to the ``json.dumps``
+    function as its keyword arguments.
+
+    .. code-block:: python
+
+       from pyramid.config import Configurator
+
+       config = Configurator()
+       config.add_renderer('jsonp', JSONP(param_name='callback', indent=4))
+    
+    .. note:: The ability of this class to accept a ``**kw`` in its
+       constructor is new as of Pyramid 1.4.
+
+    The arguments passed to this class' constructor mean the same thing as
+    the arguments passed to :class:`pyramid.renderers.JSON` (including
+    ``serializer`` and ``adapters``).
 
     Once this renderer is registered via
     :meth:`~pyramid.config.Configurator.add_renderer` as above, you can use
@@ -210,9 +336,10 @@ class JSONP(object):
 
     See also: :ref:`jsonp_renderer`.
     """
-    
-    def __init__(self, param_name='callback'):
+
+    def __init__(self, param_name='callback', **kw):
         self.param_name = param_name
+        JSON.__init__(self, **kw)
 
     def __call__(self, info):
         """ Returns JSONP-encoded string with content-type
@@ -221,7 +348,8 @@ class JSONP(object):
         plain-JSON encoded string with content-type ``application/json``"""
         def _render(value, system):
             request = system['request']
-            val =  json.dumps(value)
+            default = self._make_default(request)
+            val = self.serializer(value, default=default, **self.kw)
             callback = request.GET.get(self.param_name)
             if callback is None:
                 ct = 'application/json'
@@ -239,6 +367,12 @@ class JSONP(object):
 
 @implementer(IChameleonLookup)
 class ChameleonRendererLookup(object):
+    spec_re = re.compile(
+        r'(?P<asset>[\w_.:/-]+)'
+        r'(?:\#(?P<defname>[\w_]+))?'
+        r'(\.(?P<ext>.*))'
+        )
+
     def __init__(self, impl, registry):
         self.impl = impl
         self.registry = registry
@@ -289,6 +423,12 @@ class ChameleonRendererLookup(object):
             return False
         return settings.get('reload_templates', False)
 
+    def _crack_spec(self, spec):
+        asset, macro, ext = self.spec_re.match(spec).group(
+            'asset', 'defname', 'ext'
+            )
+        return asset, macro, ext
+    
     def __call__(self, info):
         spec = self.get_spec(info.name, info.package)
         registry = info.registry
@@ -299,40 +439,38 @@ class ChameleonRendererLookup(object):
                 raise ValueError('Missing template file: %s' % spec)
             renderer = registry.queryUtility(ITemplateRenderer, name=spec)
             if renderer is None:
-                renderer = self.impl(spec, self)
+                renderer = self.impl(spec, self, macro=None)
                 # cache the template
-                try:
-                    self.lock.acquire()
+                with self.lock:
                     registry.registerUtility(renderer,
                                              ITemplateRenderer, name=spec)
-                finally:
-                    self.lock.release()
         else:
             # spec is a package:relpath asset spec
             renderer = registry.queryUtility(ITemplateRenderer, name=spec)
             if renderer is None:
+                asset, macro, ext = self._crack_spec(spec)
+                spec_without_macro = '%s.%s' % (asset, ext)
                 try:
-                    package_name, filename = spec.split(':', 1)
+                    package_name, filename = spec_without_macro.split(':', 1)
                 except ValueError: # pragma: no cover
                     # somehow we were passed a relative pathname; this
                     # should die
                     package_name = caller_package(4).__name__
-                    filename = spec
+                    filename = spec_without_macro
                 abspath = pkg_resources.resource_filename(package_name,
                                                           filename)
                 if not pkg_resources.resource_exists(package_name, filename):
                     raise ValueError(
-                        'Missing template asset: %s (%s)' % (spec, abspath))
-                renderer = self.impl(abspath, self)
+                        'Missing template asset: %s (%s)' % (
+                            spec_without_macro, abspath)
+                        )
+                renderer = self.impl(abspath, self, macro=macro)
                 settings = info.settings
                 if not settings.get('reload_assets'):
                     # cache the template
-                    self.lock.acquire()
-                    try:
+                    with self.lock:
                         registry.registerUtility(renderer, ITemplateRenderer,
                                                  name=spec)
-                    finally:
-                        self.lock.release()
 
         return renderer
 
@@ -343,11 +481,8 @@ def template_renderer_factory(info, impl, lock=registry_lock):
     lookup = registry.queryUtility(IChameleonLookup, name=info.type)
     if lookup is None:
         lookup = ChameleonRendererLookup(impl, registry)
-        lock.acquire()
-        try:
+        with lock:
             registry.registerUtility(lookup, IChameleonLookup, name=info.type)
-        finally:
-            lock.release()
     return lookup(info)
 
 @implementer(IRendererInfo)
@@ -438,13 +573,11 @@ class RendererHelper(object):
 
             response = response_factory()
 
-        if result is None:
-            result = ''
-
-        if isinstance(result, text_type):
-            response.text = result
-        else:
-            response.body = result
+        if result is not None:
+            if isinstance(result, text_type):
+                response.text = result
+            else:
+                response.body = result
 
         if request is not None:
             # deprecated mechanism to set up request.response_* attrs, see

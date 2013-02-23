@@ -290,12 +290,13 @@ configured view.
   of the ``REQUEST_METHOD`` of the :term:`WSGI` environment.
 
 ``request_param``
-  This value can be any string.  A view declaration with this argument
-  ensures that the view will only be called when the :term:`request` has a
-  key in the ``request.params`` dictionary (an HTTP ``GET`` or ``POST``
-  variable) that has a name which matches the supplied value.
+  This value can be any string or a sequence of strings.  A view declaration 
+  with this argument ensures that the view will only be called when the 
+  :term:`request` has a key in the ``request.params`` dictionary (an HTTP 
+  ``GET`` or ``POST`` variable) that has a name which matches the a 
+  supplied value.
 
-  If the value supplied has a ``=`` sign in it,
+  If any value supplied has a ``=`` sign in it,
   e.g. ``request_param="foo=123"``, then the key (``foo``) must both exist
   in the ``request.params`` dictionary, *and* the value must match the right
   hand side of the expression (``123``) for the view to "match" the current
@@ -394,6 +395,54 @@ configured view.
   consideration when deciding whether or not to invoke the associated view
   callable.
 
+``check_csrf``
+  If specified, this value should be one of ``None``, ``True``, ``False``, or
+  a string representing the 'check name'.  If the value is ``True`` or a
+  string, CSRF checking will be performed.  If the value is ``False`` or
+  ``None``, CSRF checking will not be performed.
+
+  If the value provided is a string, that string will be used as the 'check
+  name'.  If the value provided is ``True``, ``csrf_token`` will be used as
+  the check name.
+
+  If CSRF checking is performed, the checked value will be the value of
+  ``request.params[check_name]``.  This value will be compared against the
+  value of ``request.session.get_csrf_token()``, and the check will pass if
+  these two values are the same.  If the check passes, the associated view
+  will be permitted to execute.  If the check fails, the associated view
+  will not be permitted to execute.
+
+  Note that using this feature requires a :term:`session factory` to have
+  been configured.
+
+  .. versionadded:: 1.4a2
+
+``physical_path``
+  If specified, this value should be a string or a tuple representing the
+  :term:`physical path` of the context found via traversal for this predicate
+  to match as true.  For example: ``physical_path='/'`` or
+  ``physical_path='/a/b/c'`` or ``physical_path=('', 'a', 'b', 'c')``.  This is
+  not a path prefix match or a regex, it's a whole-path match.  It's useful
+  when you want to always potentially show a view when some object is traversed
+  to, but you can't be sure about what kind of object it will be, so you can't
+  use the ``context`` predicate.  The individual path elements inbetween slash
+  characters or in tuple elements should be the Unicode representation of the
+  name of the resource and should not be encoded in any way.
+
+  .. versionadded:: 1.4a3
+
+``effective_principals``
+
+  If specified, this value should be a :term:`principal` identifier or a
+  sequence of principal identifiers.  If the
+  :func:`pyramid.security.effective_principals` method indicates that every
+  principal named in the argument list is present in the current request, this
+  predicate will return True; otherwise it will return False.  For example:
+  ``effective_principals=pyramid.security.Authenticated`` or
+  ``effective_principals=('fred', 'group:admins')``.
+
+  .. versionadded:: 1.4a4
+
 ``custom_predicates``
   If ``custom_predicates`` is specified, it must be a sequence of references
   to custom predicate callables.  Use custom predicates when no set of
@@ -406,6 +455,15 @@ configured view.
 
   If ``custom_predicates`` is not specified, no custom predicates are
   used.
+
+``predicates``
+  Pass a key/value pair here to use a third-party predicate registered via
+  :meth:`pyramid.config.Configurator.add_view_predicate`.  More than one
+  key/value pair can be used at the same time.  See
+  :ref:`view_and_route_predicates` for more information about third-party
+  predicates.
+
+  .. versionadded:: 1.4a1
 
 .. index::
    single: view_config decorator
@@ -928,7 +986,7 @@ there's a ``should_cache`` GET or POST variable:
 Note that the ``http_cache`` machinery will overwrite or add to caching
 headers you set within the view itself unless you use ``prevent_auto``.
 
-You can also turn of the effect of ``http_cache`` entirely for the duration
+You can also turn off the effect of ``http_cache`` entirely for the duration
 of a Pyramid application lifetime.  To do so, set the
 ``PYRAMID_PREVENT_HTTP_CACHE`` environment variable or the
 ``pyramid.prevent_http_cache`` configuration value setting to a true value.

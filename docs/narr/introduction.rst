@@ -641,7 +641,7 @@ Pyramid では単一のテンプレートシステムを排他的に使用する
 
 .. If you use a :term:`renderer`, you don't have to return a special kind of
 .. "webby" ``Response`` object from a view.  Instead, you can return a
-.. dictionary instead, and Pyramid will take care of converting that dictionary
+.. dictionary, and Pyramid will take care of converting that dictionary
 .. to a Response using a template on your behalf.  This makes the view easier to
 .. test, because you don't have to parse HTML in your tests; just make an
 .. assertion instead that the view returns "the right stuff" in the dictionary
@@ -1009,7 +1009,7 @@ Pyramid は、「シングルトン」データ構造を正確に一つも持た
 .. successfully, and all changes are committed, or it does not, and all changes
 .. are aborted.
 
-Pyramid の scaffold システムは、 Zope から取られた *トランザクション
+Pyramid の :term:`scaffold` システムは、 Zope から取られた *トランザクション
 管理* システムを含むプロジェクトを生成します。このトランザクション管理
 システムを使用すると、あなたはもはやデータをコミットすることに責任を
 持たなくなります。代わりに Pyramid がコミットの面倒を見ます:
@@ -1088,14 +1088,14 @@ Pyramid の設定システムは、あなたの設定ステートメントを追
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. Unlike other systems, Pyramid provides a structured "include" mechanism (see
-.. :meth:`~pyramid.config.Configurator.include`) that allows you to compose
+.. :meth:`~pyramid.config.Configurator.include`) that allows you to combine
 .. applications from multiple Python packages.  All the configuration statements
 .. that can be performed in your "main" Pyramid application can also be
 .. performed by included packages including the addition of views, routes,
 .. subscribers, and even authentication and authorization policies. You can even
 .. extend or override an existing application by including another application's
 .. configuration in your own, overriding or adding new views and routes to
-.. it.  This has the potential to allow you to compose a big application out of
+.. it.  This has the potential to allow you to create a big application out of
 .. many other smaller ones.  For example, if you want to reuse an existing
 .. application that already has a bunch of routes, you can just use the
 .. ``include`` statement with a ``route_prefix``; the new application will live
@@ -1104,7 +1104,7 @@ Pyramid の設定システムは、あなたの設定ステートメントを追
 
 他のシステムと異なり、 Pyramid は構造化された「インクルード」メカニズムを
 提供します (:meth:`~pyramid.config.Configurator.include` を参照)。
-それは複数の Python パッケージからアプリケーションを構成することを可能
+それは複数の Python パッケージからアプリケーションを組み合わせることを可能
 にします。ビューやルート、 (イベントの) サブスクライバー、および認証と認可ポリシーの追加など、
 「メイン」 Pyramid アプリケーションで行なうことができるすべての設定
 ステートメントはインクルードされたパッケージでも行なうことができます。
@@ -1112,7 +1112,7 @@ Pyramid の設定システムは、あなたの設定ステートメントを追
 オーバーライドしたり新しいビューやルートを追加したりすることで、さらに
 既存のアプリケーションを拡張またはオーバーライドすることができます。
 これには、大きなアプリケーションを他の多くのより小さなアプリケーション
-から構成できる可能性があります。例えば、既に沢山のルートを持つ既存の
+から作成できる可能性があります。例えば、既に沢山のルートを持つ既存の
 アプリケーションを再利用したければ、単純に ``route_prefix`` を付けて
 ``include`` ステートメントを使用することができます; 新しいアプリケーション
 はあなたのアプリケーション内の URL プリフィックスで動作するようになります。
@@ -1191,9 +1191,9 @@ Pyramid には構築済みの十分テストされた認証および認可スキ
 .. another entire instance of an application to service a department and glue
 .. code to allow disparate apps to share data.  It's a great fit for sites that
 .. naturally lend themselves to changing departmental hierarchies, such as
-.. content management systems and document management systems.  Traversal also lends itself well to
-.. systems that require very granular security ("Bob can edit *this* document"
-.. as opposed to "Bob can edit documents").
+.. content management systems and document management systems.  Traversal also
+.. lends itself well to systems that require very granular security ("Bob can
+.. edit *this* document" as opposed to "Bob can edit documents").
 
 :term:`Traversal` は :term:`Zope` から盗まれた概念です。それは各々の
 リソースが 複数の URL から参照されるリソースツリーを作成することを可能
@@ -1212,7 +1212,8 @@ Pyramid には構築済みの十分テストされた認証および認可スキ
 ことができる」)を要求するシステムにも向いています
 
 
-.. Example: :ref:`hello_traversal_chapter` and :ref:`much_ado_about_traversal_chapter`.
+.. Examples: :ref:`hello_traversal_chapter` and
+.. :ref:`much_ado_about_traversal_chapter`.
 
 例: :ref:`hello_traversal_chapter` と :ref:`much_ado_about_traversal_chapter`
 
@@ -1530,6 +1531,69 @@ Pyramid configurator にディレクティブを加えることができます:
 .. See also :ref:`add_directive`.
 
 :ref:`add_directive` も参照してください。
+
+
+.. Programmatic Introspection
+
+プログラムによる introspection
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. If you're building a large system that other users may plug code into, it's
+.. useful to be able to get an enumeration of what code they plugged in *at
+.. application runtime*.  For example, you might want to show them a set of tabs
+.. at the top of the screen based on an enumeration of views they registered.
+
+他のユーザがコードをプラグインする可能性のある大規模システムを構築して
+いる場合、どんなコードがプラグインされているかをアプリケーションの
+ランタイム時に列挙することができれば便利です。例えば、登録されている
+ビューの列挙に基づいて画面の一番上にタブを表示すことができるでしょう。
+
+
+.. This is possible using Pyramid's :term:`introspector`.
+
+Pyramid の :term:`introspector` を使用すれば、これは可能です。
+
+
+.. Here's an example of using Pyramid's introspector from within a view
+.. callable:
+
+これは、ビュー callable 内部で Pyramid の introspector を使用する例です:
+
+
+
+.. code-block:: python
+   :linenos:
+
+    from pyramid.view import view_config
+    from pyramid.response import Response
+
+    @view_config(route_name='bar')
+    def show_current_route_pattern(request):
+        introspector = request.registry.introspector
+        route_name = request.matched_route.name
+        route_intr = introspector.get('routes', route_name)
+        return Response(str(route_intr['pattern']))
+
+
+.. See also :ref:`using_introspection`.
+
+:ref:`using_introspection` も参照してください。
+
+
+.. Python 3 Compatibility
+
+Python 3 互換性
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. Pyramid and most of its add-ons are Python 3 compatible.  If you develop a
+.. Pyramid application today, you won't need to worry that five years from now
+.. you'll be backwatered because there are language features you'd like to use
+.. but your framework doesn't support newer Python versions.
+
+Pyramid 本体と大部分の add-on は Python 3 との互換性があります。そのため、
+今 Pyramid アプリケーションを開発すれば、今後5年間はフレームワークが
+Python の新しいバージョンをサポートしないせいで使いたい言語の機能が
+使えないということを心配する必要はないでしょう。
 
 
 .. Testing

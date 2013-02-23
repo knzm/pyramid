@@ -1,4 +1,6 @@
 import os
+import posixpath
+import re
 import sys
 import threading
 
@@ -33,44 +35,70 @@ class PkgResourceTemplateLookup(TemplateLookup):
         """Called from within a Mako template, avoids adjusting the
         uri if it looks like an asset specification"""
         # Don't adjust asset spec names
-        if ':' in uri:
+        isabs = os.path.isabs(uri)
+        if (not isabs) and (':' in uri):
             return uri
+        if not(isabs) and ('$' in uri):
+            return uri.replace('$', ':')
+        if relativeto is not None:
+            relativeto = relativeto.replace('$', ':')
+            if not(':' in uri) and (':' in relativeto):
+                if uri.startswith('/'):
+                    return uri
+                pkg, relto = relativeto.split(':')
+                _uri = posixpath.join(posixpath.dirname(relto), uri)
+                return '{0}:{1}'.format(pkg, _uri)
+            if not(':' in uri) and not(':' in relativeto):
+                return posixpath.join(posixpath.dirname(relativeto), uri)
         return TemplateLookup.adjust_uri(self, uri, relativeto)
 
     def get_template(self, uri):
         """Fetch a template from the cache, or check the filesystem
         for it
-        
+
         In addition to the basic filesystem lookup, this subclass will
         use pkg_resource to load a file using the asset
         specification syntax.
-        
+
         """
         isabs = os.path.isabs(uri)
         if (not isabs) and (':' in uri):
+            # Windows can't cope with colons in filenames, so we replace the
+            # colon with a dollar sign in the filename mako uses to actually
+            # store the generated python code in the mako module_directory or
+            # in the temporary location of mako's modules
+            adjusted = uri.replace(':', '$')
             try:
                 if self.filesystem_checks:
-                    return self._check(uri, self._collection[uri])
+                    return self._check(adjusted, self._collection[adjusted])
                 else:
-                    return self._collection[uri]
+                    return self._collection[adjusted]
             except KeyError:
                 pname, path = resolve_asset_spec(uri)
                 srcfile = abspath_from_asset_spec(path, pname)
                 if os.path.isfile(srcfile):
-                    return self._load(srcfile, uri)
+                    return self._load(srcfile, adjusted)
                 raise exceptions.TopLevelLookupException(
                     "Can not locate template for uri %r" % uri)
         return TemplateLookup.get_template(self, uri)
 
 
-registry_lock = threading.Lock() 
+registry_lock = threading.Lock()
 
 class MakoRendererFactoryHelper(object):
     def __init__(self, settings_prefix=None):
         self.settings_prefix = settings_prefix
 
     def __call__(self, info):
-        path = info.name
+        p = re.compile(
+                r'(?P<asset>[\w_.:/-]+)'
+                r'(?:\#(?P<defname>[\w_]+))?'
+                r'(\.(?P<ext>.*))'
+                )
+        asset, defname, ext = p.match(info.name).group(
+            'asset', 'defname', 'ext'
+            )
+        path = '%s.%s' % (asset, ext)
         registry = info.registry
         settings = info.settings
         settings_prefix = self.settings_prefix
@@ -128,14 +156,11 @@ class MakoRendererFactoryHelper(object):
                 preprocessor=preprocessor
                 )
 
-            registry_lock.acquire()
-            try:
-                registry.registerUtility(lookup, IMakoLookup, 
+            with registry_lock:
+                registry.registerUtility(lookup, IMakoLookup,
                                          name=settings_prefix)
-            finally:
-                registry_lock.release()
 
-        return MakoLookupTemplateRenderer(path, lookup)
+        return MakoLookupTemplateRenderer(path, defname, lookup)
 
 renderer_factory = MakoRendererFactoryHelper('mako.')
 
@@ -150,10 +175,18 @@ class MakoRenderingException(Exception):
 
 @implementer(ITemplateRenderer)
 class MakoLookupTemplateRenderer(object):
-    def __init__(self, path, lookup):
+    """ Render a :term:`Mako` template using the template
+    implied by the ``path`` argument.The ``path`` argument may be a
+    package-relative path, an absolute path, or a :term:`asset
+    specification`. If a defname is defined, in the form of
+    package:path/to/template#defname.mako, a function named ``defname``
+    inside the template will then be rendered.
+    """
+    def __init__(self, path, defname, lookup):
         self.path = path
+        self.defname = defname
         self.lookup = lookup
- 
+
     def implementation(self):
         return self.lookup.get_template(self.path)
 
@@ -161,16 +194,19 @@ class MakoLookupTemplateRenderer(object):
         context = system.pop('context', None)
         if context is not None:
             system['_context'] = context
-        def_name = None
-        if isinstance(value, tuple):
-            def_name, value = value
+        if self.defname is None:
+            if isinstance(value, tuple):
+                self.defname, value = value
+        else:
+            if isinstance(value, tuple):
+                _, value = value
         try:
             system.update(value)
         except (TypeError, ValueError):
             raise ValueError('renderer was passed non-dictionary as value')
         template = self.implementation()
-        if def_name is not None:
-            template = template.get_def(def_name)
+        if self.defname is not None:
+            template = template.get_def(self.defname)
         try:
             result = template.render_unicode(**system)
         except:

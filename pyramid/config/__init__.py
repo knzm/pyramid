@@ -1,9 +1,9 @@
 import inspect
+import itertools
 import logging
 import operator
 import os
 import sys
-import types
 import warnings
 import venusian
 
@@ -12,6 +12,8 @@ from webob.exc import WSGIHTTPException as WebobWSGIHTTPException
 from pyramid.interfaces import (
     IDebugLogger,
     IExceptionResponse,
+    IPredicateList,
+    PHASE1_CONFIG,
     )
 
 from pyramid.asset import resolve_asset_spec
@@ -22,7 +24,6 @@ from pyramid.compat import (
     text_,
     reraise,
     string_types,
-    PY3,
     )
 
 from pyramid.events import ApplicationCreated
@@ -44,6 +45,7 @@ from pyramid.registry import (
     Introspectable,
     Introspector,
     Registry,
+    undefer,
     )
 
 from pyramid.router import Router
@@ -68,14 +70,16 @@ from pyramid.config.security import SecurityConfiguratorMixin
 from pyramid.config.settings import SettingsConfiguratorMixin
 from pyramid.config.testing import TestingConfiguratorMixin
 from pyramid.config.tweens import TweensConfiguratorMixin
-from pyramid.config.util import (
-    action_method,
-    ActionInfo,
-    )
+from pyramid.config.util import PredicateList
 from pyramid.config.views import ViewsConfiguratorMixin
 from pyramid.config.zca import ZCAConfiguratorMixin
 
 from pyramid.path import DottedNameResolver
+
+from pyramid.util import (
+    action_method,
+    ActionInfo,
+    )
 
 empty = text_('')
 _marker = object()
@@ -240,7 +244,7 @@ class Configurator(
     prepended to their pattern. This parameter is new in Pyramid 1.2.
 
     If ``introspection`` is passed, it must be a boolean value.  If it's
-    ``True``, introspection values during actions will be kept for for use
+    ``True``, introspection values during actions will be kept for use
     for tools like the debug toolbar.  If it's ``False``, introspection
     values provided by registrations will be ignored.  By default, it is
     ``True``.  This parameter is new as of Pyramid 1.3.
@@ -352,6 +356,9 @@ class Configurator(
 
         for name, renderer in DEFAULT_RENDERERS:
             self.add_renderer(name, renderer)
+
+        self.add_default_view_predicates()
+        self.add_default_route_predicates()
 
         if exceptionresponse_view is not None:
             exceptionresponse_view = self.maybe_dotted(exceptionresponse_view)
@@ -486,6 +493,32 @@ class Configurator(
         _get_introspector, _set_introspector, _del_introspector
         )
 
+    def get_predlist(self, name):
+        predlist = self.registry.queryUtility(IPredicateList, name=name)
+        if predlist is None:
+            predlist = PredicateList()
+            self.registry.registerUtility(predlist, IPredicateList, name=name)
+        return predlist
+
+    def _add_predicate(self, type, name, factory, weighs_more_than=None,
+                       weighs_less_than=None):
+        discriminator = ('%s predicate' % type, name)
+        intr = self.introspectable(
+            '%s predicates' % type,
+            discriminator,
+            '%s predicate named %s' % (type, name),
+            '%s predicate' % type)
+        intr['name'] = name
+        intr['factory'] = factory
+        intr['weighs_more_than'] = weighs_more_than
+        intr['weighs_less_than'] = weighs_less_than
+        def register():
+            predlist = self.get_predlist(type)
+            predlist.add(name, factory, weighs_more_than=weighs_more_than,
+                         weighs_less_than=weighs_less_than)
+        self.action(discriminator, register, introspectables=(intr,),
+                    order=PHASE1_CONFIG) # must be registered early
+
     @property
     def action_info(self):
         info = self.info # usually a ZCML action (ParserInfo) if self.info
@@ -547,6 +580,9 @@ class Configurator(
             introspectables = ()
 
         if autocommit:
+            # callables can depend on the side effects of resolving a
+            # deferred discriminator
+            undefer(discriminator)
             if callable is not None:
                 callable(*args, **kw)
             for introspectable in introspectables:
@@ -776,10 +812,9 @@ class Configurator(
         c, action_wrap = c
         if action_wrap:
             c = action_method(c)
-        if PY3: # pragma: no cover
-            m = types.MethodType(c, self)
-        else:
-            m = types.MethodType(c, self, self.__class__)
+        # Create a bound method (works on both Py2 and Py3)
+        # http://stackoverflow.com/a/1015405/209039
+        m = c.__get__(self, self.__class__)
         return m
 
     def with_package(self, package):
@@ -1070,73 +1105,96 @@ def resolveConflicts(actions):
     other conflicting actions.
     """
 
-    # organize actions by discriminators
-    unique = {}
-    output = []
-    for i, action in enumerate(actions):
-        if not isinstance(action, dict):
+    def orderandpos(v):
+        n, v = v
+        if not isinstance(v, dict):
             # old-style tuple action
-            action = expand_action(*action)
+            v = expand_action(*v)
+        return (v['order'] or 0, n)
 
+    sactions = sorted(enumerate(actions), key=orderandpos)
+
+    def orderonly(v):
+        n, v = v
+        if not isinstance(v, dict):
+            # old-style tuple action
+            v = expand_action(*v)
+        return v['order'] or 0
+
+    for order, actiongroup in itertools.groupby(sactions, orderonly):
         # "order" is an integer grouping. Actions in a lower order will be
-        # executed before actions in a higher order.  Within an order,
-        # actions are executed sequentially based on original action ordering
-        # ("i").
-        order = action['order'] or 0
-        discriminator = action['discriminator']
+        # executed before actions in a higher order.  All of the actions in
+        # one grouping will be executed (its callable, if any will be called)
+        # before any of the actions in the next.
+        
+        unique = {}
+        output = []
 
-        # "ainfo" is a tuple of (order, i, action) where "order" is a
-        # user-supplied grouping, "i" is an integer expressing the relative
-        # position of this action in the action list being resolved, and
-        # "action" is an action dictionary.  The purpose of an ainfo is to
-        # associate an "order" and an "i" with a particular action; "order"
-        # and "i" exist for sorting purposes after conflict resolution.
-        ainfo = (order, i, action)
+        for i, action in actiongroup:
+            # Within an order, actions are executed sequentially based on
+            # original action ordering ("i").
 
-        if discriminator is None:
-            # The discriminator is None, so this action can never conflict.
-            # We can add it directly to the result.
+            if not isinstance(action, dict):
+                # old-style tuple action
+                action = expand_action(*action)
+
+            # "ainfo" is a tuple of (order, i, action) where "order" is a
+            # user-supplied grouping, "i" is an integer expressing the relative
+            # position of this action in the action list being resolved, and
+            # "action" is an action dictionary.  The purpose of an ainfo is to
+            # associate an "order" and an "i" with a particular action; "order"
+            # and "i" exist for sorting purposes after conflict resolution.
+            ainfo = (order, i, action)
+
+            discriminator = undefer(action['discriminator'])
+            action['discriminator'] = discriminator
+
+            if discriminator is None:
+                # The discriminator is None, so this action can never conflict.
+                # We can add it directly to the result.
+                output.append(ainfo)
+                continue
+
+            L = unique.setdefault(discriminator, [])
+            L.append(ainfo)
+
+        # Check for conflicts
+        conflicts = {}
+
+        for discriminator, ainfos in unique.items():
+            # We use (includepath, order, i) as a sort key because we need to
+            # sort the actions by the paths so that the shortest path with a
+            # given prefix comes first.  The "first" action is the one with the
+            # shortest include path.  We break sorting ties using "order", then
+            # "i".
+            def bypath(ainfo):
+                path, order, i = ainfo[2]['includepath'], ainfo[0], ainfo[1]
+                return path, order, i
+
+            ainfos.sort(key=bypath)
+            ainfo, rest = ainfos[0], ainfos[1:]
             output.append(ainfo)
-            continue
+            _, _, action = ainfo
+            basepath, baseinfo, discriminator = (
+                action['includepath'],
+                action['info'],
+                action['discriminator'],
+                )
 
-        L = unique.setdefault(discriminator, [])
-        L.append(ainfo)
+            for _, _, action in rest:
+                includepath = action['includepath']
+                # Test whether path is a prefix of opath
+                if (includepath[:len(basepath)] != basepath # not a prefix
+                    or includepath == basepath):
+                    L = conflicts.setdefault(discriminator, [baseinfo])
+                    L.append(action['info'])
 
-    # Check for conflicts
-    conflicts = {}
+        if conflicts:
+            raise ConfigurationConflictError(conflicts)
 
-    for discriminator, ainfos in unique.items():
-
-        # We use (includepath, order, i) as a sort key because we need to
-        # sort the actions by the paths so that the shortest path with a
-        # given prefix comes first.  The "first" action is the one with the
-        # shortest include path.  We break sorting ties using "order", then
-        # "i".
-        def bypath(ainfo):
-            path, order, i = ainfo[2]['includepath'], ainfo[0], ainfo[1]
-            return path, order, i
-
-        ainfos.sort(key=bypath)
-        ainfo, rest = ainfos[0], ainfos[1:]
-        output.append(ainfo)
-        _, _, action = ainfo
-        basepath, baseinfo, discriminator = (action['includepath'],
-                                             action['info'],
-                                             action['discriminator'])
-
-        for _, _, action in rest:
-            includepath = action['includepath']
-            # Test whether path is a prefix of opath
-            if (includepath[:len(basepath)] != basepath # not a prefix
-                or includepath == basepath):
-                L = conflicts.setdefault(discriminator, [baseinfo])
-                L.append(action['info'])
-
-    if conflicts:
-        raise ConfigurationConflictError(conflicts)
-
-    # sort conflict-resolved actions by (order, i) and return them
-    return [ x[2] for x in sorted(output, key=operator.itemgetter(0, 1))]
+        # sort conflict-resolved actions by (order, i) and yield them one by one
+        for a in [x[2] for x in sorted(output, key=operator.itemgetter(0, 1))]:
+            yield a
                 
 def expand_action(discriminator, callable=None, args=(), kw=None,
                   includepath=(), info=None, order=0, introspectables=()):

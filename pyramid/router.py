@@ -6,6 +6,7 @@ from zope.interface import (
 from pyramid.interfaces import (
     IDebugLogger,
     IRequest,
+    IRequestExtensions,
     IRootFactory,
     IRouteRequest,
     IRouter,
@@ -48,9 +49,11 @@ class Router(object):
         self.root_factory = q(IRootFactory, default=DefaultRootFactory)
         self.routes_mapper = q(IRoutesMapper)
         self.request_factory = q(IRequestFactory, default=Request)
+        self.request_extensions = q(IRequestExtensions)
         tweens = q(ITweens)
         if tweens is None:
             tweens = excview_tween_factory
+        self.orig_handle_request = self.handle_request
         self.handle_request = tweens(self.handle_request, registry)
         self.root_policy = self.root_factory # b/w compat
         self.registry = registry
@@ -84,13 +87,6 @@ class Router(object):
                            request.url)
                     logger and logger.debug(msg)
             else:
-                # TODO: kill off bfg.routes.* environ keys
-                # when traverser requires request arg, and
-                # cant cope with environ anymore (they are
-                # docs-deprecated as of BFG 1.3)
-                environ = request.environ
-                environ['bfg.routes.route'] = route 
-                environ['bfg.routes.matchdict'] = match
                 attrs['matchdict'] = match
                 attrs['matched_route'] = route
 
@@ -105,8 +101,9 @@ class Router(object):
                             request.url,
                             route.name,
                             request.path_info,
-                            route.pattern, match,
-                            ', '.join([p.__text__ for p in route.predicates]))
+                            route.pattern,
+                            match,
+                            ', '.join([p.text() for p in route.predicates]))
                         )
                     logger and logger.debug(msg)
 
@@ -165,6 +162,83 @@ class Router(object):
 
         return response
 
+    def invoke_subrequest(self, request, use_tweens=False):
+        """
+        Obtain a response object from the Pyramid application based on
+        information in the ``request`` object provided.  The ``request``
+        object must be an object that implements the Pyramid request
+        interface (such as a :class:`pyramid.request.Request` instance).  If
+        ``use_tweens`` is ``True``, the request will be sent to the
+        :term:`tween` in the tween stack closest to the request ingress.  If
+        ``use_tweens`` is ``False``, the request will be sent to the main
+        router handler, and no tweens will be invoked.  This function also:
+        
+        - manages the threadlocal stack (so that
+          :func:`~pyramid.threadlocal.get_current_request` and
+          :func:`~pyramid.threadlocal.get_current_registry` work during a
+          request)
+
+        - Adds a ``registry`` attribute and a ``invoke_subrequest`` attribute
+          (a callable) to the request object it's handed.
+
+        - sets request extensions (such as those added via
+          :meth:`~pyramid.config.Configurator.add_request_method` or
+          :meth:`~pyramid.config.Configurator.set_request_property`) on the
+          request it's passed.
+
+        - causes a :class:`~pyramid.event.NewRequest` event to be sent at the
+          beginning of request processing.
+
+        - causes a :class:`~pyramid.event.ContextFound` event to be sent
+          when a context resource is found.
+          
+        - causes a :class:`~pyramid.event.NewResponse` event to be sent when
+          the Pyramid application returns a response.
+
+        - Calls any :term:`response callback` functions defined within the
+          request's lifetime if a response is obtained from the Pyramid
+          application.
+
+        - Calls any :term:`finished callback` functions defined within the
+          request's lifetime.
+
+        See also :ref:`subrequest_chapter`.
+        """
+        registry = self.registry
+        has_listeners = self.registry.has_listeners
+        notify = self.registry.notify
+        threadlocals = {'registry':registry, 'request':request}
+        manager = self.threadlocal_manager
+        manager.push(threadlocals)
+        request.registry = registry
+        request.invoke_subrequest = self.invoke_subrequest
+        
+        if use_tweens:
+            handle_request = self.handle_request
+        else:
+            handle_request = self.orig_handle_request
+
+        try:
+
+            try:
+                extensions = self.request_extensions
+                if extensions is not None:
+                    request._set_extensions(extensions)
+                response = handle_request(request)
+                has_listeners and notify(NewResponse(request, response))
+
+                if request.response_callbacks:
+                    request._process_response_callbacks(response)
+
+                return response
+
+            finally:
+                if request.finished_callbacks:
+                    request._process_finished_callbacks()
+
+        finally:
+            manager.pop()
+
     def __call__(self, environ, start_response):
         """
         Accept ``environ`` and ``start_response``; create a
@@ -173,29 +247,7 @@ class Router(object):
         within the application registry; call ``start_response`` and
         return an iterable.
         """
-        registry = self.registry
-        has_listeners = self.registry.has_listeners
-        notify = self.registry.notify
         request = self.request_factory(environ)
-        threadlocals = {'registry':registry, 'request':request}
-        manager = self.threadlocal_manager
-        manager.push(threadlocals)
-        request.registry = registry
-        try:
-
-            try:
-                response = self.handle_request(request)
-                has_listeners and notify(NewResponse(request, response))
-
-                if request.response_callbacks:
-                    request._process_response_callbacks(response)
-
-                return response(request.environ, start_response)
-
-            finally:
-                if request.finished_callbacks:
-                    request._process_finished_callbacks()
-
-        finally:
-            manager.pop()
+        response = self.invoke_subrequest(request, use_tweens=True)
+        return response(request.environ, start_response)
 

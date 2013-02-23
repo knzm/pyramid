@@ -7,7 +7,7 @@ from pyramid.interfaces import (
     )
 
 from pyramid.exceptions import ConfigurationError
-from pyramid.config.util import action_method
+from pyramid.util import action_method
 
 class SecurityConfiguratorMixin(object):
     @action_method
@@ -136,4 +136,24 @@ class SecurityConfiguratorMixin(object):
         self.action(IDefaultPermission, register, order=PHASE1_CONFIG,
                     introspectables=(intr, perm_intr,))
 
+
+    def add_permission(self, permission_name):
+        """
+        A configurator directive which registers a free-standing
+        permission without associating it with a view callable.  This can be
+        used so that the permission shows up in the introspectable data under
+        the ``permissions`` category (permissions mentioned via ``add_view``
+        already end up in there).  For example::
+
+          config = Configurator()
+          config.add_permission('view')
+        """
+        intr = self.introspectable(
+            'permissions',
+            permission_name,
+            permission_name,
+            'permission'
+            )
+        intr['value'] = permission_name
+        self.action(None, introspectables=(intr,))
 

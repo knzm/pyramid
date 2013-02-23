@@ -73,7 +73,7 @@ Python オブジェクトです。具体的には、ビュー callable は、関
 
 ビュー callable は、最低限 ``request`` という名前の単一の引数を受け取る
 必要があります。この引数は :app:`Pyramid` :term:`Request` オブジェクトを
-表わします。request オブジェクトは、上流の :term:`WSGI` サーバーによって
+表わします。 request オブジェクトは、上流の WSGI サーバーによって
 :app:`Pyramid` に提供される :term:`WSGI` 環境変数を表わします。
 予想されるように、 request オブジェクトは実行中の特定の HTTP リクエストに
 関してアプリケーションが知る必要のあるすべてのものを含んでいます。
@@ -84,7 +84,7 @@ Python オブジェクトです。具体的には、ビュー callable は、関
 .. object in the view callable code and returning it directly or by raising
 .. special kinds of exceptions from within the body of a view callable.
 
-ビュー callable の最終責任は :app:`Pyramid` :term:`Response` オブジェクト
+ビュー callable の最終責任は :mod:`Pyramid` :term:`Response` オブジェクト
 を生成することです。これは、ビュー callable コード内で :term:`Response`
 オブジェクトを生成してそれを直接返すか、あるいはビュー callable の本体
 内部から特別な種類の例外を上げることによって行うことができます。
@@ -245,7 +245,7 @@ callable クラスを異なるビュー設定の中で使用することがで�
 :app:`Pyramid` は、 :class:`pyramid.response.Response` を継承する一連の
 様々な「例外」クラスを提供しています。例えば、クラス
 :class:`pyramid.httpexceptions.HTTPFound` のインスタンスは
-:class:`pyramid.response.Response` を継承するので、これも有効な
+:class:`~pyramid.response.Response` を継承するので、これも有効な
 response オブジェクトです。例については、 :ref:`http_exceptions` と
 :ref:`http_redirect` を参照してください。
 
@@ -311,13 +311,13 @@ HTTP 例外
 ~~~~~~~~~~~~~~~
 
 .. All classes documented in the :mod:`pyramid.httpexceptions` module documented
-.. as inheriting from the :class:`pryamid.httpexceptions.HTTPException` are
+.. as inheriting from the :class:`pyramid.httpexceptions.HTTPException` are
 .. :term:`http exception` objects.  Instances of an HTTP exception object may
 .. either be *returned* or *raised* from within view code.  In either case
-.. (return or raise) the instance will be used as as the view's response.
+.. (return or raise) the instance will be used as the view's response.
 
 :mod:`pyramid.httpexceptions` モジュールの中で
-:class:`pryamid.httpexceptions.HTTPException` から継承すると文書化
+:class:`pyramid.httpexceptions.HTTPException` から継承すると文書化
 されたすべてのクラスは :term:`http exception` オブジェクトです。
 HTTP 例外オブジェクトのインスタンスは、ビューコードの内部から
 *戻り値として返される* か、または *例外として投げられ* ます。
@@ -428,9 +428,9 @@ HTTP 例外はアプリケーション開発者が直接使うためのもので
 2 つの HTTP 例外を上げます: :exc:`pyramid.httpexceptions.HTTPNotFound` と
 :exc:`pyramid.httpexceptions.HTTPForbidden` です。
 リクエストをサービスするビューが見つからない場合、 Pyramid は
-:exc:`pyramid.httpexceptions.HTTPNotFound` 例外を上げます。
+:exc:`~pyramid.httpexceptions.HTTPNotFound` 例外を上げます。
 認可がセキュリティポリシーによって禁止された場合、 Pyramid は
-:exc:`pyramid.httpexceptions.Forbidden` 例外を上げます。
+:exc:`~pyramid.httpexceptions.Forbidden` 例外を上げます。
 
 
 .. If :exc:`~pyramid.httpexceptions.HTTPNotFound` is raised by Pyramid itself or
@@ -446,7 +446,7 @@ HTTP 例外はアプリケーション開発者が直接使うためのもので
 .. within view code, the result of the :term:`Forbidden View` will be returned
 .. to the user agent which performed the request.
 
-:exc:`pyramid.httpexceptions.HTTPForbidden` が Pyramid 自体によって、
+:exc:`~pyramid.httpexceptions.HTTPForbidden` が Pyramid 自体によって、
 またはビューコード内で上げられる場合、 :term:`Forbidden View` の結果が
 リクエストを行なったユーザエージェントに返されます。
 
@@ -595,6 +595,26 @@ HTTP 例外はアプリケーション開発者が直接使うためのもので
 
 例外ビューは任意のビュー登録メカニズムで構成することができます:
 ``@view_config`` デコレータまたは命令的な ``add_view`` スタイル。
+
+
+.. note::
+
+   .. Pyramid's :term:`exception view` handling logic is implemented as a tween
+   .. factory function: :func:`pyramid.tweens.excview_tween_factory`.  If
+   .. Pyramid exception view handling is desired, and tween factories are
+   .. specified via the ``pyramid.tweens`` configuration setting, the
+   .. :func:`pyramid.tweens.excview_tween_factory` function must be added to the
+   .. ``pyramid.tweens`` configuration setting list explicitly.  If it is not
+   .. present, Pyramid will not perform exception view handling.
+
+   Pyramid の :term:`exception view` 処理ロジックは
+   :func:`pyramid.tweens.excview_tween_factory` という tween ファクトリ関数
+   として実装されます。 Pyramid 例外ビューの処理が期待され、
+   ``pyramid.tweens`` 設定で tween ファクトリが指定されている場合、
+   ``pyramid.tweens`` 設定リストに
+   :func:`pyramid.tweens.excview_tween_factory` 関数を明示的に追加
+   しなければなりません。それが存在しなければ、 Pyramid は例外ビューの
+   処理を行ないません。
 
 
 .. index::
@@ -999,7 +1019,26 @@ request
 
 
 .. index::
+   single: Passing in configuration variables
+
+
+.. Passing Configuration Variables to a View
+
+.. _passing_in_config_variables:
+
+設定変数をビューへ渡す
+-----------------------------------------
+
+.. For information on passing a variable from the configuration .ini files to a
+.. view, see :ref:`deployment_settings`.
+
+設定 .ini ファイルからビューに変数を渡すことに関する情報は
+:ref:`deployment_settings` を参照してください。
+
+
+.. index::
    single: Pylons-style controller dispatch
+
 
 .. Pylons-1.0-Style "Controller" Dispatch
 

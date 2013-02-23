@@ -41,14 +41,20 @@ Glossary
    setuptools
      `Setuptools <http://peak.telecommunity.com/DevCenter/setuptools>`_
      builds on Python's ``distutils`` to provide easier building,
-     distribution, and installation of libraries and applications.
+     distribution, and installation of libraries and applications.  As of
+     this writing, setuptools runs under Python 2, but not under Python 3.
+     You can use :term:`distribute` under Python 3 instead.
+
+   distribute
+     `Distribute <http://packages.python.org/distribute/>`_ is a fork of
+     :term:`setuptools` which runs on both Python 2 and Python 3.
 
    pkg_resources
-     A module which ships with :term:`setuptools` that provides an API for
-     addressing "asset files" within a Python :term:`package`.  Asset files
-     are static files, template files, etc; basically anything
-     non-Python-source that lives in a Python package can be considered a
-     asset file.  See also `PkgResources
+     A module which ships with :term:`setuptools` and :term:`distribute` that
+     provides an API for addressing "asset files" within a Python
+     :term:`package`.  Asset files are static files, template files, etc;
+     basically anything non-Python-source that lives in a Python package can
+     be considered a asset file.  See also `PkgResources
      <http://peak.telecommunity.com/DevCenter/PkgResources>`_
 
    asset
@@ -84,7 +90,7 @@ Glossary
      (Setuptools/distutils terminology).  A file representing an
      installable library or application.  Distributions are usually
      files that have the suffix of ``.egg``, ``.tar.gz``, or ``.zip``.
-     Distributions are the target of Setuptools commands such as
+     Distributions are the target of Setuptools-related commands such as
      ``easy_install``.
 
    entry point
@@ -290,7 +296,7 @@ Glossary
      :term:`principal` (or principals) associated with a request.
 
    WSGI
-     `Web Server Gateway Interface <http://wsgi.org/>`_.  This is a
+     `Web Server Gateway Interface <http://www.wsgi.org/>`_.  This is a
      Python standard for connecting web applications to web servers,
      similar to the concept of Java Servlets.  :app:`Pyramid` requires
      that your application be served as a WSGI application.
@@ -299,7 +305,7 @@ Glossary
      *Middleware* is a :term:`WSGI` concept.  It is a WSGI component
      that acts both as a server and an application.  Interesting uses
      for middleware exist, such as caching, content-transport
-     encoding, and other functions.  See `WSGI.org <http://wsgi.org>`_
+     encoding, and other functions.  See `WSGI.org <http://www.wsgi.org>`_
      or `PyPI <http://python.org/pypi>`_ to find middleware for your
      application.
 
@@ -475,10 +481,24 @@ Glossary
      :app:`Pyramid` to form a workflow system.
 
    virtual root
-     A resource object representing the "virtual" root of a request; this
-     is typically the physical root object (the object returned by the
-     application root factory) unless :ref:`vhosting_chapter` is in
-     use.
+     A resource object representing the "virtual" root of a request; this is
+     typically the :term:`physical root` object unless :ref:`vhosting_chapter`
+     is in use.
+
+   physical root
+     The object returned by the application :term:`root factory`.
+     Unlike the :term:`virtual root` of a request, it is not impacted by
+     :ref:`vhosting_chapter`: it will always be the actual object returned by
+     the root factory, never a subobject.
+
+   physical path
+     The path required by a traversal which resolve a :term:`resource` starting
+     from the :term:`physical root`.  For example, the physical path of the
+     ``abc`` subobject of the physical root object is ``/abc``.  Physical paths
+     can also be specified as tuples where the first element is the empty
+     string (representing the root), and every other element is a Unicode
+     object, e.g. ``('', 'abc')``.  Physical paths are also sometimes called
+     "traversal paths".
 
    lineage
      An ordered sequence of objects based on a ":term:`location` -aware"
@@ -812,12 +832,15 @@ Glossary
       application.
 
    session factory
-      A callable, which, when called with a single argument named
-      ``request`` (a :term:`request` object), returns a
-      :term:`session` object.
+      A callable, which, when called with a single argument named ``request``
+      (a :term:`request` object), returns a :term:`session` object.  See
+      :ref:`using_the_default_session_factory`,
+      :ref:`using_alternate_session_factories` and
+      :meth:`pyramid.config.Configurator.set_session_factory` for more
+      information.
 
    Mako
-     `Mako <http://www.makotemplates.org/>`_ is a template language language
+     `Mako <http://www.makotemplates.org/>`_ is a template language
      which refines the familiar ideas of componentized layout and inheritance
      using Python with Python scoping and calling semantics.
 
@@ -922,9 +945,9 @@ Glossary
      http://docs.pylonsproject.org/projects/pyramid_debugtoolbar/dev/ .
 
    scaffold
-     A project template that helps users get started writing a Pyramid
-     application quickly.  Scaffolds are usually used via the ``pcreate``
-     command.
+     A project template that generates some of the major parts of a Pyramid
+     application and helps users to quickly get started writing larger
+     applications.  Scaffolds are usually used via the ``pcreate`` command.
 
    pyramid_exclog
      A package which logs Pyramid application exception (error) information
@@ -994,3 +1017,10 @@ Glossary
       Aka ``gunicorn``, a fast :term:`WSGI` server that runs on UNIX under
       Python 2.5+ (although at the time of this writing does not support
       Python 3).  See http://gunicorn.org/ for detailed information.
+
+   predicate factory
+      A callable which is used by a third party during the registration of a
+      route, view, or subscriber predicates to extend the configuration
+      system.  See :ref:`registering_thirdparty_predicates` for more
+      information.
+

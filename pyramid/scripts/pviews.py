@@ -4,6 +4,7 @@ import textwrap
 
 from pyramid.interfaces import IMultiView
 from pyramid.paster import bootstrap
+from pyramid.scripts.common import parse_vars
 
 def main(argv=sys.argv, quiet=False):
     command = PViewsCommand(argv, quiet)
@@ -17,11 +18,11 @@ class PViewsCommand(object):
     each route+predicate set, print each view that might match and its
     predicates.
 
-    This command accepts two positional arguments: "config_uri" specifies the
+    This command accepts two positional arguments: 'config_uri' specifies the
     PasteDeploy config file to use for the interactive shell. The format is
-    "inifile#name". If the name is left off, "main" will be assumed.  "url"
+    'inifile#name'. If the name is left off, 'main' will be assumed.  'url'
     specifies the path info portion of a URL that will be used to find
-    matching views.  Example: "proutes myapp.ini#main /url"
+    matching views.  Example: 'proutes myapp.ini#main /url'
     """
     stdout = sys.stdout
 
@@ -187,7 +188,7 @@ class PViewsCommand(object):
         self.out("%sroute pattern: %s" % (indent, route.pattern))
         self.out("%sroute path: %s" % (indent, route.path))
         self.out("%ssubpath: %s" % (indent, '/'.join(attrs['subpath'])))
-        predicates = ', '.join([p.__text__ for p in route.predicates])
+        predicates = ', '.join([p.text() for p in route.predicates])
         if predicates != '':
             self.out("%sroute predicates (%s)" % (indent, predicates))
 
@@ -223,17 +224,19 @@ class PViewsCommand(object):
                 self.out("%srequired permission = %s" % (indent, permission))
             predicates = getattr(view_wrapper, '__predicates__', None)
             if predicates is not None:
-                predicate_text = ', '.join([p.__text__ for p in predicates])
+                predicate_text = ', '.join([p.text() for p in predicates])
                 self.out("%sview predicates (%s)" % (indent, predicate_text))
 
     def run(self):
         if len(self.args) < 2:
             self.out('Command requires a config file arg and a url arg')
             return 2
-        config_uri, url = self.args
+        config_uri = self.args[0]
+        url = self.args[1]
+
         if not url.startswith('/'):
             url = '/%s' % url
-        env = self.bootstrap[0](config_uri)
+        env = self.bootstrap[0](config_uri, options=parse_vars(self.args[2:]))
         registry = env['registry']
         view = self._find_view(url, registry)
         self.out('')

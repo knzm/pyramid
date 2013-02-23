@@ -54,6 +54,7 @@ Narrative Documentation
    narr/traversal
    narr/security
    narr/hybrid
+   narr/subrequest
    narr/hooks
    narr/introspector
    narr/extending
@@ -85,8 +86,6 @@ API Reference
 
    api/authorization
    api/authentication
-   api/chameleon_text
-   api/chameleon_zpt
    api/config
    api/events
    api/exceptions

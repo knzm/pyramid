@@ -1,733 +1,687 @@
-1.3 (2012-03-21)
+1.4 (2012-12-18)
 ================
 
-Bug Fixes
----------
+Docs
+----
 
-- When ``pyramid.wsgi.wsgiapp2`` calls the downstream WSGI app, the app's
-  environ will no longer have (deprecated and potentially misleading)
-  ``bfg.routes.matchdict`` or ``bfg.routes.route`` keys in it.  A symptom of
-  this bug would be a ``wsgiapp2``-wrapped Pyramid app finding the wrong view
-  because it mistakenly detects that a route was matched when, in fact, it
-  was not.
+- Fix functional tests in the ZODB tutorial
 
-- The fix for issue https://github.com/Pylons/pyramid/issues/461 (which made
-  it possible for instance methods to be used as view callables) introduced a
-  backwards incompatibility when methods that declared only a request
-  argument were used.  See https://github.com/Pylons/pyramid/issues/503
-
-1.3b3 (2012-03-17)
+1.4b3 (2012-12-10)
 ==================
 
+- Packaging release only, no code changes.  1.4b2 was a brownbag release due to
+  missing directories in the tarball.
+
+1.4b2 (2012-12-10)
+==================
+
+Docs
+----
+
+- Scaffolding is now PEP-8 compliant (at least for a brief shining moment).
+
+- Tutorial improvements.
+
+Backwards Incompatibilities
+---------------------------
+
+- Modified the ``_depth`` argument to ``pyramid.view.view_config`` to accept
+  a value relative to the invocation of ``view_config`` itself. Thus, when it
+  was previously expecting a value of ``1`` or greater, to reflect that
+  the caller of ``view_config`` is 1 stack frame away from ``venusian.attach``,
+  this implementation detail is now hidden.
+
+- Modified the ``_backframes`` argument to ``pyramid.util.action_method`` in a
+  similar way to the changes described to ``_depth`` above.  This argument
+  remains undocumented, but might be used in the wild by some insane person.
+
+1.4b1 (2012-11-21)
+==================
+
+Features
+--------
+
+- Small microspeed enhancement which anticipates that a
+  ``pyramid.response.Response`` object is likely to be returned from a view.
+  Some code is shortcut if the class of the object returned by a view is this
+  class.  A similar microoptimization was done to
+  ``pyramid.request.Request.is_response``.
+
+- Make it possible to use variable arguments on ``p*`` commands (``pserve``,
+  ``pshell``, ``pviews``, etc) in the form ``a=1 b=2`` so you can fill in
+  values in parameterized ``.ini`` file, e.g. ``pshell etc/development.ini
+  http_port=8080``.  See https://github.com/Pylons/pyramid/pull/714
+
+- A somewhat advanced and obscure feature of Pyramid event handlers is their
+  ability to handle "multi-interface" notifications.  These notifications have
+  traditionally presented multiple objects to the subscriber callable.  For
+  instance, if an event was sent by code like this::
+
+     registry.notify(event, context)
+
+  In the past, in order to catch such an event, you were obligated to write and
+  register an event subscriber that mentioned both the event and the context in
+  its argument list::
+
+     @subscriber([SomeEvent, SomeContextType])
+     def asubscriber(event, context):
+         pass
+
+  In many subscriber callables registered this way, it was common for the logic
+  in the subscriber callable to completely ignore the second and following
+  arguments (e.g. ``context`` in the above example might be ignored), because
+  they usually existed as attributes of the event anyway.  You could usually
+  get the same value by doing ``event.context`` or similar.
+
+  The fact that you needed to put an extra argument which you usually ignored
+  in the subscriber callable body was only a minor annoyance until we added
+  "subscriber predicates", used to narrow the set of circumstances under which
+  a subscriber will be executed, in a prior 1.4 alpha release.  Once those were
+  added, the annoyance was escalated, because subscriber predicates needed to
+  accept the same argument list and arity as the subscriber callables that they
+  were configured against.  So, for example, if you had these two subscriber
+  registrations in your code::
+
+     @subscriber([SomeEvent, SomeContextType])
+     def asubscriber(event, context):
+         pass
+
+     @subscriber(SomeOtherEvent)
+     def asubscriber(event):
+         pass
+ 
+  And you wanted to use a subscriber predicate::
+
+     @subscriber([SomeEvent, SomeContextType], mypredicate=True)
+     def asubscriber1(event, context):
+         pass
+
+     @subscriber(SomeOtherEvent, mypredicate=True)
+     def asubscriber2(event):
+         pass
+
+  If an existing ``mypredicate`` subscriber predicate had been written in such
+  a way that it accepted only one argument in its ``__call__``, you could not
+  use it against a subscription which named more than one interface in its
+  subscriber interface list.  Similarly, if you had written a subscriber
+  predicate that accepted two arguments, you couldn't use it against a
+  registration that named only a single interface type.
+
+  For example, if you created this predicate::
+
+    class MyPredicate(object):
+        # portions elided...
+        def __call__(self, event):
+            return self.val == event.context.foo
+
+  It would not work against a multi-interface-registered subscription, so in
+  the above example, when you attempted to use it against ``asubscriber1``, it
+  would fail at runtime with a TypeError, claiming something was attempting to
+  call it with too many arguments.
+
+  To hack around this limitation, you were obligated to design the
+  ``mypredicate`` predicate to expect to receive in its ``__call__`` either a
+  single ``event`` argument (a SomeOtherEvent object) *or* a pair of arguments
+  (a SomeEvent object and a SomeContextType object), presumably by doing
+  something like this::
+
+    class MyPredicate(object):
+        # portions elided...
+        def __call__(self, event, context=None):
+            return self.val == event.context.foo
+
+  This was confusing and bad.
+
+  In order to allow people to ignore unused arguments to subscriber callables
+  and to normalize the relationship between event subscribers and subscriber
+  predicates, we now allow both subscribers and subscriber predicates to accept
+  only a single ``event`` argument even if they've been subscribed for
+  notifications that involve multiple interfaces.  Subscribers and subscriber
+  predicates that accept only one argument will receive the first object passed
+  to ``notify``; this is typically (but not always) the event object.  The
+  other objects involved in the subscription lookup will be discarded.  You can
+  now write an event subscriber that accepts only ``event`` even if it
+  subscribes to multiple interfaces::
+
+     @subscriber([SomeEvent, SomeContextType])
+     def asubscriber(event):
+         # this will work!
+
+  This prevents you from needing to match the subscriber callable parameters to
+  the subscription type unnecessarily, especially when you don't make use of
+  any argument in your subscribers except for the event object itself.
+
+  Note, however, that if the event object is not the first
+  object in the call to ``notify``, you'll run into trouble.  For example, if
+  notify is called with the context argument first::
+
+     registry.notify(context, event)
+
+  You won't be able to take advantage of the event-only feature.  It will
+  "work", but the object received by your event handler won't be the event
+  object, it will be the context object, which won't be very useful::
+
+     @subscriber([SomeContextType, SomeEvent])
+     def asubscriber(event):
+         # bzzt! you'll be getting the context here as ``event``, and it'll 
+         # be useless
+
+  Existing multiple-argument subscribers continue to work without issue, so you
+  should continue use those if your system notifies using multiple interfaces
+  and the first interface is not the event interface.  For example::
+
+     @subscriber([SomeContextType, SomeEvent])
+     def asubscriber(context, event):
+         # this will still work!
+
+  The event-only feature makes it possible to use a subscriber predicate that
+  accepts only a request argument within both multiple-interface subscriber
+  registrations and single-interface subscriber registrations.  You needn't
+  make slightly different variations of predicates depending on the
+  subscription type arguments.  Instead, just write all your subscriber
+  predicates so they only accept ``event`` in their ``__call__`` and they'll be
+  useful across all registrations for subscriptions that use an event as their
+  first argument, even ones which accept more than just ``event``.
+
+  However, the same caveat applies to predicates as to subscriber callables: if
+  you're subscribing to a multi-interface event, and the first interface is not
+  the event interface, the predicate won't work properly.  In such a case,
+  you'll need to match the predicate ``__call__`` argument ordering and
+  composition to the ordering of the interfaces.  For example, if the
+  registration for the subscription uses ``[SomeContext, SomeEvent]``, you'll
+  need to reflect that in the ordering of the parameters of the predicate's
+  ``__call__`` method::
+
+        def __call__(self, context, event):
+            return event.request.path.startswith(self.val)
+
+  tl;dr: 1) When using multi-interface subscriptions, always use the event type
+  as the first subscription registration argument and 2) When 1 is true, use
+  only ``event`` in your subscriber and subscriber predicate parameter lists,
+  no matter how many interfaces the subscriber is notified with.  This
+  combination will result in the maximum amount of reusability of subscriber
+  predicates and the least amount of thought on your part.  Drink responsibly.
+
 Bug Fixes
 ---------
 
-- ``config.add_view(<aninstancemethod>)`` raised AttributeError involving
-  ``__text__``.  See https://github.com/Pylons/pyramid/issues/461
-
-- Remove references to do-nothing ``pyramid.debug_templates`` setting in all
-  Pyramid-provided ``.ini`` files.  This setting previously told Chameleon to
-  render better exceptions; now Chameleon always renders nice exceptions
-  regardless of the value of this setting.
-
-Scaffolds
----------
-
-- The ``alchemy`` scaffold now shows an informative error message in the
-  browser if the person creating the project forgets to run the
-  initialization script.
-
-- The ``alchemy`` scaffold initialization script is now called
-  ``initialize_<projectname>_db`` instead of ``populate_<projectname>``.
+- A failure when trying to locate the attribute ``__text__`` on route and view
+  predicates existed when the ``debug_routematch`` setting was true or when the
+  ``pviews`` command was used. See https://github.com/Pylons/pyramid/pull/727
 
 Documentation
 -------------
 
-- Wiki tutorials improved due to collaboration at PyCon US 2012 sprints.
+- Sync up tutorial source files with the files that are rendered by the
+  scaffold that each uses.
 
-1.3b2 (2012-03-02)
+1.4a4 (2012-11-14)
 ==================
+
+Features
+--------
+
+- ``pyramid.authentication.AuthTktAuthenticationPolicy`` has been updated to
+  support newer hashing algorithms such as ``sha512``. Existing applications
+  should consider updating if possible for improved security over the default
+  md5 hashing.
+
+- Added an ``effective_principals`` route and view predicate.
+
+- Do not allow the userid returned from the ``authenticated_userid`` or the
+  userid that is one of the list of principals returned by
+  ``effective_principals`` to be either of the strings ``system.Everyone`` or
+  ``system.Authenticated`` when any of the built-in authorization policies that
+  live in ``pyramid.authentication`` are in use.  These two strings are
+  reserved for internal usage by Pyramid and they will not be accepted as valid
+  userids.
+
+- Slightly better debug logging from
+  ``pyramid.authentication.RepozeWho1AuthenticationPolicy``.
+
+- ``pyramid.security.view_execution_permitted`` used to return ``True`` if no
+  view could be found. It now raises a ``TypeError`` exception in that case, as
+  it doesn't make sense to assert that a nonexistent view is
+  execution-permitted. See https://github.com/Pylons/pyramid/issues/299.
+
+- Allow a ``_depth`` argument to ``pyramid.view.view_config``, which will
+  permit limited composition reuse of the decorator by other software that
+  wants to provide custom decorators that are much like view_config.
+
+- Allow an iterable of decorators to be passed to
+  ``pyramid.config.Configurator.add_view``. This allows views to be wrapped
+  by more than one decorator without requiring combining the decorators
+  yourself.
 
 Bug Fixes
 ---------
 
-- The method ``pyramid.request.Request.partial_application_url`` is no longer
-  in the API docs.  It was meant to be a private method; its publication in
-  the documentation as an API method was a mistake, and it has been renamed
-  to something private.
+- In the past if a renderer returned ``None``, the body of the resulting
+  response would be set explicitly to the empty string.  Instead, now, the body
+  is left unchanged, which allows the renderer to set a body itself by using
+  e.g. ``request.response.body = b'foo'``.  The body set by the renderer will
+  be unmolested on the way out.  See
+  https://github.com/Pylons/pyramid/issues/709
 
-- When a static view was registered using an absolute filesystem path on
-  Windows, the ``request.static_url`` function did not work to generate URLs
-  to its resources.  Symptom: "No static URL definition matching
-  c:\\foo\\bar\\baz".
+- In uncommon cases, the ``pyramid_excview_tween_factory`` might have
+  inadvertently raised a ``KeyError`` looking for ``request_iface`` as an
+  attribute of the request.  It no longer fails in this case.  See
+  https://github.com/Pylons/pyramid/issues/700
 
-- Make all tests pass on Windows XP.
+- Be more tolerant of potential error conditions in ``match_param`` and
+  ``physical_path`` predicate implementations; instead of raising an exception,
+  return False.
 
-- Bug in ACL authentication checking on Python 3: the ``permits`` and
-  ``principals_allowed_by_permission`` method of
-  ``pyramid.authorization.ACLAuthenticationPolicy`` could return an
-  inappropriate ``True`` value when a permission on an ACL was a string
-  rather than a sequence, and then only if the ACL permission string was a
-  substring of the ``permission`` value passed to the function.
-
-  This bug effects no Pyramid deployment under Python 2; it is a bug that
-  exists only in deployments running on Python 3.  It has existed since
-  Pyramid 1.3a1.
-
-  This bug was due to the presence of an ``__iter__`` attribute on strings
-  under Python 3 which is not present under strings in Python 2.
-
-1.3b1 (2012-02-26)
-==================
-
-Bug Fixes
----------
-
-- ``pyramid.config.Configurator.with_package`` didn't work if the
-  Configurator was an old-style ``pyramid.configuration.Configurator``
-  instance.
-
-- Pyramid authorization policies did not show up in the introspector.
+- ``pyramid.view.render_view`` was not functioning properly under Python 3.x
+  due to a byte/unicode discrepancy. See
+  http://github.com/Pylons/pyramid/issues/721
 
 Deprecations
 ------------
 
-- All references to the ``tmpl_context`` request variable were removed from
-  the docs.  Its existence in Pyramid is confusing for people who were never
-  Pylons users.  It was added as a porting convenience for Pylons users in
-  Pyramid 1.0, but it never caught on because the Pyramid rendering system is
-  a lot different than Pylons' was, and alternate ways exist to do what it
-  was designed to offer in Pylons.  It will continue to exist "forever" but
-  it will not be recommended or mentioned in the docs.
+- ``pyramid.authentication.AuthTktAuthenticationPolicy`` will emit a warning if
+  an application is using the policy without explicitly passing a ``hashalg``
+  argument. This is because the default is "md5" which is considered
+  theoretically subject to collision attacks. If you really want "md5" then you
+  must specify it explicitly to get rid of the warning.
 
-1.3a9 (2012-02-22)
+Documentation
+-------------
+
+- All of the tutorials that use
+  ``pyramid.authentication.AuthTktAuthenticationPolicy`` now explicitly pass
+  ``sha512`` as a ``hashalg`` argument.
+
+
+Internals
+---------
+
+- Move ``TopologicalSorter`` from ``pyramid.config.util`` to ``pyramid.util``,
+  move ``CyclicDependencyError`` from ``pyramid.config.util`` to
+  ``pyramid.exceptions``, rename ``Singleton`` to ``Sentinel`` and move from
+  ``pyramid.config.util`` to ``pyramid.util``; this is in an effort to
+  move that stuff that may be an API one day out of ``pyramid.config.util``,
+  because that package should never be imported from non-Pyramid code.
+  TopologicalSorter is still not an API, but may become one.
+
+- Get rid of shady monkeypatching of ``pyramid.request.Request`` and
+  ``pyramid.response.Response`` done within the ``__init__.py`` of Pyramid.
+  Webob no longer relies on this being done.  Instead, the ResponseClass
+  attribute of the Pyramid Request class is assigned to the Pyramid response
+  class; that's enough to satisfy WebOb and behave as it did before with the
+  monkeypatching.
+
+1.4a3 (2012-10-26)
 ==================
+
+Bug Fixes
+---------
+
+- The match_param predicate's text method was fixed to sort its values.
+  Part of https://github.com/Pylons/pyramid/pull/705
+
+- 1.4a ``pyramid.scripting.prepare`` behaved differently than 1.3 series
+  function of same name.  In particular, if passed a request, it would not
+  set the ``registry`` attribute of the request like 1.3 did.  A symptom
+  would be that passing a request to ``pyramid.paster.bootstrap`` (which uses
+  the function) that did not have a ``registry`` attribute could assume that
+  the registry would be attached to the request by Pyramid.  This assumption
+  could be made in 1.3, but not in 1.4.  The assumption can now be made in
+  1.4 too (a registry is attached to a request passed to bootstrap or
+  prepare).
+
+- When registering a view configuration that named a Chameleon ZPT renderer
+  with a macro name in it (e.g. ``renderer='some/template#somemacro.pt``) as
+  well as a view configuration without a macro name in it that pointed to the
+  same template (e.g. ``renderer='some/template.pt'``), internal caching could
+  confuse the two, and your code might have rendered one instead of the
+  other.
 
 Features
 --------
 
-- Add an ``introspection`` boolean to the Configurator constructor.  If this
-  is ``True``, actions registered using the Configurator will be registered
-  with the introspector.  If it is ``False``, they won't.  The default is
-  ``True``.  Setting it to ``False`` during action processing will prevent
-  introspection for any following registration statements, and setting it to
-  ``True`` will start them up again.  This addition is to service a
-  requirement that the debug toolbar's own views and methods not show up in
-  the introspector.
+- Allow multiple values to be specified to the ``request_param`` view/route
+  predicate as a sequence.  Previously only a single string value was allowed.
+  See https://github.com/Pylons/pyramid/pull/705
 
-- New API: ``pyramid.config.Configurator.add_notfound_view``.  This is a
-  wrapper for ``pyramid.Config.configurator.add_view`` which provides easy
-  append_slash support and does the right thing about permissions.  It should
-  be preferred over calling ``add_view`` directly with
-  ``context=HTTPNotFound`` as was previously recommended.
+- Comments with references to documentation sections placed in scaffold
+  ``.ini`` files.
 
-- New API: ``pyramid.view.notfound_view_config``.  This is a decorator
-  constructor like ``pyramid.view.view_config`` that calls
-  ``pyramid.config.Configurator.add_notfound_view`` when scanned.  It should
-  be preferred over using ``pyramid.view.view_config`` with
-  ``context=HTTPNotFound`` as was previously recommended.
+- Added an HTTP Basic authentication policy
+  at ``pyramid.authentication.BasicAuthAuthenticationPolicy``.
 
-- New API: ``pyramid.config.Configurator.add_forbidden_view``.  This is a
-  wrapper for ``pyramid.Config.configurator.add_view`` which does the right
-  thing about permissions.  It should be preferred over calling ``add_view``
-  directly with ``context=HTTPForbidden`` as was previously recommended.
+- The Configurator ``testing_securitypolicy`` method now returns the policy
+  object it creates.
 
-- New API: ``pyramid.view.forbidden_view_config``.  This is a decorator
-  constructor like ``pyramid.view.view_config`` that calls
-  ``pyramid.config.Configurator.add_forbidden_view`` when scanned.  It should
-  be preferred over using ``pyramid.view.view_config`` with
-  ``context=HTTPForbidden`` as was previously recommended.
+- The Configurator ``testing_securitypolicy`` method accepts two new
+  arguments: ``remember_result`` and ``forget_result``.  If supplied, these
+  values influence the result of the policy's ``remember`` and ``forget``
+  methods, respectively.
 
-- New APIs: ``pyramid.response.FileResponse`` and
-  ``pyramid.response.FileIter``, for usage in views that must serve files
-  "manually".
+- The DummySecurityPolicy created by ``testing_securitypolicy`` now sets a
+  ``forgotten`` value on the policy (the value ``True``) when its ``forget``
+  method is called.
 
-Backwards Incompatibilities
----------------------------
+- The DummySecurityPolicy created by ``testing_securitypolicy`` now sets a
+  ``remembered`` value on the policy, which is the value of the ``principal``
+  argument it's called with when its ``remember`` method is called.
 
-- Remove ``pyramid.config.Configurator.with_context`` class method.  It was
-  never an API, it is only used by ``pyramid_zcml`` and its functionality has
-  been moved to that package's latest release.  This means that you'll need
-  to use the 0.9.2 or later release of ``pyramid_zcml`` with this release of
-  Pyramid.
+- New ``physical_path`` view predicate.  If specified, this value should be a
+  string or a tuple representing the physical traversal path of the context
+  found via traversal for this predicate to match as true.  For example:
+  ``physical_path='/'`` or ``physical_path='/a/b/c'`` or ``physical_path=('',
+  'a', 'b', 'c')``.  This is not a path prefix match or a regex, it's a
+  whole-path match.  It's useful when you want to always potentially show a
+  view when some object is traversed to, but you can't be sure about what kind
+  of object it will be, so you can't use the ``context`` predicate.  The
+  individual path elements inbetween slash characters or in tuple elements
+  should be the Unicode representation of the name of the resource and should
+  not be encoded in any way.
 
-- The ``introspector`` argument to the ``pyramid.config.Configurator``
-  constructor API has been removed.  It has been replaced by the boolean
-  ``introspection`` flag.
+1.4a2 (2012-09-27)
+==================
 
-- The ``pyramid.registry.noop_introspector`` API object has been removed.
+Bug Fixes
+---------
 
-- The older deprecated ``set_notfound_view`` Configurator method is now an
-  alias for the new ``add_notfound_view`` Configurator method.  Likewise, the
-  older deprecated ``set_forbidden_view`` is now an alias for the new
-  ``add_forbidden_view``. This has the following impact: the ``context`` sent
-  to views with a ``(context, request)`` call signature registered via the
-  ``set_notfound_view`` or ``set_forbidden_view`` will now be an exception
-  object instead of the actual resource context found.  Use
-  ``request.context`` to get the actual resource context.  It's also
-  recommended to disuse ``set_notfound_view`` in favor of
-  ``add_notfound_view``, and disuse ``set_forbidden_view`` in favor of
-  ``add_forbidden_view`` despite the aliasing.
+- When trying to determine Mako defnames and Chameleon macro names in asset
+  specifications, take into account that the filename may have a hyphen in
+  it.  See https://github.com/Pylons/pyramid/pull/692
+
+Features
+--------
+
+- A new ``pyramid.session.check_csrf_token`` convenience function was added.
+
+- A ``check_csrf`` view predicate was added.  For example, you can now do
+  ``config.add_view(someview, check_csrf=True)``.  When the predicate is
+  checked, if the ``csrf_token`` value in ``request.params`` matches the CSRF
+  token in the request's session, the view will be permitted to execute.
+  Otherwise, it will not be permitted to execute.
+
+- Add ``Base.metadata.bind = engine`` to alchemy template, so that tables
+  defined imperatively will work.
+
+Documentation
+-------------
+
+- update wiki2 SQLA tutorial with the changes required after inserting
+  ``Base.metadata.bind = engine`` into the alchemy scaffold.
+
+1.4a1 (2012-09-16)
+==================
+
+Bug Fixes
+---------
+
+- Forward port from 1.3 branch: When no authentication policy was configured,
+  a call to ``pyramid.security.effective_principals`` would unconditionally
+  return the empty list.  This was incorrect, it should have unconditionally
+  returned ``[Everyone]``, and now does.
+
+- Explicit url dispatch regexes can now contain colons.
+  https://github.com/Pylons/pyramid/issues/629
+
+- On at least one 64-bit Ubuntu system under Python 3.2, using the
+  ``view_config`` decorator caused a ``RuntimeError: dictionary changed size
+  during iteration`` exception.  It no longer does.  See
+  https://github.com/Pylons/pyramid/issues/635 for more information.
+
+- In Mako Templates lookup, check if the uri is already adjusted and bring
+  it back to an asset spec. Normally occurs with inherited templates or
+  included components.
+  https://github.com/Pylons/pyramid/issues/606
+  https://github.com/Pylons/pyramid/issues/607
+
+- In Mako Templates lookup, check for absolute uri (using mako directories) 
+  when mixing up inheritance with asset specs.
+  https://github.com/Pylons/pyramid/issues/662
+
+- HTTP Accept headers were not being normalized causing potentially
+  conflicting view registrations to go unnoticed. Two views that only
+  differ in the case ('text/html' vs. 'text/HTML') will now raise an error.
+  https://github.com/Pylons/pyramid/pull/620
+
+- Forward-port from 1.3 branch: when registering multiple views with an
+  ``accept`` predicate in a Pyramid application runing under Python 3, you
+  might have received a ``TypeError: unorderable types: function() <
+  function()`` exception.
+
+Features
+--------
+
+- Configurator.add_directive now accepts arbitrary callables like partials or
+  objects implementing ``__call__`` which dont have ``__name__`` and
+  ``__doc__`` attributes.  See https://github.com/Pylons/pyramid/issues/621
+  and https://github.com/Pylons/pyramid/pull/647.
+
+- Third-party custom view, route, and subscriber predicates can now be added
+  for use by view authors via
+  ``pyramid.config.Configurator.add_view_predicate``,
+  ``pyramid.config.Configurator.add_route_predicate`` and
+  ``pyramid.config.Configurator.add_subscriber_predicate``.  So, for example,
+  doing this::
+
+     config.add_view_predicate('abc', my.package.ABCPredicate)
+
+  Might allow a view author to do this in an application that configured that
+  predicate::
+
+     @view_config(abc=1)
+
+  Similar features exist for ``add_route``, and ``add_subscriber``.  See
+  "Adding A Third Party View, Route, or Subscriber Predicate" in the Hooks
+  chapter for more information.
+
+  Note that changes made to support the above feature now means that only
+  actions registered using the same "order" can conflict with one another.
+  It used to be the case that actions registered at different orders could
+  potentially conflict, but to my knowledge nothing ever depended on this
+  behavior (it was a bit silly).
+
+- Custom objects can be made easily JSON-serializable in Pyramid by defining
+  a ``__json__`` method on the object's class. This method should return
+  values natively serializable by ``json.dumps`` (such as ints, lists,
+  dictionaries, strings, and so forth).
+
+- The JSON renderer now allows for the definition of custom type adapters to
+  convert unknown objects to JSON serializations.
+
+- As of this release, the ``request_method`` predicate, when used, will also
+  imply that ``HEAD`` is implied when you use ``GET``.  For example, using
+  ``@view_config(request_method='GET')`` is equivalent to using
+  ``@view_config(request_method=('GET', 'HEAD'))``.  Using
+  ``@view_config(request_method=('GET', 'POST')`` is equivalent to using
+  ``@view_config(request_method=('GET', 'HEAD', 'POST')``.  This is because
+  HEAD is a variant of GET that omits the body, and WebOb has special support
+  to return an empty body when a HEAD is used.
+
+- ``config.add_request_method`` has been introduced to support extending
+  request objects with arbitrary callables. This method expands on the
+  previous ``config.set_request_property`` by supporting methods as well as
+  properties. This method now causes less code to be executed at
+  request construction time than ``config.set_request_property`` in
+  version 1.3.
+
+- Don't add a ``?`` to URLs generated by ``request.resource_url`` if the
+  ``query`` argument is provided but empty.
+
+- Don't add a ``?`` to URLs generated by ``request.route_url`` if the
+  ``_query`` argument is provided but empty.
+
+- The static view machinery now raises (rather than returns) ``HTTPNotFound``
+  and ``HTTPMovedPermanently`` exceptions, so these can be caught by the
+  NotFound view (and other exception views).
+
+- The Mako renderer now supports a def name in an asset spec.  When the def
+  name is present in the asset spec, the system will render the template def
+  within the template and will return the result. An example asset spec is
+  ``package:path/to/template#defname.mako``. This will render the def named
+  ``defname`` inside the ``template.mako`` template instead of rendering the
+  entire template.  The old way of returning a tuple in the form
+  ``('defname', {})`` from the view is supported for backward compatibility,
+
+- The Chameleon ZPT renderer now accepts a macro name in an asset spec.  When
+  the macro name is present in the asset spec, the system will render the
+  macro listed as a ``define-macro`` and return the result instead of
+  rendering the entire template.  An example asset spec:
+  ``package:path/to/template#macroname.pt``.  This will render the macro
+  defined as ``macroname`` within the ``template.pt`` template instead of the
+  entire templae.
+
+- When there is a predicate mismatch exception (seen when no view matches for
+  a given request due to predicates not working), the exception now contains
+  a textual description of the predicate which didn't match.
+
+- An ``add_permission`` directive method was added to the Configurator.  This
+  directive registers a free-standing permission introspectable into the
+  Pyramid introspection system.  Frameworks built atop Pyramid can thus use
+  the ``permissions`` introspectable category data to build a
+  comprehensive list of permissions supported by a running system.  Before
+  this method was added, permissions were already registered in this
+  introspectable category as a side effect of naming them in an ``add_view``
+  call, this method just makes it possible to arrange for a permission to be
+  put into the ``permissions`` introspectable category without naming it
+  along with an associated view.  Here's an example of usage of
+  ``add_permission``::
+
+      config = Configurator()
+      config.add_permission('view')
+
+- The ``UnencryptedCookieSessionFactoryConfig`` now accepts
+  ``signed_serialize`` and ``signed_deserialize`` hooks which may be used
+  to influence how the sessions are marshalled (by default this is done
+  with HMAC+pickle).
+
+- ``pyramid.testing.DummyRequest`` now supports methods supplied by the
+  ``pyramid.util.InstancePropertyMixin`` class such as ``set_property``.
+
+- Request properties and methods added via ``config.set_request_property`` or
+  ``config.add_request_method`` are now available to tweens.
+
+- Request properties and methods added via ``config.set_request_property`` or
+  ``config.add_request_method`` are now available in the request object
+  returned from ``pyramid.paster.bootstrap``.
+
+- ``request.context`` of environment request during ``bootstrap`` is now the
+  root object if a context isn't already set on a provided request.
+
+- The ``pyramid.decorator.reify`` function is now an API, and was added to
+  the API documentation.
+
+- Added the ``pyramid.testing.testConfig`` context manager, which can be used
+  to generate a configurator in a test, e.g. ``with testing.testConfig(...):``.
+
+- Users can now invoke a subrequest from within view code using a new
+  ``request.invoke_subrequest`` API.
 
 Deprecations
 ------------
 
-- The API documentation for ``pyramid.view.append_slash_notfound_view`` and
-  ``pyramid.view.AppendSlashNotFoundViewFactory`` was removed.  These names
-  still exist and are still importable, but they are no longer APIs.  Use
-  ``pyramid.config.Configurator.add_notfound_view(append_slash=True)`` or
-  ``pyramid.view.notfound_view_config(append_slash=True)`` to get the same
-  behavior.
-
-- The ``set_forbidden_view`` and ``set_notfound_view`` methods of the
-  Configurator were removed from the documentation.  They have been
-  deprecated since Pyramid 1.1.
-
-Bug Fixes
----------
-
-- The static file response object used by ``config.add_static_view`` opened
-  the static file twice, when it only needed to open it once.
-
-- The AppendSlashNotFoundViewFactory used request.path to match routes.  This
-  was wrong because request.path contains the script name, and this would
-  cause it to fail in circumstances where the script name was not empty.  It
-  should have used request.path_info, and now does.
-
-Documentation
--------------
-
-- Updated the "Creating a Not Found View" section of the "Hooks" chapter,
-  replacing explanations of registering a view using ``add_view`` or
-  ``view_config`` with ones using ``add_notfound_view`` or
-  ``notfound_view_config``.
-
-- Updated the "Creating a Not Forbidden View" section of the "Hooks" chapter,
-  replacing explanations of registering a view using ``add_view`` or
-  ``view_config`` with ones using ``add_forbidden_view`` or
-  ``forbidden_view_config``.
-
-- Updated the "Redirecting to Slash-Appended Routes" section of the "URL
-  Dispatch" chapter, replacing explanations of registering a view using
-  ``add_view`` or ``view_config`` with ones using ``add_notfound_view`` or
-  ``notfound_view_config``
-
-- Updated all tutorials to use ``pyramid.view.forbidden_view_config`` rather
-  than ``pyramid.view.view_config`` with an HTTPForbidden context.
-
-1.3a8 (2012-02-19)
-==================
-
-Features
---------
-
-- The ``scan`` method of a ``Configurator`` can be passed an ``ignore``
-  argument, which can be a string, a callable, or a list consisting of
-  strings and/or callables.  This feature allows submodules, subpackages, and
-  global objects from being scanned.  See
-  http://readthedocs.org/docs/venusian/en/latest/#ignore-scan-argument for
-  more information about how to use the ``ignore`` argument to ``scan``.
-
-- Better error messages when a view callable returns a value that cannot be
-  converted to a response (for example, when a view callable returns a
-  dictionary without a renderer defined, or doesn't return any value at all).
-  The error message now contains information about the view callable itself
-  as well as the result of calling it.
-
-- Better error message when a .pyc-only module is ``config.include`` -ed.
-  This is not permitted due to error reporting requirements, and a better
-  error message is shown when it is attempted.  Previously it would fail with
-  something like "AttributeError: 'NoneType' object has no attribute
-  'rfind'".
-
-- Add ``pyramid.config.Configurator.add_traverser`` API method.  See the
-  Hooks narrative documentation section entitled "Changing the Traverser" for
-  more information.  This is not a new feature, it just provides an API for
-  adding a traverser without needing to use the ZCA API.
-
-- Add ``pyramid.config.Configurator.add_resource_url_adapter`` API method.
-  See the Hooks narrative documentation section entitled "Changing How
-  pyramid.request.Request.resource_url Generates a URL" for more information.
-  This is not a new feature, it just provides an API for adding a resource
-  url adapter without needing to use the ZCA API.
-
-- The system value ``req`` is now supplied to renderers as an alias for
-  ``request``.  This means that you can now, for example, in a template, do
-  ``req.route_url(...)`` instead of ``request.route_url(...)``.  This is
-  purely a change to reduce the amount of typing required to use request
-  methods and attributes from within templates.  The value ``request`` is
-  still available too, this is just an alternative.
-
-- A new interface was added: ``pyramid.interfaces.IResourceURL``.  An adapter
-  implementing its interface can be used to override resource URL generation
-  when ``request.resource_url`` is called.  This interface replaces the
-  now-deprecated ``pyramid.interfaces.IContextURL`` interface.
-
-- The dictionary passed to a resource's ``__resource_url__`` method (see
-  "Overriding Resource URL Generation" in the "Resources" chapter) now
-  contains an ``app_url`` key, representing the application URL generated
-  during ``request.resource_url``.  It represents a potentially customized
-  URL prefix, containing potentially custom scheme, host and port information
-  passed by the user to ``request.resource_url``.  It should be used instead
-  of ``request.application_url`` where necessary.
-
-- The ``request.resource_url`` API now accepts these arguments: ``app_url``,
-  ``scheme``, ``host``, and ``port``.  The app_url argument can be used to
-  replace the URL prefix wholesale during url generation.  The ``scheme``,
-  ``host``, and ``port`` arguments can be used to replace the respective
-  default values of ``request.application_url`` partially.
-
-- A new API named ``request.resource_path`` now exists.  It works like
-  ``request.resource_url`` but produces a relative URL rather than an
-  absolute one.
-
-- The ``request.route_url`` API now accepts these arguments: ``_app_url``,
-  ``_scheme``, ``_host``, and ``_port``.  The ``_app_url`` argument can be
-  used to replace the URL prefix wholesale during url generation.  The
-  ``_scheme``, ``_host``, and ``_port`` arguments can be used to replace the
-  respective default values of ``request.application_url`` partially.
+- The ``pyramid.config.Configurator.set_request_property`` has been
+  documentation-deprecated.  The method remains usable but the more
+  featureful ``pyramid.config.Configurator.add_request_method`` should be
+  used in its place (it has all of the same capabilities but can also extend
+  the request object with methods).
 
 Backwards Incompatibilities
 ---------------------------
 
-- The ``pyramid.interfaces.IContextURL`` interface has been deprecated.
-  People have been instructed to use this to register a resource url adapter
-  in the "Hooks" chapter to use to influence ``request.resource_url`` URL
-  generation for resources found via custom traversers since Pyramid 1.0.
+- The Pyramid router no longer adds the values ``bfg.routes.route`` or
+  ``bfg.routes.matchdict`` to the request's WSGI environment dictionary.
+  These values were docs-deprecated in ``repoze.bfg`` 1.0 (effectively seven
+  minor releases ago).  If your code depended on these values, use
+  request.matched_route and request.matchdict instead.
 
-  The interface still exists and registering such an adapter still works, but
-  this interface will be removed from the software after a few major Pyramid
-  releases.  You should replace it with an equivalent
-  ``pyramid.interfaces.IResourceURL`` adapter, registered using the new
-  ``pyramid.config.Configurator.add_resource_url_adapter`` API.  A
-  deprecation warning is now emitted when a
-  ``pyramid.interfaces.IContextURL`` adapter is found when
-  ``request.resource_url`` is called.
+- It is no longer possible to pass an environ dictionary directly to
+  ``pyramid.traversal.ResourceTreeTraverser.__call__`` (aka
+  ``ModelGraphTraverser.__call__``).  Instead, you must pass a request
+  object.  Passing an environment instead of a request has generated a
+  deprecation warning since Pyramid 1.1.
+
+- Pyramid will no longer work properly if you use the
+  ``webob.request.LegacyRequest`` as a request factory.  Instances of the
+  LegacyRequest class have a ``request.path_info`` which return a string.
+  This Pyramid release assumes that ``request.path_info`` will
+  unconditionally be Unicode.
+
+- The functions from ``pyramid.chameleon_zpt`` and ``pyramid.chameleon_text``
+  named ``get_renderer``, ``get_template``, ``render_template``, and
+  ``render_template_to_response`` have been removed.  These have issued a
+  deprecation warning upon import since Pyramid 1.0.  Use
+  ``pyramid.renderers.get_renderer()``,
+  ``pyramid.renderers.get_renderer().implementation()``,
+  ``pyramid.renderers.render()`` or ``pyramid.renderers.render_to_response``
+  respectively instead of these functions.
+
+- The ``pyramid.configuration`` module was removed.  It had been deprecated
+  since Pyramid 1.0 and printed a deprecation warning upon its use.  Use
+  ``pyramid.config`` instead.
+
+- The ``pyramid.paster.PyramidTemplate`` API was removed.  It had been
+  deprecated since Pyramid 1.1 and issued a warning on import.  If your code
+  depended on this, adjust your code to import
+  ``pyramid.scaffolds.PyramidTemplate`` instead.
+
+- The ``pyramid.settings.get_settings()`` API was removed.  It had been
+  printing a deprecation warning since Pyramid 1.0.  If your code depended on
+  this API, use ``pyramid.threadlocal.get_current_registry().settings``
+  instead or use the ``settings`` attribute of the registry available from
+  the request (``request.registry.settings``).
+
+- These APIs from the ``pyramid.testing`` module were removed.  They have
+  been printing deprecation warnings since Pyramid 1.0:
+
+  * ``registerDummySecurityPolicy``, use
+    ``pyramid.config.Configurator.testing_securitypolicy`` instead.
+
+  * ``registerResources`` (aka ``registerModels``, use
+    ``pyramid.config.Configurator.testing_resources`` instead.
+
+  * ``registerEventListener``, use
+    ``pyramid.config.Configurator.testing_add_subscriber`` instead.
+
+  * ``registerTemplateRenderer`` (aka `registerDummyRenderer``), use
+    ``pyramid.config.Configurator.testing_add_template`` instead.
+
+  * ``registerView``, use ``pyramid.config.Configurator.add_view`` instead.
+
+  * ``registerUtility``, use
+    ``pyramid.config.Configurator.registry.registerUtility`` instead.
+
+  * ``registerAdapter``, use
+    ``pyramid.config.Configurator.registry.registerAdapter`` instead.
+
+  * ``registerSubscriber``, use 
+    ``pyramid.config.Configurator.add_subscriber`` instead.
+
+  * ``registerRoute``, use 
+    ``pyramid.config.Configurator.add_route`` instead.
+
+  * ``registerSettings``, use 
+    ``pyramid.config.Configurator.add_settings`` instead.
+
+- In Pyramid 1.3 and previous, the ``__call__`` method of a Response object
+  was invoked before any finished callbacks were executed.  As of this
+  release, the ``__call__`` method of a Response object is invoked *after*
+  finished callbacks are executed.  This is in support of the
+  ``request.invoke_subrequest`` feature.
 
 Documentation
 -------------
 
-- Don't create a ``session`` instance in SQLA Wiki tutorial, use raw
-  ``DBSession`` instead (this is more common in real SQLA apps).
+- Added an "Upgrading Pyramid" chapter to the narrative documentation.  It
+  describes how to cope with deprecations and removals of Pyramid APIs and
+  how to show Pyramid-generated deprecation warnings while running tests and
+  while running a server.
 
-Scaffolding
------------
-
-- Put ``pyramid.includes`` targets within ini files in scaffolds on separate
-  lines in order to be able to tell people to comment out only the
-  ``pyramid_debugtoolbar`` line when they want to disable the toolbar.
+- Added a "Invoking a Subrequest" chapter to the documentation.  It describes
+  how to use the new ``request.invoke_subrequest`` API.
 
 Dependencies
 ------------
 
-- Depend on ``venusian`` >= 1.0a3 to provide scan ``ignore`` support.
-
-Internal
---------
-
-- Create a "MakoRendererFactoryHelper" that provides customizable settings
-  key prefixes.  Allows settings prefixes other than "mako." to be used to
-  create different factories that don't use the global mako settings.  This
-  will be useful for the debug toolbar, which can currently be sabotaged by
-  someone using custom mako configuration settings.
-
-1.3a7 (2012-02-07)
-==================
-
-Features
---------
-
-- More informative error message when a ``config.include`` cannot find an
-  ``includeme``.  See https://github.com/Pylons/pyramid/pull/392.
-
-- Internal: catch unhashable discriminators early (raise an error instead of
-  allowing them to find their way into resolveConflicts).
-
-- The `match_param` view predicate now accepts a string or a tuple.
-  This replaces the broken behavior of accepting a dict. See
-  https://github.com/Pylons/pyramid/issues/425 for more information.
-
-Bug Fixes
----------
-
-- The process will now restart when ``pserve`` is used with the ``--reload``
-  flag when the ``development.ini`` file (or any other .ini file in use) is
-  changed.  See https://github.com/Pylons/pyramid/issues/377 and
-  https://github.com/Pylons/pyramid/pull/411
-
-- The ``prequest`` script would fail when used against URLs which did not
-  return HTML or text.  See https://github.com/Pylons/pyramid/issues/381
-
-Backwards Incompatibilities
----------------------------
-
-- The `match_param` view predicate no longer accepts a dict. This will
-  have no negative affect because the implementation was broken for
-  dict-based arguments.
-
-Documentation
--------------
-
-- Add a traversal hello world example to the narrative docs.
-
-1.3a6 (2012-01-20)
-==================
-
-Features
---------
-
-- New API: ``pyramid.config.Configurator.set_request_property``. Add lazy
-  property descriptors to a request without changing the request factory.
-  This method provides conflict detection and is the suggested way to add
-  properties to a request.
-
-- Responses generated by Pyramid's ``static_view`` now use
-  a ``wsgi.file_wrapper`` (see
-  http://www.python.org/dev/peps/pep-0333/#optional-platform-specific-file-handling)
-  when one is provided by the web server.
-
-Bug Fixes
----------
-
-- Views registered with an ``accept`` could not be overridden correctly with
-  a different view that had the same predicate arguments.  See
-  https://github.com/Pylons/pyramid/pull/404 for more information.
-
-- When using a dotted name for a ``view`` argument to
-  ``Configurator.add_view`` that pointed to a class with a ``view_defaults``
-  decorator, the view defaults would not be applied.  See
-  https://github.com/Pylons/pyramid/issues/396 .
-
-- Static URL paths were URL-quoted twice.  See
-  https://github.com/Pylons/pyramid/issues/407 .
-
-1.3a5 (2012-01-09)
-==================
-
-Bug Fixes
----------
-
-- The ``pyramid.view.view_defaults`` decorator did not work properly when
-  more than one view relied on the defaults being different for configuration
-  conflict resolution.  See https://github.com/Pylons/pyramid/issues/394.
-
-Backwards Incompatibilities
----------------------------
-
-- The ``path_info`` route and view predicates now match against
-  ``request.upath_info`` (Unicode) rather than ``request.path_info``
-  (indeterminate value based on Python 3 vs. Python 2).  This has to be done
-  to normalize matching on Python 2 and Python 3.
-
-1.3a4 (2012-01-05)
-==================
-
-Features
---------
-
-- New API: ``pyramid.request.Request.set_property``. Add lazy property
-  descriptors to a request without changing the request factory. New
-  properties may be reified, effectively caching the value for the lifetime
-  of the instance. Common use-cases for this would be to get a database
-  connection for the request or identify the current user.
-
-- Use the ``waitress`` WSGI server instead of ``wsgiref`` in scaffolding.
-
-Bug Fixes
----------
-
-- The documentation of ``pyramid.events.subscriber`` indicated that using it
-  as a decorator with no arguments like this::
-
-    @subscriber()
-    def somefunc(event):
-        pass
-
-  Would register ``somefunc`` to receive all events sent via the registry,
-  but this was untrue.  Instead, it would receive no events at all.  This has
-  now been fixed and the code matches the documentation.  See also
-  https://github.com/Pylons/pyramid/issues/386
-
-- Literal portions of route patterns were not URL-quoted when ``route_url``
-  or ``route_path`` was used to generate a URL or path.
-
-- The result of ``route_path`` or ``route_url`` might have been ``unicode``
-  or ``str`` depending on the input.  It is now guaranteed to always be
-  ``str``.
-
-- URL matching when the pattern contained non-ASCII characters in literal
-  parts was indeterminate.  Now the pattern supplied to ``add_route`` is
-  assumed to be either: a ``unicode`` value, or a ``str`` value that contains
-  only ASCII characters.  If you now want to match the path info from a URL
-  that contains high order characters, you can pass the Unicode
-  representation of the decoded path portion in the pattern.
-
-- When using a ``traverse=`` route predicate, traversal would fail with a
-  URLDecodeError if there were any high-order characters in the traversal
-  pattern or in the matched dynamic segments.
-
-- Using a dynamic segment named ``traverse`` in a route pattern like this::
-
-    config.add_route('trav_route', 'traversal/{traverse:.*}')
-
-  Would cause a ``UnicodeDecodeError`` when the route was matched and the
-  matched portion of the URL contained any high-order characters.  See
-  https://github.com/Pylons/pyramid/issues/385 .
-
-- When using a ``*traverse`` stararg in a route pattern, a URL that matched
-  that possessed a ``@@`` in its name (signifying a view name) would be
-  inappropriately quoted by the traversal machinery during traversal,
-  resulting in the view not being found properly. See
-  https://github.com/Pylons/pyramid/issues/382 and
-  https://github.com/Pylons/pyramid/issues/375 .
-
-Backwards Incompatibilities
----------------------------
-
-- String values passed to ``route_url`` or ``route_path`` that are meant to
-  replace "remainder" matches will now be URL-quoted except for embedded
-  slashes. For example::
-
-     config.add_route('remain', '/foo*remainder')
-     request.route_path('remain', remainder='abc / def')
-     # -> '/foo/abc%20/%20def'
-
-  Previously string values passed as remainder replacements were tacked on
-  untouched, without any URL-quoting.  But this doesn't really work logically
-  if the value passed is Unicode (raw unicode cannot be placed in a URL or in
-  a path) and it is inconsistent with the rest of the URL generation
-  machinery if the value is a string (it won't be quoted unless by the
-  caller).
-
-  Some folks will have been relying on the older behavior to tack on query
-  string elements and anchor portions of the URL; sorry, you'll need to
-  change your code to use the ``_query`` and/or ``_anchor`` arguments to
-  ``route_path`` or ``route_url`` to do this now.
-
-- If you pass a bytestring that contains non-ASCII characters to
-  ``add_route`` as a pattern, it will now fail at startup time.  Use Unicode
-  instead.
-
-1.3a3 (2011-12-21)
-==================
-
-Features
---------
-
-- Added a ``prequest`` script (along the lines of ``paster request``).  It is
-  documented in the "Command-Line Pyramid" chapter in the section entitled
-  "Invoking a Request".
-
-- Add undocumented ``__discriminator__`` API to derived view callables.
-  e.g. ``adapters.lookup(...).__discriminator__(context, request)``.  It will
-  be used by superdynamic systems that require the discriminator to be used
-  for introspection after manual view lookup.
-
-Bug Fixes
----------
-
-- Normalized exit values and ``-h`` output for all ``p*`` scripts
-  (``pviews``, ``proutes``, etc).
-
-Documentation
--------------
-
-- Added a section named "Making Your Script into a Console Script" in the
-  "Command-Line Pyramid" chapter.
-
-- Removed the "Running Pyramid on Google App Engine" tutorial from the main
-  docs.  It survives on in the Cookbook
-  (http://docs.pylonsproject.org/projects/pyramid_cookbook/en/latest/gae.html).
-  Rationale: it provides the correct info for the Python 2.5 version of GAE
-  only, and this version of Pyramid does not support Python 2.5.
-
-1.3a2 (2011-12-14)
-==================
-
-Features
---------
-
-- New API: ``pyramid.view.view_defaults``. If you use a class as a view, you
-  can use the new ``view_defaults`` class decorator on the class to provide
-  defaults to the view configuration information used by every
-  ``@view_config`` decorator that decorates a method of that class.  It also
-  works against view configurations involving a class made imperatively.
-
-- Added a backwards compatibility knob to ``pcreate`` to emulate ``paster
-  create`` handling for the ``--list-templates`` option.
-
-- Changed scaffolding machinery around a bit to make it easier for people who
-  want to have extension scaffolds that can work across Pyramid 1.0.X, 1.1.X,
-  1.2.X and 1.3.X.  See the new "Creating Pyramid Scaffolds" chapter in the
-  narrative documentation for more info.
-
-Documentation
--------------
-
-- Added documentation to "View Configuration" narrative documentation chapter
-  about ``view_defaults`` class decorator.
-
-- Added API docs for ``view_defaults`` class decorator.
-
-- Added an API docs chapter for ``pyramid.scaffolds``.
-
-- Added a narrative docs chapter named "Creating Pyramid Scaffolds".
-
-Backwards Incompatibilities
----------------------------
-
-- The ``template_renderer`` method of ``pyramid.scaffolds.PyramidScaffold``
-  was renamed to ``render_template``.  If you were overriding it, you're a
-  bad person, because it wasn't an API before now.  But we're nice so we're
-  letting you know.
-
-1.3a1 (2011-12-09)
-==================
-
-Features
---------
-
-- Python 3.2 compatibility.
-
-- New ``pyramid.compat`` module and API documentation which provides Python
-  2/3 straddling support for Pyramid add-ons and development environments.
-
-- A ``mako.directories`` setting is no longer required to use Mako templates
-  Rationale: Mako template renderers can be specified using an absolute asset
-  spec.  An entire application can be written with such asset specs,
-  requiring no ordered lookup path.
-
-- ``bpython`` interpreter compatibility in ``pshell``.  See the "Command-Line
-  Pyramid" narrative docs chapter for more information.
-
-- Added ``get_appsettings`` API function to the ``pyramid.paster`` module.
-  This function returns the settings defined within an ``[app:...]`` section
-  in a PasteDeploy ini file.
-
-- Added ``setup_logging`` API function to the ``pyramid.paster`` module.
-  This function sets up Python logging according to the logging configuration
-  in a PasteDeploy ini file.
-
-- Configuration conflict reporting is reported in a more understandable way
-  ("Line 11 in file..." vs. a repr of a tuple of similar info).
-
-- A configuration introspection system was added; see the narrative
-  documentation chapter entitled "Pyramid Configuration Introspection" for
-  more information.  New APIs: ``pyramid.registry.Introspectable``,
-  ``pyramid.config.Configurator.introspector``,
-  ``pyramid.config.Configurator.introspectable``,
-  ``pyramid.registry.Registry.introspector``.
-
-- Allow extra keyword arguments to be passed to the
-  ``pyramid.config.Configurator.action`` method.
-
-- New APIs: ``pyramid.path.AssetResolver`` and
-  ``pyramid.path.DottedNameResolver``.  The former can be used to resolve
-  asset specifications, the latter can be used to resolve dotted names to
-  modules or packages.
-
-Bug Fixes
----------
-
-- Make test suite pass on 32-bit systems; closes #286.  closes #306.
-  See also https://github.com/Pylons/pyramid/issues/286
-
-- The ``pryamid.view.view_config`` decorator did not accept a ``match_params``
-  predicate argument.  See https://github.com/Pylons/pyramid/pull/308
-
-- The AuthTktCookieHelper could potentially generate Unicode headers
-  inappropriately when the ``tokens`` argument to remember was used.  See 
-  https://github.com/Pylons/pyramid/pull/314.
-
-- The AuthTktAuthenticationPolicy did not use a timing-attack-aware string
-  comparator.  See https://github.com/Pylons/pyramid/pull/320 for more info.
-
-- The DummySession in ``pyramid.testing`` now generates a new CSRF token if
-  one doesn't yet exist.
-
-- ``request.static_url`` now generates URL-quoted URLs when fed a ``path``
-  argument which contains characters that are unsuitable for URLs.  See
-  https://github.com/Pylons/pyramid/issues/349 for more info.
-
-- Prevent a scaffold rendering from being named ``site`` (conflicts with
-  Python internal site.py).
-
-- Support for using instances as targets of the ``pyramid.wsgi.wsgiapp`` and
-  ``pryramid.wsgi.wsgiapp2`` functions.
-  See https://github.com/Pylons/pyramid/pull/370 for more info.
-
-Backwards Incompatibilities
----------------------------
-
-- Pyramid no longer runs on Python 2.5 (which includes the most recent
-  release of Jython and the Python 2.5 version of GAE as of this writing).
-
-- The ``paster`` command is no longer the documented way to create projects,
-  start the server, or run debugging commands.  To create projects from
-  scaffolds, ``paster create`` is replaced by the ``pcreate`` console script.
-  To serve up a project, ``paster serve`` is replaced by the ``pserve``
-  console script.  New console scripts named ``pshell``, ``pviews``,
-  ``proutes``, and ``ptweens`` do what their ``paster <commandname>``
-  equivalents used to do.  Rationale: the Paste and PasteScript packages do
-  not run under Python 3.
-
-- The default WSGI server run as the result of ``pserve`` from newly rendered
-  scaffolding is now the ``wsgiref`` WSGI server instead of the
-  ``paste.httpserver`` server.  Rationale: Rationale: the Paste and
-  PasteScript packages do not run under Python 3.
-
-- The ``pshell`` command (see "paster pshell") no longer accepts a
-  ``--disable-ipython`` command-line argument.  Instead, it accepts a ``-p``
-  or ``--python-shell`` argument, which can be any of the values ``python``,
-  ``ipython`` or ``bpython``.
-
-- Removed the ``pyramid.renderers.renderer_from_name`` function.  It has been
-  deprecated since Pyramid 1.0, and was never an API.
-
-- To use ZCML with versions of Pyramid >= 1.3, you will need ``pyramid_zcml``
-  version >= 0.8 and ``zope.configuration`` version >= 3.8.0.  The
-  ``pyramid_zcml`` package version 0.8 is backwards compatible all the way to
-  Pyramid 1.0, so you won't be warned if you have older versions installed
-  and upgrade Pyramid "in-place"; it may simply break instead.
-
-Dependencies
-------------
-
-- Pyramid no longer depends on the ``zope.component`` package, except as a
-  testing dependency.
-
-- Pyramid now depends on a zope.interface>=3.8.0, WebOb>=1.2dev,
-  repoze.lru>=0.4, zope.deprecation>=3.5.0, translationstring>=0.4 (for
-  Python 3 compatibility purposes).  It also, as a testing dependency,
-  depends on WebTest>=1.3.1 for the same reason.
-
-- Pyramid no longer depends on the Paste or PasteScript packages.
-
-Documentation
--------------
-
-- The SQLAlchemy Wiki tutorial has been updated.  It now uses
-  ``@view_config`` decorators and an explicit database population script.
-
-- Minor updates to the ZODB Wiki tutorial.
-
-- A narrative documentation chapter named "Extending Pyramid Configuration"
-  was added; it describes how to add a new directive, and how use the
-  ``pyramid.config.Configurator.action`` method within custom directives.  It
-  also describes how to add introspectable objects.
-
-- A narrative documentation chapter named "Pyramid Configuration
-  Introspection" was added.  It describes how to query the introspection
-  system.
-
-Scaffolds
----------
-
-- Rendered scaffolds have now been changed to be more relocatable (fewer
-  mentions of the package name within files in the package).
-
-- The ``routesalchemy`` scaffold has been renamed ``alchemy``, replacing the
-  older (traversal-based) ``alchemy`` scaffold (which has been retired).
-
-- The ``starter`` scaffold now uses URL dispatch by default.
+- Pyramid now requires WebOb 1.2b3+ (the prior Pyramid release only relied on
+  1.2dev+).  This is to ensure that we obtain a version of WebOb that returns
+  ``request.path_info`` as text.
 

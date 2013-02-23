@@ -68,40 +68,40 @@ class TestFactoriesMixin(unittest.TestCase):
                          dummyfactory)
 
     def test_set_request_property_with_callable(self):
-        from pyramid.interfaces import IRequestProperties
+        from pyramid.interfaces import IRequestExtensions
         config = self._makeOne(autocommit=True)
         callable = lambda x: None
         config.set_request_property(callable, name='foo')
-        plist = config.registry.getUtility(IRequestProperties)
-        self.assertEqual(plist, [('foo', callable, False)])
+        exts = config.registry.getUtility(IRequestExtensions)
+        self.assertTrue('foo' in exts.descriptors)
 
     def test_set_request_property_with_unnamed_callable(self):
-        from pyramid.interfaces import IRequestProperties
+        from pyramid.interfaces import IRequestExtensions
         config = self._makeOne(autocommit=True)
         def foo(self): pass
         config.set_request_property(foo, reify=True)
-        plist = config.registry.getUtility(IRequestProperties)
-        self.assertEqual(plist, [('foo', foo, True)])
+        exts = config.registry.getUtility(IRequestExtensions)
+        self.assertTrue('foo' in exts.descriptors)
 
     def test_set_request_property_with_property(self):
-        from pyramid.interfaces import IRequestProperties
+        from pyramid.interfaces import IRequestExtensions
         config = self._makeOne(autocommit=True)
         callable = property(lambda x: None)
         config.set_request_property(callable, name='foo')
-        plist = config.registry.getUtility(IRequestProperties)
-        self.assertEqual(plist, [('foo', callable, False)])
+        exts = config.registry.getUtility(IRequestExtensions)
+        self.assertTrue('foo' in exts.descriptors)
 
     def test_set_multiple_request_properties(self):
-        from pyramid.interfaces import IRequestProperties
+        from pyramid.interfaces import IRequestExtensions
         config = self._makeOne()
         def foo(self): pass
         bar = property(lambda x: None)
         config.set_request_property(foo, reify=True)
         config.set_request_property(bar, name='bar')
         config.commit()
-        plist = config.registry.getUtility(IRequestProperties)
-        self.assertEqual(plist, [('foo', foo, True),
-                                 ('bar', bar, False)])
+        exts = config.registry.getUtility(IRequestExtensions)
+        self.assertTrue('foo' in exts.descriptors)
+        self.assertTrue('bar' in exts.descriptors)
 
     def test_set_multiple_request_properties_conflict(self):
         from pyramid.exceptions import ConfigurationConflictError
@@ -112,33 +112,48 @@ class TestFactoriesMixin(unittest.TestCase):
         config.set_request_property(bar, name='bar')
         self.assertRaises(ConfigurationConflictError, config.commit)
 
-    def test_set_request_property_subscriber(self):
-        from zope.interface import implementer
-        from pyramid.interfaces import INewRequest
+    def test_add_request_method_with_callable(self):
+        from pyramid.interfaces import IRequestExtensions
+        config = self._makeOne(autocommit=True)
+        callable = lambda x: None
+        config.add_request_method(callable, name='foo')
+        exts = config.registry.getUtility(IRequestExtensions)
+        self.assertTrue('foo' in exts.methods)
+
+    def test_add_request_method_with_unnamed_callable(self):
+        from pyramid.interfaces import IRequestExtensions
+        config = self._makeOne(autocommit=True)
+        def foo(self): pass
+        config.add_request_method(foo)
+        exts = config.registry.getUtility(IRequestExtensions)
+        self.assertTrue('foo' in exts.methods)
+
+    def test_set_multiple_request_methods_conflict(self):
+        from pyramid.exceptions import ConfigurationConflictError
         config = self._makeOne()
-        def foo(r): pass
-        config.set_request_property(foo, name='foo')
-        config.set_request_property(foo, name='bar', reify=True)
-        config.commit()
-        @implementer(INewRequest)
-        class Event(object):
-            request = DummyRequest(config.registry)
-        event = Event()
-        config.registry.notify(event)
-        callables = event.request.callables
-        self.assertEqual(callables, [('foo', foo, False),
-                                     ('bar', foo, True)])
+        def foo(self): pass
+        def bar(self): pass
+        config.add_request_method(foo, name='bar')
+        config.add_request_method(bar, name='bar')
+        self.assertRaises(ConfigurationConflictError, config.commit)
 
+    def test_add_request_method_with_None_callable(self):
+        from pyramid.interfaces import IRequestExtensions
+        config = self._makeOne(autocommit=True)
+        config.add_request_method(name='foo')
+        exts = config.registry.queryUtility(IRequestExtensions)
+        self.assertTrue(exts is None)
 
-        
-class DummyRequest(object):
-    callables = None
+    def test_add_request_method_with_None_callable_conflict(self):
+        from pyramid.exceptions import ConfigurationConflictError
+        config = self._makeOne()
+        def bar(self): pass
+        config.add_request_method(name='foo')
+        config.add_request_method(bar, name='foo')
+        self.assertRaises(ConfigurationConflictError, config.commit)
 
-    def __init__(self, registry):
-        self.registry = registry
+    def test_add_request_method_with_None_callable_and_no_name(self):
+        config = self._makeOne(autocommit=True)
+        self.assertRaises(AttributeError, config.add_request_method)
 
-    def set_property(self, callable, name, reify):
-        if self.callables is None:
-            self.callables = []
-        self.callables.append((name, callable, reify))
 

@@ -25,21 +25,11 @@ Pyramid Web アプリケーション開発フレームワーク
 .. literalinclude:: narr/helloworld.py
 
 
-.. When saved to ``helloworld.py``, the above application can be run via:
+.. After you install :app:`Pyramid` and run this application, when you visit
+.. ``http://localhost:8080/hello/world`` in a browser, you will see the text
+.. ``Hello, world!``
 
-このファイルを ``helloworld.py`` として保存したら、上記のアプリケーションは
-次のようにして実行することができます:
-
-
-.. code-block:: text
-
-   $ easy_install pyramid
-   $ python helloworld.py
-
-
-.. When you visit ``http://localhost:8080/hello/world`` in a browser, you will
-.. see the text ``Hello, world!``.
-
+:app:`Pyramid` をインストールしてアプリケーションを起動した後で、
 ブラウザで ``http://localhost:8080/hello/world`` を訪れれば、
 ``Hello, world!`` というテキストが見えるはずです。
 
@@ -76,6 +66,7 @@ What's New
 .. toctree::
    :maxdepth: 1
 
+   whatsnew-1.4
    whatsnew-1.3
    whatsnew-1.2
    whatsnew-1.1
@@ -128,12 +119,14 @@ What's New
    narr/traversal
    narr/security
    narr/hybrid
+   narr/subrequest
    narr/hooks
    narr/introspector
    narr/extending
    narr/advconfig
    narr/extconfig
    narr/scaffolding
+   narr/upgrading
    narr/threadlocals
    narr/zca
 
@@ -316,10 +309,10 @@ Guardia と Lukasz Fidosz による「アイデア競争」アプリケーショ
 
 .. To find out how to become a contributor to :app:`Pyramid`, please see the
 .. `contributor's section of the documentation
-.. <http://docs.pylonsproject.org/index.html#contributing>`_.
+.. <http://docs.pylonsproject.org/en/latest/#contributing>`_.
 
 Pyramid の貢献者になる方法を理解するためには、 `ドキュメントの貢献者の
-セクション <http://pylons-ja.readthedocs.org/en/latest/index.html#id5>`_ を
+セクション <http://docs.pylonsproject.jp/en/latest/index.html#id5>`_ を
 参照してください。
 
 

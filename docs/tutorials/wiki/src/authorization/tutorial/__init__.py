@@ -11,11 +11,12 @@ def root_factory(request):
     conn = get_connection(request)
     return appmaker(conn.root())
 
+
 def main(global_config, **settings):
-    """ This function returns a WSGI application.
+    """ This function returns a Pyramid WSGI application.
     """
-    authn_policy = AuthTktAuthenticationPolicy(secret='sosecret',
-                                               callback=groupfinder)
+    authn_policy = AuthTktAuthenticationPolicy(
+        'sosecret', callback=groupfinder, hashalg='sha512')
     authz_policy = ACLAuthorizationPolicy()
     config = Configurator(root_factory=root_factory, settings=settings)
     config.set_authentication_policy(authn_policy)

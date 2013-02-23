@@ -144,13 +144,13 @@ directories which he creates within his ``~/projects`` directory.  On
 Windows, it's a good idea to put project directories within a directory that
 contains no space characters, so it's wise to *avoid* a path that contains
 i.e. ``My Documents``.  As a result, the author, when he uses Windows, just
-puts his projects in ``C:\\projects``.
+puts his projects in ``C:\projects``.
 
 .. warning:: 
 
    You’ll need to avoid using ``pcreate`` to create a project with the same
-   as a Python standard library component. In particular, this means you
-   should avoid using names the names ``site`` or ``test``, both of which
+   name as a Python standard library component. In particular, this means you
+   should avoid using the names ``site`` or ``test``, both of which
    conflict with Python standard library packages.  You should also avoid
    using the name ``pyramid``, which will conflict with Pyramid itself.
 
@@ -286,11 +286,39 @@ Here's sample output from a run of ``pserve`` on UNIX:
 
    $ ../bin/pserve development.ini
    Starting server in PID 16601.
-   serving on 0.0.0.0:6543 view at http://127.0.0.1:6543
+   serving on http://0.0.0.0:6543
 
-By default, :app:`Pyramid` applications generated from a scaffold
-will listen on TCP port 6543.  You can shut down a server started this way by
-pressing ``Ctrl-C``.
+When you use ``pserve`` to start the application implied by the default
+rendering of a scaffold, it will respond to requests on *all* IP addresses
+possessed by your system, not just requests to ``localhost``.  This is what
+the ``0.0.0.0`` in ``serving on http://0.0.0.0:6543`` means.  The server will
+respond to requests made to ``127.0.0.1`` and on any external IP address.
+For example, your system might be configured to have an external IP address
+``192.168.1.50``.  If that's the case, if you use a browser running on the
+same system as Pyramid, it will be able to access the application via
+``http://127.0.0.1:6543/`` as well as via
+``http://129.168.1.50:6543/``. However, *other people* on other computers on
+the same network will also be able to visit your Pyramid application in their
+browser by visiting ``http://192.168.1.50:6543/``.
+
+If you want to restrict access such that only a browser running on the same
+machine as Pyramid will be able to access your Pyramid application, edit the
+``development.ini`` file, and replace the ``host`` value in the
+``[server:main]`` section.  Change it from ``0.0.0.0`` to ``127.0.0.1``.  For
+example::
+
+   [server:main]
+   use = egg:waitress#main
+   host = 127.0.0.1
+   port = 6543
+
+You can change the port on which the server runs on by changing the same
+portion of the ``development.ini`` file.  For example, you can change the
+``port = 6543`` line in the ``development.ini`` file's ``[server:main]``
+section to ``port = 8080`` to run the server on port 8080 instead of
+port 6543.
+
+You can shut down a server started this way by pressing ``Ctrl-C``.
 
 The default server used to run your Pyramid application when a project is
 created from a scaffold is named :term:`Waitress`.  This server is what
@@ -308,11 +336,6 @@ servers is that they're largely interchangeable, so if your application works
 under the default server, it will almost certainly work under any other
 server in production if you eventually choose to use a different one.  Don't
 worry about it right now.
-
-You can change the port on which the server runs on by changing the
-``development.ini`` file.  For example, you can change the ``port = 6543``
-line in the ``development.ini`` file's ``[server:main]`` section to ``port =
-8080`` to run the server on port 8080 instead of port 6543.
 
 For more detailed information about the startup process, see
 :ref:`startup_chapter`.  For more information about environment variables and
@@ -447,7 +470,7 @@ first column instead, for example like this:
    pyramid.includes =
        #pyramid_debugtoolbar
 
-When you attempt to restart the application with a section like the abvoe
+When you attempt to restart the application with a section like the above
 you'll receive an error that ends something like this, and the application
 will not start:
 
@@ -684,7 +707,7 @@ testing your application, packaging, and distributing your application.
 
 .. note::
 
-  ``setup.py`` is the defacto standard which Python developers use to
+  ``setup.py`` is the de facto standard which Python developers use to
   distribute their reusable code.  You can read more about ``setup.py`` files
   and their usage in the `Setuptools documentation
   <http://peak.telecommunity.com/DevCenter/setuptools>`_ and `The
@@ -806,25 +829,25 @@ also informs Python that the directory which contains it is a *package*.
 #. Line 1 imports the :term:`Configurator` class from :mod:`pyramid.config`
    that we use later.
 
-#. Lines 3-10 define a function named ``main`` that returns a :app:`Pyramid`
+#. Lines 4-11 define a function named ``main`` that returns a :app:`Pyramid`
    WSGI application.  This function is meant to be called by the
    :term:`PasteDeploy` framework as a result of running ``pserve``.
 
    Within this function, application configuration is performed.
 
-   Line 6 creates an instance of a :term:`Configurator`.
+   Line 7 creates an instance of a :term:`Configurator`.
 
-   Line 7 registers a static view, which will serve up the files from the
+   Line 8 registers a static view, which will serve up the files from the
    ``myproject:static`` :term:`asset specification` (the ``static``
    directory of the ``myproject`` package).
 
-   Line 8 adds a :term:`route` to the configuration.  This route is later
+   Line 9 adds a :term:`route` to the configuration.  This route is later
    used by a view in the ``views`` module.
 
-   Line 9 calls ``config.scan()``, which picks up view registrations declared
+   Line 10 calls ``config.scan()``, which picks up view registrations declared
    elsewhere in the package (in this case, in the ``views.py`` module).
 
-   Line 10 returns a :term:`WSGI` application to the caller of the function
+   Line 11 returns a :term:`WSGI` application to the caller of the function
    (Pyramid's pserve).
 
 .. index::
@@ -842,7 +865,7 @@ and which returns a :term:`response`.
    :language: python
    :linenos:
 
-Lines 3-5 define and register a :term:`view callable` named ``my_view``.  The
+Lines 4-6 define and register a :term:`view callable` named ``my_view``.  The
 function named ``my_view`` is decorated with a ``view_config`` decorator
 (which is processed by the ``config.scan()`` line in our ``__init__.py``).
 The view_config decorator asserts that this view be found when a
@@ -966,7 +989,7 @@ named ``views`` instead of within a single ``views.py`` file, you might:
 You can then continue to add view callable functions to the ``blog.py``
 module, but you can also add other ``.py`` files which contain view callable
 functions to the ``views`` directory.  As long as you use the
-``@view_config`` directive to register views in conjuction with
+``@view_config`` directive to register views in conjunction with
 ``config.scan()`` they will be picked up automatically when the application
 is restarted.
 
@@ -994,7 +1017,7 @@ run a :app:`Pyramid` application is purely conventional based on the output
 of its scaffolding.  But we strongly recommend using while developing your
 application, because many other convenience introspection commands (such as
 ``pviews``, ``prequest``, ``proutes`` and others) are also implemented in
-terms of configuration availaibility of this ``.ini`` file format.  It also
+terms of configuration availability of this ``.ini`` file format.  It also
 configures Pyramid logging and provides the ``--reload`` switch for
 convenient restarting of the server when code changes.
 

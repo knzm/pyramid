@@ -18,12 +18,14 @@ class TestRequest(unittest.TestCase):
     def tearDown(self):
         testing.tearDown()
 
-    def _makeOne(self, environ):
-        return self._getTargetClass()(environ)
-
     def _getTargetClass(self):
         from pyramid.request import Request
         return Request
+
+    def _makeOne(self, environ=None):
+        if environ is None:
+            environ = {}
+        return self._getTargetClass()(environ)
 
     def _registerResourceURL(self):
         from pyramid.interfaces import IResourceURL
@@ -35,6 +37,21 @@ class TestRequest(unittest.TestCase):
         self.config.registry.registerAdapter(
             DummyResourceURL, (Interface, Interface),
             IResourceURL)
+
+    def test_class_conforms_to_IRequest(self):
+        from zope.interface.verify import verifyClass
+        from pyramid.interfaces import IRequest
+        verifyClass(IRequest, self._getTargetClass())
+
+    def test_instance_conforms_to_IRequest(self):
+        from zope.interface.verify import verifyObject
+        from pyramid.interfaces import IRequest
+        verifyObject(IRequest, self._makeOne())
+
+    def test_ResponseClass_is_pyramid_Response(self):
+        from pyramid.response import Response
+        cls = self._getTargetClass()
+        self.assertEqual(cls.ResponseClass, Response)
 
     def test_charset_defaults_to_utf8(self):
         r = self._makeOne({'PATH_INFO':'/'})
@@ -61,25 +78,15 @@ class TestRequest(unittest.TestCase):
         request.charset = None
         self.assertEqual(request.GET['la'], text_(b'La Pe\xf1a'))
 
-    def test_class_implements(self):
-        from pyramid.interfaces import IRequest
-        klass = self._getTargetClass()
-        self.assertTrue(IRequest.implementedBy(klass))
-
-    def test_instance_provides(self):
-        from pyramid.interfaces import IRequest
-        inst = self._makeOne({})
-        self.assertTrue(IRequest.providedBy(inst))
-
     def test_tmpl_context(self):
         from pyramid.request import TemplateContext
-        inst = self._makeOne({})
+        inst = self._makeOne()
         result = inst.tmpl_context
         self.assertEqual(result.__class__, TemplateContext)
 
     def test_session_configured(self):
         from pyramid.interfaces import ISessionFactory
-        inst = self._makeOne({})
+        inst = self._makeOne()
         def factory(request):
             return 'orangejuice'
         self.config.registry.registerUtility(factory, ISessionFactory)
@@ -88,12 +95,12 @@ class TestRequest(unittest.TestCase):
         self.assertEqual(inst.__dict__['session'], 'orangejuice')
 
     def test_session_not_configured(self):
-        inst = self._makeOne({})
+        inst = self._makeOne()
         inst.registry = self.config.registry
         self.assertRaises(AttributeError, getattr, inst, 'session')
 
     def test_setattr_and_getattr_dotnotation(self):
-        inst = self._makeOne({})
+        inst = self._makeOne()
         inst.foo = 1
         self.assertEqual(inst.foo, 1)
 
@@ -105,7 +112,7 @@ class TestRequest(unittest.TestCase):
         self.assertEqual(environ, {}) # make sure we're not using adhoc attrs
 
     def test_add_response_callback(self):
-        inst = self._makeOne({})
+        inst = self._makeOne()
         self.assertEqual(inst.response_callbacks, ())
         def callback(request, response):
             """ """
@@ -115,7 +122,7 @@ class TestRequest(unittest.TestCase):
         self.assertEqual(inst.response_callbacks, [callback, callback])
 
     def test__process_response_callbacks(self):
-        inst = self._makeOne({})
+        inst = self._makeOne()
         def callback1(request, response):
             request.called1 = True
             response.called1 = True
@@ -132,7 +139,7 @@ class TestRequest(unittest.TestCase):
         self.assertEqual(inst.response_callbacks, [])
 
     def test_add_finished_callback(self):
-        inst = self._makeOne({})
+        inst = self._makeOne()
         self.assertEqual(inst.finished_callbacks, ())
         def callback(request):
             """ """
@@ -142,7 +149,7 @@ class TestRequest(unittest.TestCase):
         self.assertEqual(inst.finished_callbacks, [callback, callback])
 
     def test__process_finished_callbacks(self):
-        inst = self._makeOne({})
+        inst = self._makeOne()
         def callback1(request):
             request.called1 = True
         def callback2(request):
@@ -219,13 +226,20 @@ class TestRequest(unittest.TestCase):
                          ('pyramid.tests:static/foo.css', request, {}) )
 
     def test_is_response_false(self):
-        request = self._makeOne({})
+        request = self._makeOne()
         request.registry = self.config.registry
         self.assertEqual(request.is_response('abc'), False)
 
+    def test_is_response_true_ob_is_pyramid_response(self):
+        from pyramid.response import Response
+        r = Response('hello')
+        request = self._makeOne()
+        request.registry = self.config.registry
+        self.assertEqual(request.is_response(r), True)
+
     def test_is_response_false_adapter_is_not_self(self):
         from pyramid.interfaces import IResponse
-        request = self._makeOne({})
+        request = self._makeOne()
         request.registry = self.config.registry
         def adapter(ob):
             return object()
@@ -237,7 +251,7 @@ class TestRequest(unittest.TestCase):
         
     def test_is_response_adapter_true(self):
         from pyramid.interfaces import IResponse
-        request = self._makeOne({})
+        request = self._makeOne()
         request.registry = self.config.registry
         class Foo(object):
             pass
@@ -277,7 +291,7 @@ class TestRequest(unittest.TestCase):
         self.assertRaises(ValueError, getattr, request, 'json_body')
 
     def test_set_property(self):
-        request = self._makeOne({})
+        request = self._makeOne()
         opts = [2, 1]
         def connect(obj):
             return opts.pop()
@@ -286,7 +300,7 @@ class TestRequest(unittest.TestCase):
         self.assertEqual(2, request.db)
 
     def test_set_property_reify(self):
-        request = self._makeOne({})
+        request = self._makeOne()
         opts = [2, 1]
         def connect(obj):
             return opts.pop()
@@ -546,18 +560,6 @@ class Test_call_app_with_subpath_as_path_info(unittest.TestCase):
         self.assertEqual(request.environ['SCRIPT_NAME'], '/' + encoded)
         self.assertEqual(request.environ['PATH_INFO'], '/' + encoded)
 
-    def test_it_removes_bfg_routes_info(self):
-        request = DummyRequest({})
-        request.environ['bfg.routes.route'] = True
-        request.environ['bfg.routes.matchdict'] = True
-        response = self._callFUT(request, 'app')
-        self.assertTrue(request.copied)
-        self.assertEqual(response, 'app')
-        self.assertEqual(request.environ['SCRIPT_NAME'], '')
-        self.assertEqual(request.environ['PATH_INFO'], '/')
-        self.assertFalse('bfg.routes.route' in request.environ)
-        self.assertFalse('bfg.routes.matchdict' in request.environ)
-        
 class DummyRequest:
     def __init__(self, environ=None):
         if environ is None:

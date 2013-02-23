@@ -8,7 +8,8 @@ Creating Your First :app:`Pyramid` Application
 
 In this chapter, we will walk through the creation of a tiny :app:`Pyramid`
 application.  After we're finished creating the application, we'll explain in
-more detail how it works.
+more detail how it works. It assumes you already have :app:`Pyramid` installed.
+If you do not, head over to the :ref:`installing_chapter` section.
 
 .. _helloworld_imperative:
 
@@ -126,7 +127,7 @@ defined imports and function definitions, placed within the confines of an
 
 .. literalinclude:: helloworld.py
    :linenos:
-   :lines: 8-13
+   :lines: 9-15
 
 Let's break this down piece-by-piece.
 
@@ -135,7 +136,7 @@ Configurator Construction
 
 .. literalinclude:: helloworld.py
    :linenos:
-   :lines: 8-9
+   :lines: 9-10
 
 The ``if __name__ == '__main__':`` line in the code sample above represents a
 Python idiom: the code inside this if clause is not invoked unless the script
@@ -168,7 +169,7 @@ Adding Configuration
 .. ignore-next-block
 .. literalinclude:: helloworld.py
    :linenos:
-   :lines: 10-11
+   :lines: 11-12
 
 First line above calls the :meth:`pyramid.config.Configurator.add_route`
 method, which registers a :term:`route` to match any URL path that begins
@@ -188,7 +189,7 @@ WSGI Application Creation
 .. ignore-next-block
 .. literalinclude:: helloworld.py
    :linenos:
-   :lines: 12
+   :lines: 13
 
 After configuring views and ending configuration, the script creates a WSGI
 *application* via the :meth:`pyramid.config.Configurator.make_wsgi_app`
@@ -217,7 +218,7 @@ WSGI Application Serving
 .. ignore-next-block
 .. literalinclude:: helloworld.py
    :linenos:
-   :lines: 13
+   :lines: 14-15
 
 Finally, we actually serve the application to requestors by starting up a
 WSGI server.  We happen to use the :mod:`wsgiref` ``make_server`` server
@@ -227,7 +228,7 @@ listens only on the ``127.0.0.1`` interface, which is problematic if you're
 running the server on a remote system and you wish to access it with a web
 browser from a local system.  We also specify a TCP port number to listen on,
 which is 8080, passing it as the second argument.  The final argument is the
-``app`` object (a :term:`router`), which is the the application we wish to
+``app`` object (a :term:`router`), which is the application we wish to
 serve.  Finally, we call the server's ``serve_forever`` method, which starts
 the main loop in which it will wait for requests from the outside world.
 

@@ -1,10 +1,32 @@
 import unittest
 from pyramid.compat import text_
 
-class Test__make_predicates(unittest.TestCase):
+class TestPredicateList(unittest.TestCase):
+
+    def _makeOne(self):
+        from pyramid.config.util import PredicateList
+        from pyramid.config import predicates
+        inst = PredicateList()
+        for name, factory in (
+            ('xhr', predicates.XHRPredicate),
+            ('request_method', predicates.RequestMethodPredicate),
+            ('path_info', predicates.PathInfoPredicate),
+            ('request_param', predicates.RequestParamPredicate),
+            ('header', predicates.HeaderPredicate),
+            ('accept', predicates.AcceptPredicate),
+            ('containment', predicates.ContainmentPredicate),
+            ('request_type', predicates.RequestTypePredicate),
+            ('match_param', predicates.MatchParamPredicate),
+            ('custom', predicates.CustomPredicate),
+            ('traverse', predicates.TraversePredicate),
+            ):
+            inst.add(name, factory)
+        return inst
+
     def _callFUT(self, **kw):
-        from pyramid.config.util import make_predicates
-        return make_predicates(**kw)
+        inst = self._makeOne()
+        config = DummyConfigurator()
+        return inst.make(config, **kw)
 
     def test_ordering_xhr_and_request_method_trump_only_containment(self):
         order1, _, _ = self._callFUT(xhr=True, request_method='GET')
@@ -12,6 +34,7 @@ class Test__make_predicates(unittest.TestCase):
         self.assertTrue(order1 < order2)
 
     def test_ordering_number_of_predicates(self):
+        from pyramid.config.util import predvalseq
         order1, _, _ = self._callFUT(
             xhr='xhr',
             request_method='request_method',
@@ -22,7 +45,7 @@ class Test__make_predicates(unittest.TestCase):
             accept='accept',
             containment='containment',
             request_type='request_type',
-            custom=(DummyCustomPredicate(),),
+            custom=predvalseq([DummyCustomPredicate()]),
             )
         order2, _, _ = self._callFUT(
             xhr='xhr',
@@ -34,7 +57,7 @@ class Test__make_predicates(unittest.TestCase):
             accept='accept',
             containment='containment',
             request_type='request_type',
-            custom=(DummyCustomPredicate(),),
+            custom=predvalseq([DummyCustomPredicate()]),
             )
         order3, _, _ = self._callFUT(
             xhr='xhr',
@@ -114,6 +137,7 @@ class Test__make_predicates(unittest.TestCase):
         self.assertTrue(order12 > order10)
 
     def test_ordering_importance_of_predicates(self):
+        from pyramid.config.util import predvalseq
         order1, _, _ = self._callFUT(
             xhr='xhr',
             )
@@ -142,7 +166,7 @@ class Test__make_predicates(unittest.TestCase):
             match_param='foo=bar',
             )
         order10, _, _ = self._callFUT(
-            custom=(DummyCustomPredicate(),),
+            custom=predvalseq([DummyCustomPredicate()]),
             )
         self.assertTrue(order1 > order2)
         self.assertTrue(order2 > order3)
@@ -155,12 +179,13 @@ class Test__make_predicates(unittest.TestCase):
         self.assertTrue(order9 > order10)
 
     def test_ordering_importance_and_number(self):
+        from pyramid.config.util import predvalseq
         order1, _, _ = self._callFUT(
             xhr='xhr',
             request_method='request_method',
             )
         order2, _, _ = self._callFUT(
-            custom=(DummyCustomPredicate(),),
+            custom=predvalseq([DummyCustomPredicate()]),
             )
         self.assertTrue(order1 < order2)
 
@@ -170,7 +195,7 @@ class Test__make_predicates(unittest.TestCase):
             )
         order2, _, _ = self._callFUT(
             request_method='request_method',
-            custom=(DummyCustomPredicate(),),
+            custom=predvalseq([DummyCustomPredicate()]),
             )
         self.assertTrue(order1 > order2)
 
@@ -181,7 +206,7 @@ class Test__make_predicates(unittest.TestCase):
             )
         order2, _, _ = self._callFUT(
             request_method='request_method',
-            custom=(DummyCustomPredicate(),),
+            custom=predvalseq([DummyCustomPredicate()]),
             )
         self.assertTrue(order1 < order2)
 
@@ -193,18 +218,19 @@ class Test__make_predicates(unittest.TestCase):
         order2, _, _ = self._callFUT(
             xhr='xhr',
             request_method='request_method',
-            custom=(DummyCustomPredicate(),),
+            custom=predvalseq([DummyCustomPredicate()]),
             )
         self.assertTrue(order1 > order2)
 
     def test_different_custom_predicates_with_same_hash(self):
+        from pyramid.config.util import predvalseq
         class PredicateWithHash(object):
             def __hash__(self):
                 return 1
         a = PredicateWithHash()
         b = PredicateWithHash()
-        _, _, a_phash = self._callFUT(custom=(a,))
-        _, _, b_phash = self._callFUT(custom=(b,))
+        _, _, a_phash = self._callFUT(custom=predvalseq([a]))
+        _, _, b_phash = self._callFUT(custom=predvalseq([b]))
         self.assertEqual(a_phash, b_phash)
 
     def test_traverse_has_remainder_already(self):
@@ -244,12 +270,14 @@ class Test__make_predicates(unittest.TestCase):
              )
 
     def test_custom_predicates_can_affect_traversal(self):
+        from pyramid.config.util import predvalseq
         def custom(info, request):
             m = info['match']
             m['dummy'] = 'foo'
             return True
-        _, predicates, _ = self._callFUT(custom=(custom,),
-                                         traverse='/1/:dummy/:a')
+        _, predicates, _ = self._callFUT(
+            custom=predvalseq([custom]),
+            traverse='/1/:dummy/:a')
         self.assertEqual(len(predicates), 2)
         info = {'match':{'a':'a'}}
         request = DummyRequest()
@@ -259,6 +287,7 @@ class Test__make_predicates(unittest.TestCase):
                                  'traverse':('1', 'foo', 'a')}})
 
     def test_predicate_text_is_correct(self):
+        from pyramid.config.util import predvalseq
         _, predicates, _ = self._callFUT(
             xhr='xhr',
             request_method='request_method',
@@ -268,23 +297,27 @@ class Test__make_predicates(unittest.TestCase):
             accept='accept',
             containment='containment',
             request_type='request_type',
-            custom=(DummyCustomPredicate(),
+            custom=predvalseq(
+                [
+                    DummyCustomPredicate(),
                     DummyCustomPredicate.classmethod_predicate,
-                    DummyCustomPredicate.classmethod_predicate_no_text),
+                    DummyCustomPredicate.classmethod_predicate_no_text,
+                ]
+            ),
             match_param='foo=bar')
-        self.assertEqual(predicates[0].__text__, 'xhr = True')
-        self.assertEqual(predicates[1].__text__,
-                         "request method = ['request_method']")
-        self.assertEqual(predicates[2].__text__, 'path_info = path_info')
-        self.assertEqual(predicates[3].__text__, 'request_param param')
-        self.assertEqual(predicates[4].__text__, 'header header')
-        self.assertEqual(predicates[5].__text__, 'accept = accept')
-        self.assertEqual(predicates[6].__text__, 'containment = containment')
-        self.assertEqual(predicates[7].__text__, 'request_type = request_type')
-        self.assertEqual(predicates[8].__text__, "match_param ['foo=bar']")
-        self.assertEqual(predicates[9].__text__, 'custom predicate')
-        self.assertEqual(predicates[10].__text__, 'classmethod predicate')
-        self.assertEqual(predicates[11].__text__, '<unknown custom predicate>')
+        self.assertEqual(predicates[0].text(), 'xhr = True')
+        self.assertEqual(predicates[1].text(),
+                         "request_method = request_method")
+        self.assertEqual(predicates[2].text(), 'path_info = path_info')
+        self.assertEqual(predicates[3].text(), 'request_param param')
+        self.assertEqual(predicates[4].text(), 'header header')
+        self.assertEqual(predicates[5].text(), 'accept = accept')
+        self.assertEqual(predicates[6].text(), 'containment = containment')
+        self.assertEqual(predicates[7].text(), 'request_type = request_type')
+        self.assertEqual(predicates[8].text(), "match_param foo=bar")
+        self.assertEqual(predicates[9].text(), 'custom predicate')
+        self.assertEqual(predicates[10].text(), 'classmethod predicate')
+        self.assertTrue(predicates[11].text().startswith('custom predicate'))
 
     def test_match_param_from_string(self):
         _, predicates, _ = self._callFUT(match_param='foo=bar')
@@ -328,45 +361,196 @@ class Test__make_predicates(unittest.TestCase):
         hash2, _, __= self._callFUT(request_method='GET')
         self.assertEqual(hash1, hash2)
 
-    def test_match_param_hashable(self):
-        # https://github.com/Pylons/pyramid/issues/425
-        import pyramid.testing
-        def view(request): pass
-        config = pyramid.testing.setUp(autocommit=False)
-        config.add_route('foo', '/foo/{a}/{b}')
-        config.add_view(view, route_name='foo', match_param='a=bar')
-        config.add_view(view, route_name='foo', match_param=('a=bar', 'b=baz'))
-        config.commit()
-
-class TestActionInfo(unittest.TestCase):
-    def _getTargetClass(self):
-        from pyramid.config.util import ActionInfo
-        return ActionInfo
+    def test_unknown_predicate(self):
+        from pyramid.exceptions import ConfigurationError
+        self.assertRaises(ConfigurationError, self._callFUT, unknown=1)
         
-    def _makeOne(self, filename, lineno, function, linerepr):
-        return self._getTargetClass()(filename, lineno, function, linerepr)
+class Test_takes_one_arg(unittest.TestCase):
+    def _callFUT(self, view, attr=None, argname=None):
+        from pyramid.config.util import takes_one_arg
+        return takes_one_arg(view, attr=attr, argname=argname)
 
-    def test_class_conforms(self):
-        from zope.interface.verify import verifyClass
-        from pyramid.interfaces import IActionInfo
-        verifyClass(IActionInfo, self._getTargetClass())
+    def test_requestonly_newstyle_class_no_init(self):
+        class foo(object):
+            """ """
+        self.assertFalse(self._callFUT(foo))
 
-    def test_instance_conforms(self):
-        from zope.interface.verify import verifyObject
-        from pyramid.interfaces import IActionInfo
-        verifyObject(IActionInfo, self._makeOne('f', 0, 'f', 'f'))
+    def test_requestonly_newstyle_class_init_toomanyargs(self):
+        class foo(object):
+            def __init__(self, context, request):
+                """ """
+        self.assertFalse(self._callFUT(foo))
 
-    def test_ctor(self):
-        inst = self._makeOne('filename', 10, 'function', 'src')
-        self.assertEqual(inst.file, 'filename')
-        self.assertEqual(inst.line, 10)
-        self.assertEqual(inst.function, 'function')
-        self.assertEqual(inst.src, 'src')
+    def test_requestonly_newstyle_class_init_onearg_named_request(self):
+        class foo(object):
+            def __init__(self, request):
+                """ """
+        self.assertTrue(self._callFUT(foo))
 
-    def test___str__(self):
-        inst = self._makeOne('filename', 0, 'function', '   linerepr  ')
-        self.assertEqual(str(inst),
-                         "Line 0 of file filename:\n       linerepr  ")
+    def test_newstyle_class_init_onearg_named_somethingelse(self):
+        class foo(object):
+            def __init__(self, req):
+                """ """
+        self.assertTrue(self._callFUT(foo))
+
+    def test_newstyle_class_init_defaultargs_firstname_not_request(self):
+        class foo(object):
+            def __init__(self, context, request=None):
+                """ """
+        self.assertFalse(self._callFUT(foo))
+
+    def test_newstyle_class_init_defaultargs_firstname_request(self):
+        class foo(object):
+            def __init__(self, request, foo=1, bar=2):
+                """ """
+        self.assertTrue(self._callFUT(foo, argname='request'))
+
+    def test_newstyle_class_init_firstname_request_with_secondname(self):
+        class foo(object):
+            def __init__(self, request, two):
+                """ """
+        self.assertFalse(self._callFUT(foo))
+
+    def test_newstyle_class_init_noargs(self):
+        class foo(object):
+            def __init__():
+                """ """
+        self.assertFalse(self._callFUT(foo))
+
+    def test_oldstyle_class_no_init(self):
+        class foo:
+            """ """
+        self.assertFalse(self._callFUT(foo))
+
+    def test_oldstyle_class_init_toomanyargs(self):
+        class foo:
+            def __init__(self, context, request):
+                """ """
+        self.assertFalse(self._callFUT(foo))
+
+    def test_oldstyle_class_init_onearg_named_request(self):
+        class foo:
+            def __init__(self, request):
+                """ """
+        self.assertTrue(self._callFUT(foo))
+
+    def test_oldstyle_class_init_onearg_named_somethingelse(self):
+        class foo:
+            def __init__(self, req):
+                """ """
+        self.assertTrue(self._callFUT(foo))
+
+    def test_oldstyle_class_init_defaultargs_firstname_not_request(self):
+        class foo:
+            def __init__(self, context, request=None):
+                """ """
+        self.assertFalse(self._callFUT(foo))
+
+    def test_oldstyle_class_init_defaultargs_firstname_request(self):
+        class foo:
+            def __init__(self, request, foo=1, bar=2):
+                """ """
+        self.assertTrue(self._callFUT(foo, argname='request'), True)
+
+    def test_oldstyle_class_init_noargs(self):
+        class foo:
+            def __init__():
+                """ """
+        self.assertFalse(self._callFUT(foo))
+
+    def test_function_toomanyargs(self):
+        def foo(context, request):
+            """ """
+        self.assertFalse(self._callFUT(foo))
+
+    def test_function_with_attr_false(self):
+        def bar(context, request):
+            """ """
+        def foo(context, request):
+            """ """
+        foo.bar = bar
+        self.assertFalse(self._callFUT(foo, 'bar'))
+
+    def test_function_with_attr_true(self):
+        def bar(context, request):
+            """ """
+        def foo(request):
+            """ """
+        foo.bar = bar
+        self.assertTrue(self._callFUT(foo, 'bar'))
+
+    def test_function_onearg_named_request(self):
+        def foo(request):
+            """ """
+        self.assertTrue(self._callFUT(foo))
+
+    def test_function_onearg_named_somethingelse(self):
+        def foo(req):
+            """ """
+        self.assertTrue(self._callFUT(foo))
+
+    def test_function_defaultargs_firstname_not_request(self):
+        def foo(context, request=None):
+            """ """
+        self.assertFalse(self._callFUT(foo))
+
+    def test_function_defaultargs_firstname_request(self):
+        def foo(request, foo=1, bar=2):
+            """ """
+        self.assertTrue(self._callFUT(foo, argname='request'))
+
+    def test_function_noargs(self):
+        def foo():
+            """ """
+        self.assertFalse(self._callFUT(foo))
+
+    def test_instance_toomanyargs(self):
+        class Foo:
+            def __call__(self, context, request):
+                """ """
+        foo = Foo()
+        self.assertFalse(self._callFUT(foo))
+
+    def test_instance_defaultargs_onearg_named_request(self):
+        class Foo:
+            def __call__(self, request):
+                """ """
+        foo = Foo()
+        self.assertTrue(self._callFUT(foo))
+
+    def test_instance_defaultargs_onearg_named_somethingelse(self):
+        class Foo:
+            def __call__(self, req):
+                """ """
+        foo = Foo()
+        self.assertTrue(self._callFUT(foo))
+
+    def test_instance_defaultargs_firstname_not_request(self):
+        class Foo:
+            def __call__(self, context, request=None):
+                """ """
+        foo = Foo()
+        self.assertFalse(self._callFUT(foo))
+
+    def test_instance_defaultargs_firstname_request(self):
+        class Foo:
+            def __call__(self, request, foo=1, bar=2):
+                """ """
+        foo = Foo()
+        self.assertTrue(self._callFUT(foo, argname='request'), True)
+
+    def test_instance_nocall(self):
+        class Foo: pass
+        foo = Foo()
+        self.assertFalse(self._callFUT(foo))
+    
+    def test_method_onearg_named_request(self):
+        class Foo:
+            def method(self, request):
+                """ """
+        foo = Foo()
+        self.assertTrue(self._callFUT(foo.method))
+
 
 class DummyCustomPredicate(object):
     def __init__(self):
@@ -392,3 +576,7 @@ class DummyRequest:
         self.params = {}
         self.cookies = {}
 
+class DummyConfigurator(object):
+    def maybe_dotted(self, thing):
+        return thing
+    

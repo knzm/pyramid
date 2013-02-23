@@ -19,36 +19,13 @@ import warnings
 
 warnings.simplefilter('ignore', DeprecationWarning)
 
-# RTD support
-on_rtd = os.environ.get('READTHEDOCS') == 'True'
-
-class Mock(object):
-    def __init__(self, *args, **kwargs):
-        pass
-
-    def __call__(self, *args, **kwargs):
-        return Mock()
-
-    @classmethod
-    def __getattr__(self, name):
-        if name in ('__file__', '__path__'):
-            return '/dev/null'
-        elif name[0] == name[0].upper():
-            return type(name, (), {})
-        else:
-            return Mock()
-
-if on_rtd:
-    MOCK_MODULES = ['repoze.sphinx.autointerface']
-    for mod_name in MOCK_MODULES:
-        sys.modules[mod_name] = Mock()
-
 # skip raw nodes
 from sphinx.writers.text import TextTranslator
 from sphinx.writers.latex import LaTeXTranslator
 
 from docutils import nodes
 from docutils import utils
+
 
 def raw(*arg):
     raise nodes.SkipNode
@@ -68,17 +45,13 @@ book = os.environ.get('BOOK')
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-if on_rtd:
-    extensions = [
-        'sphinx.ext.autodoc',
-        ]
-else:
-    extensions = [
-        'sphinx.ext.autodoc',
-        'sphinx.ext.doctest',
-        'repoze.sphinx.autointerface',
-        'sphinx.ext.intersphinx'
-        ]
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.doctest',
+    'repoze.sphinx.autointerface',
+    'sphinx.ext.viewcode',
+#    'sphinx.ext.intersphinx'
+    ]
 
 # Looks for objects in other Pyramid projects
 ## intersphinx_mapping = {
@@ -93,8 +66,7 @@ else:
 ##     }
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = [os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                               '_templates')]
+templates_path = ['_templates']
 
 # The suffix of source filenames.
 source_suffix = '.rst'
@@ -110,7 +82,7 @@ copyright = '%s, Agendaless Consulting' % datetime.datetime.now().year
 # other places throughout the built documents.
 #
 # The short X.Y version.
-version = '1.3'
+version = '1.4'
 
 # The full version, including alpha/beta/rc tags.
 release = version
@@ -126,7 +98,7 @@ today_fmt = '%B %d, %Y'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_themes/README.rst',]
+exclude_patterns = ['_themes/README.rst', ]
 
 # List of directories, relative to source directories, that shouldn't be searched
 # for source files.
@@ -158,42 +130,39 @@ if book:
 # -----------------------
 
 # Add and use Pylons theme
-if 'sphinx-build' in ' '.join(sys.argv): # protect against dumb importers
+if 'sphinx-build' in ' '.join(sys.argv):  # protect against dumb importers
     from subprocess import call, Popen, PIPE
 
     p = Popen('which git', shell=True, stdout=PIPE)
-    git = p.stdout.read().strip()
     cwd = os.getcwd()
     _themes = os.path.join(cwd, '_themes')
-
-    if not os.path.isdir(_themes):
-        call([git, 'clone', 'git://github.com/Pylons/pylons_sphinx_theme.git',
-                '_themes'])
+    git = p.stdout.read().strip()
+    if not os.listdir(_themes):
+        call([git, 'submodule', '--init'])
     else:
-        os.chdir(_themes)
-        call([git, 'checkout', 'master'])
-        call([git, 'pull'])
-        os.chdir(cwd)
+        call([git, 'submodule', 'update'])
 
     sys.path.append(os.path.abspath('_themes'))
 
     parent = os.path.dirname(os.path.dirname(__file__))
     sys.path.append(os.path.abspath(parent))
-    # wd = os.getcwd()
-    # os.chdir(parent)
-    # os.system('%s setup.py test -q' % sys.executable)
-    # os.chdir(wd)
+    wd = os.getcwd()
+    os.chdir(parent)
+    os.system('%s setup.py test -q' % sys.executable)
+    os.chdir(wd)
 
     for item in os.listdir(parent):
         if item.endswith('.egg'):
             sys.path.append(os.path.join(parent, item))
 
-html_theme_path = ['_themes', 'customtheme']
-html_theme = 'doc-ja'
-# html_theme_options = dict(
-#     github_url='https://github.com/Pylons/pyramid',
-#     in_progress='true'
-#     )
+html_theme_path = ['_themes']
+html_theme = 'pyramid-ja'
+html_theme_options = dict(
+#    github_url='https://github.com/Pylons/pyramid',
+#    in_progress='true',
+    original_url='http://docs.pylonsproject.org/projects/pyramid/en/latest/',
+    our_github_url='https://github.com/pylonsproject-jp/pyramid',
+    )
 # The style sheet to use for HTML and HTML Help pages. A file of that name
 # must exist either in Sphinx' static/ path, or in one of the custom paths
 # given in html_static_path.
@@ -218,7 +187,7 @@ html_title = u'The Pyramid Web Application Development Framework v%s (翻訳)' %
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+#html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -266,6 +235,8 @@ latex_paper_size = 'letter'
 
 # The font size ('10pt', '11pt' or '12pt').
 latex_font_size = '10pt'
+
+latex_additional_files = ['_static/latex-note.png', '_static/latex-warning.png']
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, document class [howto/manual]).
@@ -403,10 +374,10 @@ _PREAMBLE = r"""
 
 latex_elements = {
     'preamble': _PREAMBLE,
-    'wrapperclass':'book',
-    'date':'',
-    'releasename':'Version',
-    'title':r'The Pyramid Web Application \newline Development Framework',
+    'wrapperclass': 'book',
+    'date': '',
+    'releasename': 'Version',
+    'title': r'The Pyramid Web Application \newline Development Framework',
 #    'pointsize':'12pt', # uncomment for 12pt version
 }
 
@@ -421,6 +392,7 @@ latex_elements = {
 #subsubsection 3
 #paragraph     4
 #subparagraph  5
+
 
 def frontmatter(name, arguments, options, content, lineno,
                 content_offset, block_text, state, state_machine):
@@ -438,6 +410,7 @@ def frontmatter(name, arguments, options, content, lineno,
 \addtocontents{toc}{\protect\thispagestyle{empty}}
 """,
         format='latex')]
+
 
 def mainmatter(name, arguments, options, content, lineno,
                content_offset, block_text, state, state_machine):
@@ -458,10 +431,12 @@ def mainmatter(name, arguments, options, content, lineno,
 """,
         format='latex')]
 
+
 def backmatter(name, arguments, options, content, lineno,
               content_offset, block_text, state, state_machine):
     return [nodes.raw('', '\\backmatter\n\\setcounter{secnumdepth}{-1}\n',
                       format='latex')]
+
 
 def app_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
     """custom role for :app: marker, does nothing in particular except allow
@@ -479,6 +454,7 @@ def setup(app):
     app.add_directive('mainmatter', mainmatter, 1, (0, 0, 0))
     app.add_directive('backmatter', backmatter, 1, (0, 0, 0))
     app.connect('autodoc-process-signature', resig)
+
 
 def resig(app, what, name, obj, options, signature, return_annotation):
     """ Allow for preservation of ``@action_method`` decorated methods
@@ -503,19 +479,14 @@ def resig(app, what, name, obj, options, signature, return_annotation):
 
 ## PygmentsBridge.latex_formatter = NoLinenosLatexFormatter
 
-if on_rtd:
-    # We don't want to build pdf on RTD.
-    for __name in list(globals().keys()):
-        if __name.startswith("latex_"):
-            del globals()[__name]
-
 # -- Options for Epub output ---------------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = 'The Pyramid Web Application Development Framework, Version 1.3'
+epub_title = 'The Pyramid Web Application Development Framework, Version %s' \
+             % release
 epub_author = 'Chris McDonough'
 epub_publisher = 'Agendaless Consulting'
-epub_copyright = '2008-2011'
+epub_copyright = '2008-%d' % datetime.datetime.now().year
 
 # The language of the text. It defaults to the language option
 # or en if the language is not set.
@@ -529,8 +500,8 @@ epub_scheme = 'ISBN'
 epub_identifier = '0615445675'
 
 # A unique identification for the text.
-epub_uid = 'The Pyramid Web Application Development Framework, Version 1.3'
-
+epub_uid = 'The Pyramid Web Application Development Framework, Version %s' \
+           % release
 # HTML files that should be inserted before the pages created by sphinx.
 # The format is a list of tuples containing the path and title.
 #epub_pre_files = []
@@ -542,7 +513,7 @@ epub_uid = 'The Pyramid Web Application Development Framework, Version 1.3'
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ['_static/opensearch.xml', '_static/doctools.js',
     '_static/jquery.js', '_static/searchtools.js', '_static/underscore.js',
-    '_static/basic.css', 'search.html']
+    '_static/basic.css', 'search.html', '_static/websupport.js']
 
 
 # The depth of the table of contents in toc.ncx.

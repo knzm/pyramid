@@ -24,7 +24,7 @@ class TestRouter(unittest.TestCase):
         if mapper is None:
             mapper = RoutesMapper()
             self.registry.registerUtility(mapper, IRoutesMapper)
-        mapper.connect(name, path, factory)
+        return mapper.connect(name, path, factory)
 
     def _registerLogger(self):
         from pyramid.interfaces import IDebugLogger
@@ -311,6 +311,38 @@ class TestRouter(unittest.TestCase):
         app_iter = router(environ, start_response)
         self.assertEqual(app_iter, [b'abc'])
         self.assertEqual(start_response.status, '200 OK')
+
+    def test_call_with_request_extensions(self):
+        from pyramid.interfaces import IViewClassifier
+        from pyramid.interfaces import IRequestExtensions
+        from pyramid.interfaces import IRequest
+        from pyramid.request import Request
+        context = DummyContext()
+        self._registerTraverserFactory(context)
+        class Extensions(object):
+            def __init__(self):
+                self.methods = {}
+                self.descriptors = {}
+        extensions = Extensions()
+        L = []
+        request = Request.blank('/')
+        request.request_iface = IRequest
+        request.registry = self.registry
+        request._set_extensions = lambda *x: L.extend(x)
+        def request_factory(environ):
+            return request
+        self.registry.registerUtility(extensions, IRequestExtensions)
+        environ = self._makeEnviron()
+        response = DummyResponse()
+        response.app_iter = ['Hello world']
+        view = DummyView(response)
+        self._registerView(self.config.derive_view(view), '',
+                           IViewClassifier, None, None)
+        router = self._makeOne()
+        router.request_factory = request_factory
+        start_response = DummyStartResponse()
+        router(environ, start_response)
+        self.assertEqual(L, [extensions])
 
     def test_call_view_registered_nonspecific_default_path(self):
         from pyramid.interfaces import IViewClassifier
@@ -625,7 +657,8 @@ class TestRouter(unittest.TestCase):
         root = object()
         def factory(request):
             return root
-        self._connectRoute('foo', 'archives/:action/:article', factory)
+        route = self._connectRoute('foo', 'archives/:action/:article', factory)
+        route.predicates = [DummyPredicate()]
         context = DummyContext()
         self._registerTraverserFactory(context)
         response = DummyResponse()
@@ -646,8 +679,6 @@ class TestRouter(unittest.TestCase):
         self.assertEqual(request.context, context)
         self.assertEqual(request.root, root)
         matchdict = {'action':'action1', 'article':'article1'}
-        self.assertEqual(environ['bfg.routes.matchdict'], matchdict)
-        self.assertEqual(environ['bfg.routes.route'].name, 'foo')
         self.assertEqual(request.matchdict, matchdict)
         self.assertEqual(request.matched_route.name, 'foo')
         self.assertEqual(len(logger.messages), 1)
@@ -656,7 +687,11 @@ class TestRouter(unittest.TestCase):
             "route matched for url http://localhost:8080"
             "/archives/action1/article1; "
             "route_name: 'foo', "
-            "path_info: "))
+            "path_info: ")
+            )
+        self.assertTrue(
+            "predicates: 'predicate'" in logger.messages[0]
+            )
 
     def test_call_route_match_miss_debug_routematch(self):
         from pyramid.httpexceptions import HTTPNotFound
@@ -712,8 +747,6 @@ class TestRouter(unittest.TestCase):
         self.assertEqual(request.context, context)
         self.assertEqual(request.root, root)
         matchdict = {'action':'action1', 'article':'article1'}
-        self.assertEqual(environ['bfg.routes.matchdict'], matchdict)
-        self.assertEqual(environ['bfg.routes.route'].name, 'foo')
         self.assertEqual(request.matchdict, matchdict)
         self.assertEqual(request.matched_route.name, 'foo')
         self.assertTrue(IFoo.providedBy(request))
@@ -1130,6 +1163,12 @@ class TestRouter(unittest.TestCase):
         router = self._makeOne()
         start_response = DummyStartResponse()
         self.assertRaises(RuntimeError, router, environ, start_response)
+
+class DummyPredicate(object):
+    def __call__(self, info, request):
+        return True
+    def text(self):
+        return 'predicate'
 
 class DummyContext:
     pass

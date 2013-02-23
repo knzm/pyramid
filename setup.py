@@ -39,7 +39,7 @@ install_requires=[
     'setuptools',
     'Chameleon >= 1.2.3',
     'Mako >= 0.3.6', # strict_undefined
-    'WebOb >= 1.2dev', # response.text / py3 compat
+    'WebOb >= 1.2b3', # request.path_info is unicode
     'repoze.lru >= 0.4', # py3 compat
     'zope.interface >= 3.8.0',  # has zope.interface.registry
     'zope.deprecation >= 3.5.0', # py3 compat
@@ -50,21 +50,25 @@ install_requires=[
 
 tests_require = [
     'WebTest >= 1.3.1', # py3 compat
-    'virtualenv',
     ]
 
 if not PY3:
-    tests_require.extend([
-        'Sphinx',
-        'docutils',
-        'repoze.sphinx.autointerface',
-        'zope.component>=3.11.0',
-        ])
+    tests_require.append('zope.component>=3.11.0')
 
-testing_extras = tests_require + ['nose', 'coverage']
+docs_extras = [
+    'Sphinx',
+    'docutils',
+    'repoze.sphinx.autointerface',
+    ]
+
+testing_extras = tests_require + [
+    'nose',
+    'coverage',
+    'virtualenv', # for scaffolding tests
+    ]
 
 setup(name='pyramid',
-      version='1.3',
+      version='1.4',
       description=('The Pyramid web application development framework, a '
                    'Pylons project'),
       long_description=README + '\n\n' +  CHANGES,
@@ -75,9 +79,10 @@ setup(name='pyramid',
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.2",
+        "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
-        "Framework :: Pylons",
+        "Framework :: Pyramid",
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: WSGI",
         "License :: Repoze Public License",
@@ -93,6 +98,7 @@ setup(name='pyramid',
       install_requires = install_requires,
       extras_require = {
           'testing':testing_extras,
+          'docs':docs_extras,
           },
       tests_require = tests_require,
       test_suite="pyramid.tests",

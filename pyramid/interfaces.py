@@ -513,9 +513,13 @@ class IRequestHandler(Interface):
 
 IRequest.combined = IRequest # for exception view lookups
 
-class IRequestProperties(Interface):
-    """ Marker interface for storing a list of request properties which
-    will be added to the request object."""
+class IRequestExtensions(Interface):
+    """ Marker interface for storing request extensions (properties and
+    methods) which will be added to the request object."""
+    descriptors = Attribute(
+        """A list of descriptors that will be added to each request.""")
+    methods = Attribute(
+        """A list of methods to be added to each request.""")
 
 class IRouteRequest(Interface):
     """ *internal only* interface used as in a utility lookup to find
@@ -970,7 +974,7 @@ class IIntrospector(Interface):
         indirectly by :meth:`pyramid.interfaces.IIntrospector.register`"""
 
     def relate(*pairs):
-        """ Given any number of of ``(category_name, discriminator)`` pairs
+        """ Given any number of ``(category_name, discriminator)`` pairs
         passed as positional arguments, relate the associated introspectables
         to each other. The introspectable related to each pair must have
         already been added via ``.add`` or ``.add_intr``; a :exc:`KeyError`
@@ -982,7 +986,7 @@ class IIntrospector(Interface):
         """
 
     def unrelate(*pairs):
-        """ Given any number of of ``(category_name, discriminator)`` pairs
+        """ Given any number of ``(category_name, discriminator)`` pairs
         passed as positional arguments, unrelate the associated introspectables
         from each other. The introspectable related to each pair must have
         already been added via ``.add`` or ``.add_intr``; a :exc:`KeyError`
@@ -1104,6 +1108,15 @@ class IAssetDescriptor(Interface):
         """
         Returns True if asset exists, otherwise returns False.
         """
+
+class IJSONAdapter(Interface):
+    """
+    Marker interface for objects that can convert an arbitrary object
+    into a JSON-serializable primitive.
+    """
+
+class IPredicateList(Interface):
+    """ Interface representing a predicate list """
 
 # configuration phases: a lower phase number means the actions associated
 # with this phase will be executed earlier than those with later phase

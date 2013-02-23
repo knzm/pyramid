@@ -4,27 +4,16 @@
 インストール
 ============
 
-.. This tutorial assumes that Python and virtualenv are already installed
-.. and working in your system. If you need help setting this up, you should
-.. refer to the chapters on :ref:`installing_chapter`.
-
-このチュートリアルは、あなたのシステムに Python と virtualenv が既に
-インストールされて動作する状態になっていることを想定しています。
-もしこの環境構築に助けが必要な場合、 :ref:`installing_chapter` の章を
-参照してください。
-
-
 .. Preparation
 
 準備
 ===========
 
-.. Please take the following steps to prepare for the tutorial.  The
-.. steps are slightly different depending on whether you're using UNIX or
-.. Windows.
+.. Follow the steps in :ref:`installing_chapter`, but name the virtualenv
+.. directory ``pyramidtut``.
 
-チュートリアルの準備をするには次の手順を実行します。
-手順はUNIXまたはWindowsを使っているかによって、若干異なります。
+:ref:`installing_chapter` の手順に従ってください。ただし virtualenv
+ディレクトリの名前は ``pyramidtut`` にしてください。
 
 
 .. Preparation, UNIX
@@ -34,60 +23,16 @@
 
 .. #. Install SQLite3 and its development packages if you don't already
 ..    have them installed.  Usually this is via your system's package
-..    manager.  For example, on a Debian Linux system, do ``sudo apt-get
-..    install libsqlite3-dev``.
+..    manager.  On a Debian system, this would be:
 
 1. まだインストールしていなければ SQLite3 とその開発用パッケージの
    インストール。通常これはシステムのパッケージマネージャーを介して行います。
-   例えば Debian Linuxシステムでは ``sudo apt-get install
-   libsqlite3-dev`` を実行します。
-
-
-.. #. Use your Python's virtualenv to make a workspace:
-
-2. virtualenv を使ってワークスペースを作成します:
+   Debian Linuxシステムでは、以下のようになります:
 
 
    .. code-block:: text
 
-      $ path/to/my/Python-2.6/bin/virtualenv --no-site-packages pyramidtut
-
-
-.. #. Switch to the ``pyramidtut`` directory:
-
-3. ``pyramidtut`` ディレクトリに移動します:
-
-
-   .. code-block:: text
-
-      $ cd pyramidtut
-
-
-.. #. Use ``easy_install`` to get :app:`Pyramid` and its direct
-..    dependencies installed:
-
-4. ``easy_install`` を使って :app:`Pyramid` と直接の依存関係を
-   インストールします:
-
-
-   .. code-block:: text
-
-      $ bin/easy_install pyramid
-
-
-.. Preparation, Windows
-
-準備 (Windows)
---------------------
-
-.. #. Use your Python's virtualenv to make a workspace:
-
-1. virtualenv を使ってワークスペースを作成します:
-
-
-   .. code-block:: text
-
-      c:\> c:\Python26\Scripts\virtualenv --no-site-packages pyramidtut
+      $ sudo apt-get install libsqlite3-dev
 
 
 .. #. Switch to the ``pyramidtut`` directory:
@@ -97,19 +42,22 @@
 
    .. code-block:: text
 
-      c:\> cd pyramidtut
+      $ cd pyramidtut
 
 
-.. #. Use ``easy_install`` to get :app:`Pyramid` and its direct
-..    dependencies installed:
+.. Preparation, Windows
 
-3. ``easy_install`` を使って :app:`Pyramid` と直接の依存関係を
-   インストールします:
+準備 (Windows)
+--------------------
+
+.. #. Switch to the ``pyramidtut`` directory:
+
+1. ``pyramidtut`` ディレクトリに移動します:
 
 
    .. code-block:: text
 
-      c:\pyramidtut> Scripts\easy_install pyramid
+      c:\> cd pyramidtut
 
 
 .. Making a Project
@@ -119,16 +67,16 @@
 プロジェクトの作成
 ==================
 
-.. Your next step is to create a project.  :app:`Pyramid` supplies a
-.. variety of scaffolds to generate sample projects.  We will use the
-.. ``alchemy`` scaffold, which generates an application
-.. that uses :term:`SQLAlchemy` and :term:`URL dispatch`.
+.. Your next step is to create a project.  For this tutorial, we will use the
+.. :term:`scaffold` named ``alchemy``, which generates an application
+.. that uses :term:`SQLAlchemy` and :term:`URL dispatch`.  :app:`Pyramid`
+.. supplies a variety of scaffolds to generate sample projects.
 
-次のステップはプロジェクトを作成することです。 :app:`Pyramid` はサンプル
-プロジェクトを作成するための様々な骨組み (scaffold) を提供しています。
-私たちは scaffold として ``alchemy`` を使用します。これは
+次のステップはプロジェクトを作成することです。このチュートリアルでは
+:term:`scaffold` (骨組み) として ``alchemy`` を使用します。これは
 :term:`SQLAlchemy` と :term:`URL dispatch` を使用するアプリケーションを
-生成します。
+生成します。 :app:`Pyramid` はサンプルプロジェクトを作成するための様々な
+scaffold を提供しています。
 
 
 .. The below instructions assume your current working directory is the
@@ -179,15 +127,15 @@ Windows の場合:
 
 .. In order to do development on the project easily, you must "register"
 .. the project as a development egg in your workspace using the
-.. ``setup.py develop`` command.  In order to do so, cd to the "tutorial"
+.. ``setup.py develop`` command.  In order to do so, cd to the `tutorial`
 .. directory you created in :ref:`sql_making_a_project`, and run the
-.. "setup.py develop" command using virtualenv Python interpreter.
+.. ``setup.py develop`` command using the virtualenv Python interpreter.
 
 簡単にプロジェクトの開発をするために、 ``setup.py develop`` コマンドを
 使ってプロジェクトを開発用 egg として作業用スペースに "登録" する必要が
 あります。これをするために、 :ref:`sql_making_a_project` で作成した
-"tutorial" ディレクトリに移動します。そして virtualenv の Python インタプリタ
-を使って "setup.py develop" コマンドを実行します。
+`tutorial` ディレクトリに移動します。そして virtualenv の Python
+インタプリタを使って ``setup.py develop`` コマンドを実行します。
 
 
 .. On UNIX:
@@ -288,11 +236,11 @@ Windows の場合:
 いる" (もしくはカバーされていない) かを抽出します。
 
 
-.. To get this functionality working, we'll need to install a couple of
-.. other packages into our ``virtualenv``: ``nose`` and ``coverage``:
+.. To get this functionality working, we'll need to install the ``nose`` and
+.. ``coverage`` packages into our ``virtualenv``:
 
-この機能を動かすには、 ``virtualenv`` に追加で 2 つのパッケージ
-``nose`` と ``coverage`` をインストールする必要があります。
+この機能を動かすには、 ``nose`` および ``coverage`` パッケージを
+``virtualenv`` にインストールする必要があります。
 
 
 .. On UNIX:
@@ -441,11 +389,11 @@ Windows の場合:
                                 COMMIT
 
 
-.. Success!  You should now have a ``tutorial.db`` file in your current working
+.. Success!  You should now have a ``tutorial.sqlite`` file in your current working
 .. directory.  This will be a SQLite database with a single table defined in it
 .. (``models``).
 
-成功です! 現在の作業ディレクトリに ``tutorial.db`` ファイルができている
+成功です! 現在の作業ディレクトリに ``tutorial.sqlite`` ファイルができている
 はずです。このファイルは、単一のテーブルが定義された SQLite データベース
 (``models``) になります。
 
@@ -535,6 +483,13 @@ Windows の場合:
 .. - you are willing to use :term:`url dispatch` to map URLs to code.
 
 - URLからコードへのマッピング方法に :term:`url dispatch` を使用する
+
+
+.. - you want to use ``ZopeTransactionExtension`` and ``pyramid_tm`` to scope
+..   sessions to requests
+
+- セッションをリクエストスコープにするために
+  ``ZopeTransactionExtension`` と ``pyramid_tm`` を使用する
 
 
 .. .. note::

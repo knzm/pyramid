@@ -245,12 +245,12 @@ Windows の場合:
 
 .. It uses the :meth:`pyramid.request.Request.route_url` API to construct a 
 .. URL to the ``FrontPage`` page (e.g. ``http://localhost:6543/FrontPage``), which 
-.. is used as the "location" of the HTTPFound response, forming an HTTP redirect.
+.. is used as the "location" of the ``HTTPFound`` response, forming an HTTP redirect.
 
 それは ``FrontPage`` ページの URL (例えば
 ``http://localhost:6543/FrontPage``) を構築するために
 :meth:`pyramid.request.Request.route_url` APIを使用します。そして、
-それを HTTPFound レスポンスの "location" として使用し、 HTTP リダイレクト
+それを ``HTTPFound`` レスポンスの "location" として使用し、 HTTP リダイレクト
 を生成します。
 
 
@@ -261,12 +261,12 @@ Windows の場合:
 
 .. ``view_page()`` is used to display a single page of our
 .. wiki.  It renders the :term:`ReStructuredText` body of a page (stored as
-.. the ``data`` attribute of a Page object) as HTML.  Then it substitutes an
+.. the ``data`` attribute of a ``Page`` model object) as HTML.  Then it substitutes an
 .. HTML anchor for each *WikiWord* reference in the rendered HTML using a
 .. compiled regular expression.
 
 ``view_page()`` は wiki の単一のページを表示するために使用されます。
-それは (Page オブジェクトの ``data`` 属性として保存された)
+それは (``Page`` モデルオブジェクトの ``data`` 属性として保存された)
 :term:`ReStructuredText` で書かれたページの内容を HTML としてレンダリング
 します。その後、コンパイル済み正規表現を使用して、レンダリング済み HTML
 中の各 *WikiWord* 参照を HTML アンカーに置換します。
@@ -278,21 +278,21 @@ Windows の場合:
    :language: python
 
 
-.. The curried ``check()`` function is used as the first argument to
+.. The ``check()`` function is used as the first argument to
 .. ``wikiwords.sub``, indicating that it should be called to provide a value for
 .. each WikiWord match found in the content.  If the wiki already contains a
 .. page with the matched WikiWord name, ``check()`` generates a view
 .. link to be used as the substitution value and returns it.  If the wiki does
-.. not already contain a page with with the matched WikiWord name, ``check()``
+.. not already contain a page with the matched WikiWord name, ``check()``
 .. generates an "add" link as the substitution value and returns it.
 
-カリー化された関数 ``check()`` は ``wikiwords.sub`` の最初の引数として使
-用されます。それはコンテンツ内で見つかった各 WikiWord のマッチに対して
-値を提供するために呼び出す必要があると指示しています。もし、マッチした
-WikiWord 名を持つページが wiki にすでに含まれている場合、 ``check()``
-は置換する値として view リンクを生成してそれを返します。もし、マッチした
-WikiWord 名を持つページがまだ wiki に含まれていない場合、関数は置換する
-値として "add" リンクを生成してそれを返します。
+``check()`` 関数は ``wikiwords.sub`` の最初の引数として使用されます。
+それはコンテンツ内で見つかった各 WikiWord のマッチに対して値を提供するために
+呼び出す必要があると指示しています。もし、マッチした WikiWord 名を持つ
+ページが wiki にすでに含まれている場合、 ``check()`` は置換する値として
+view リンクを生成してそれを返します。もし、マッチした WikiWord 名を持つ
+ページがまだ wiki に含まれていない場合、関数は置換する値として "add"
+リンクを生成してそれを返します。
 
 
 .. As a result, the ``content`` variable is now a fully formed bit of HTML
@@ -362,6 +362,21 @@ WikiWord への様々な view または add リンクを含む完全な HTML 形
 ``matchdict`` の中の ``'pagename'`` の値は ``'SomeName'`` になります。
 
 
+.. If the view execution *is* a result of a form submission (i.e. the expression
+.. ``'form.submitted' in request.params`` is ``True``), we scrape the page body
+.. from the form data, create a Page object with this page body and the name
+.. taken from ``matchdict['pagename']``, and save it into the database using
+.. ``DBSession.add``.  We then redirect back to the ``view_page`` view for the
+.. newly created page.
+
+ビューの実行がフォーム送信の結果で *ある* 場合 (つまり評価式
+``'form.submitted' in request.params`` が ``True`` の場合)、
+フォームデータからページの本体を取り出し、このページの本体と
+``matchdict['pagename']`` から取り出した名前から Page オブジェクトを
+生成し、 ``DBSession.add`` を使ってそれをデータベースに保存します。
+その後、新しく作成したページの ``view_page`` ビューにリダイレクトします。
+
+
 .. If the view execution is *not* a result of a form submission (i.e. the
 .. expression ``'form.submitted' in request.params`` is ``False``), the view
 .. callable renders a template.  To do so, it generates a "save url" which the
@@ -382,21 +397,6 @@ callable はテンプレートをレンダリングします。そのために�
 いう編集フォームの要求を満たすために、ダミー Page オブジェクトを生成します。
 そして、 :app:`Pyramid` はレスポンスとしてこのビューに関連付けられている
 テンプレートをレンダリングします。
-
-
-.. If the view execution *is* a result of a form submission (i.e. the expression
-.. ``'form.submitted' in request.params`` is ``True``), we scrape the page body
-.. from the form data, create a Page object with this page body and the name
-.. taken from ``matchdict['pagename']``, and save it into the database using
-.. ``DBSession.add``.  We then redirect back to the ``view_page`` view for the
-.. newly created page.
-
-ビューの実行がフォーム送信の結果で *ある* 場合 (つまり評価式
-``'form.submitted' in request.params`` が ``True`` の場合)、
-フォームデータからページの本体を取り出し、このページの本体と
-``matchdict['pagename']`` から取り出した名前から Page オブジェクトを
-生成し、 ``DBSession.add`` を使ってそれをデータベースに保存します。
-その後、新しく作成したページの ``view_page`` ビューにリダイレクトします。
 
 
 .. The ``edit_page`` view function
@@ -423,17 +423,6 @@ callable はテンプレートをレンダリングします。そのために�
    :language: python
 
 
-.. If the view execution is *not* a result of a form submission (i.e. the
-.. expression ``'form.submitted' in request.params`` is ``False``), the view
-.. simply renders the edit form, passing the page object and a ``save_url``
-.. which will be used as the action of the generated form.
-
-ビューの実行がフォーム送信の結果では *ない* 場合 (つまり評価式
-``'form.submitted' in request.params`` が ``False`` の場合)、
-page オブジェクトと、生成されたフォームのアクションとして使用するための
-``save_url`` を渡して単に編集フォームをレンダリングします。
-
-
 .. If the view execution *is* a result of a form submission (i.e. the expression
 .. ``'form.submitted' in request.params`` is ``True``), the view grabs the
 .. ``body`` element of the request parameters and sets it as the ``data``
@@ -447,19 +436,33 @@ page オブジェクトと、生成されたフォームのアクションとし
 ビューにリダイレクトします。
 
 
+.. If the view execution is *not* a result of a form submission (i.e. the
+.. expression ``'form.submitted' in request.params`` is ``False``), the view
+.. simply renders the edit form, passing the page object and a ``save_url``
+.. which will be used as the action of the generated form.
+
+ビューの実行がフォーム送信の結果では *ない* 場合 (つまり評価式
+``'form.submitted' in request.params`` が ``False`` の場合)、
+page オブジェクトと、生成されたフォームのアクションとして使用するための
+``save_url`` を渡して単に編集フォームをレンダリングします。
+
+
 .. Adding Templates
 
 テンプレートの追加
 ==================
 
-.. The views we've added all reference a :term:`template`.  Each template is a
-.. :term:`Chameleon` :term:`ZPT` template.  These templates will live in the
-.. ``templates`` directory of our tutorial package.
+.. The ``view_page``, ``add_page`` and ``edit_page`` views that we've added
+.. reference a :term:`template`.  Each template is a :term:`Chameleon` :term:`ZPT`
+.. template.  These templates will live in the ``templates`` directory of our
+.. tutorial package.  Chameleon templates must have a ``.pt`` extension to be
+.. recognized as such.
 
-追加したビューはすべて :term:`template` を参照しています。
-各テンプレートは :term:`Chameleon` :term:`ZPT` テンプレートです。これら
-のテンプレートは tutorial パッケージの ``templates`` ディレクトリの
-中にあります。
+追加した ``view_page``, ``add_page``, ``edit_page`` ビューは
+:term:`template` を参照しています。各テンプレートは :term:`Chameleon`
+:term:`ZPT` テンプレートです。これらのテンプレートは tutorial パッケージの
+``templates`` ディレクトリの中にあります。 Chameleon テンプレートとして
+認識されるためには ``.pt`` 拡張子を持たなければなりません。
 
 
 .. The ``view.pt`` Template
@@ -467,52 +470,38 @@ page オブジェクトと、生成されたフォームのアクションとし
 ``view.pt`` テンプレート
 ------------------------
 
-.. The ``view.pt`` template is used for viewing a single wiki page.  It
-.. is used by the ``view_page`` view function.  It should have a ``div``
-.. that is "structure replaced" with the ``content`` value provided by
-.. the view.  It should also have a link on the rendered page that points
-.. at the "edit" URL (the URL which invokes the ``edit_page`` view for
-.. the page being viewed).
+.. Create ``tutorial/tutorial/templates/view.pt`` and add the following
+.. content:
 
-``view.pt`` テンプレートは単一の wiki ページを表示するために使用されています。
-これは ``view_page`` ビュー関数によって使用されています。ビューによって
-提供される ``content`` 値で "構造が置き換えられる" ``div`` を持っている必要
-があります。また、レンダリングされたページに "edit" URL (表示されている
-ページに対して ``edit_page`` ビューを呼び出す URL) を指すリンクを持つ
-必要もあります。
-
-
-.. Once we're done with the ``view.pt`` template, it will look a lot like the
-.. below:
-
-``view.pt`` テンプレートが完成すると、以下のようになります:
+``tutorial/tutorial/templates/view.pt`` を作成して次の内容を追加してください:
 
 
 .. literalinclude:: src/views/tutorial/templates/view.pt
+   :linenos:
    :language: xml
 
 
-.. .. note:: The names available for our use in a template are always
-..    those that are present in the dictionary returned by the view
-..    callable.  But our templates make use of a ``request`` object that
-..    none of our tutorial views return in their dictionary.  This value
-..    appears as if "by magic".  However, ``request`` is one of several
-..    names that are available "by default" in a template when a template
-..    renderer is used.  See :ref:`chameleon_template_renderers` for more
-..    information about other names that are available by default in a
-..    template when a Chameleon template is used as a renderer.
+.. This template is used by ``view_page()`` for displaying a single
+.. wiki page. It includes:
 
-.. note::
+このテンプレートは、単一の wiki ページを表示するために ``view_page()``
+によって使用されます。以下の内容が含まれています:
 
-   テンプレートで使用可能な名前は、常にビュー callable によって返された
-   辞書の中にあるものですが、これらのテンプレートではいずれのビューでも
-   その辞書の中で返していない ``request`` オブジェクトを利用しています。
-   この値は "魔法のように" 現れます。しかし、 ``request`` はテンプレート
-   レンダラが使用されているときにテンプレート内で "デフォルトで" 利用
-   可能ないくつかの名前のうちの1つです。レンダラとして Chameleon
-   テンプレートを使用しているときにテンプレート内でデフォルトで利用可能
-   な他の名前についての詳細は :ref:`chameleon_template_renderers`
-   を参照してください。
+
+.. - A ``div`` element that is replaced with the ``content``
+..   value provided by the view (rows 45-47).  ``content``
+..   contains HTML, so the ``structure`` keyword is used
+..   to prevent escaping it (i.e. changing ">" to "&gt;", etc.)
+.. - A link that points
+..   at the "edit" URL which invokes the ``edit_page`` view for
+..   the page being viewed (rows 49-51).
+
+- ビューによって提供される ``content`` 値で置き換えられる ``div`` 要素
+  (45-47行目)。 ``content`` には HTML が含まれます。そのためエスケープ
+  (つまり ">" を "&gt;" にするような変更) を防ぐために ``structure``
+  キーワードが使われています。
+- 表示されているページに対して ``edit_page`` ビューを呼び出す "edit"
+  URL を指すリンク (49-51行目)。
 
 
 .. The ``edit.pt`` Template
@@ -520,30 +509,59 @@ page オブジェクトと、生成されたフォームのアクションとし
 ``edit.pt`` テンプレート
 ------------------------
 
-.. The ``edit.pt`` template is used for adding and editing a wiki page.  It is
-.. used by the ``add_page`` and ``edit_page`` view functions.  It should display
-.. a page containing a form that POSTs back to the "save_url" argument supplied
-.. by the view.  The form should have a "body" textarea field (the page data),
-.. and a submit button that has the name "form.submitted".  The textarea in the
-.. form should be filled with any existing page data when it is rendered.
+.. Create ``tutorial/tutorial/templates/edit.pt`` and add the following
+.. content:
 
-``edit.pt`` テンプレートは wiki ページの追加と編集に使用されています。
-これはビュー関数 ``add_page`` と ``edit_page`` から使用されています。
-``edit.pt`` はビューによって提供される "save_url" 引数にポストバック
-されるフォームを含むページを表示します。フォームには "body" textarea
-フィールド (ページのデータ) と "form.submitted" という名前の送信ボタン
-があります。フォームのテキストエリアは、レンダリングされたときに
-なんらかの存在するページのデータで埋められます。
-
-
-.. Once we're done with the ``edit.pt`` template, it will look a lot like
-.. the following:
-
-``edit.pt`` テンプレートが完成すると、以下のようになります:
+``tutorial/tutorial/templates/edit.pt`` を作成して次の内容を追加してください:
 
 
 .. literalinclude:: src/views/tutorial/templates/edit.pt
+   :linenos:
    :language: xml
+
+
+.. This template is used by ``add_page()`` and ``edit_page()`` for adding
+.. and editing a wiki page.  It displays
+.. a page containing a form that includes:
+
+このテンプレートは wiki ページの追加と編集のために ``add_page()`` と
+``edit_page()`` によって使用されます。これは以下のようなフォームを含む
+ページを表示します。
+
+
+.. - A 10 row by 60 column ``textarea`` field named ``body`` that is filled
+..   with any existing page data when it is rendered (rows 46-47).
+.. - A submit button that has the name ``form.submitted`` (row 48).
+
+- レンダリングされた時に既存のページのデータで埋められる、
+  10列60行の "body" という名前の ``textarea`` フィールド (46-47行目)。
+- "form.submitted" という名前の送信ボタン (48行目)。
+
+
+.. The form POSTs back to the "save_url" argument supplied
+.. by the view (row 45).  The view will use the ``body`` and
+.. ``form.submitted`` values.
+
+このフォームは、ビューによって提供される "save_url" 引数に POST 送信されます
+(45行目)。ビューは ``body`` と ``form.submitted`` の値を使います。
+
+
+.. .. note:: Our templates use a ``request`` object that
+..    none of our tutorial views return in their dictionary.
+..    ``request`` is one of several
+..    names that are available "by default" in a template when a template
+..    renderer is used.  See :ref:`chameleon_template_renderers` for
+..    information about other names that are available by default
+..    when a Chameleon template is used as a renderer.
+
+.. note::
+
+   これらのテンプレートでは、いずれのビューでもその辞書の中で返していない
+   ``request`` オブジェクトを利用しています。 ``request`` はテンプレート内で
+   "デフォルトで" 利用可能ないくつかの名前のうちの1つです。レンダラーとして
+   Chameleon テンプレートを使用しているときにテンプレート内でデフォルトで
+   利用可能な他の名前についての情報は
+   :ref:`chameleon_template_renderers` を参照してください。
 
 
 .. Static Assets
@@ -669,7 +687,7 @@ page オブジェクトと、生成されたフォームのアクションとし
 .. literalinclude:: src/views/tutorial/__init__.py
    :linenos:
    :language: python
-   :emphasize-lines: 13-16
+   :emphasize-lines: 18-21
 
 
 .. (The highlighted lines are the ones that need to be added or edited.)
@@ -683,52 +701,50 @@ page オブジェクトと、生成されたフォームのアクションとし
 ====================================
 
 .. We can finally examine our application in a browser (See
-.. :ref:`wiki2-start-the-application`).  The views we'll try are
-.. as follows:
+.. :ref:`wiki2-start-the-application`).  Launch a browser and visit
+.. each of the following URLs, check that the result is as expected:
 
 ようやくブラウザでアプリケーションを実行することができます
-(:ref:`wiki2-start-the-application` 参照) 。
-これから試すビューは次の通りです:
+(:ref:`wiki2-start-the-application` 参照) 。ブラウザを起動して次の
+各 URL を開き、結果が予想通りであることをチェックしてください:
 
 
-.. - Visiting ``http://localhost:6543`` in a browser invokes the
+.. - ``http://localhost:6543`` in a browser invokes the
 ..   ``view_wiki`` view.  This always redirects to the ``view_page`` view
 ..   of the FrontPage page object.
 
-- ブラウザで ``http://localhost:6543`` にアクセスすると ``view_wiki``
-  ビューが呼び出されます。このビューは常に FrontPage page オブジェクト
-  の ``view_page`` ビューにリダイレクトします。
+- ``http://localhost:6543`` にブラウザでアクセスすると ``view_wiki``
+  ビューが呼び出されます。このビューは常に FrontPage page オブジェクトの
+  ``view_page`` ビューにリダイレクトします。
 
 
-.. - Visiting ``http://localhost:6543/FrontPage`` in a browser invokes
-..   the ``view_page`` view of the front page page object.
+.. - ``http://localhost:6543/FrontPage`` in a browser invokes
+..   the ``view_page`` view of the front page object.
 
-- ブラウザで ``http://localhost:6543/FrontPage`` にアクセスすると、
-  フロントページ page オブジェクトの ``view_page`` ビューが呼び出されます。
+- ``http://localhost:6543/FrontPage`` にブラウザでアクセスすると、
+  フロントページオブジェクトの ``view_page`` ビューが呼び出されます。
 
 
-.. - Visiting ``http://localhost:6543/FrontPage/edit_page`` in a browser
+.. - ``http://localhost:6543/FrontPage/edit_page`` in a browser
 ..   invokes the edit view for the front page object.
 
-- ブラウザで ``http://localhost:6543/FrontPage/edit_page`` にアクセス
-  すると、フロントページ page オブジェクトの編集ビューが呼び出されます。
+- ``http://localhost:6543/FrontPage/edit_page`` にブラウザでアクセス
+  すると、フロントページ page オブジェクトの edit ビューが呼び出されます。
 
 
-.. - Visiting ``http://localhost:6543/add_page/SomePageName`` in a
+.. - ``http://localhost:6543/add_page/SomePageName`` in a
 ..   browser invokes the add view for a page.
 
-- ブラウザで ``http://localhost:6543/add_page/SomePageName`` にアクセス
-  すると、ページの追加ビューが呼び出されます。
+- ``http://localhost:6543/add_page/SomePageName`` にブラウザでアクセス
+  すると、ページの add ビューが呼び出されます。
 
 
-.. Try generating an error within the body of a view by adding code to
-.. the top of it that generates an exception (e.g. ``raise
-.. Exception('Forced Exception')``).  Then visit the error-raising view
-.. in a browser.  You should see an interactive exception handler in the
-.. browser which allows you to examine values in a post-mortem mode.
+.. - To generate an error, visit ``http://localhost:6543/foobars/edit_page`` which
+..   will generate a ``NoResultFound: No row was found for one()`` error.
+..   You'll see an interactive traceback facility provided 
+..   by :term:`pyramid_debugtoolbar`.
 
-ビューの先頭に例外を生成するコードを追加して、ビューの本体内でエラーを
-生成してみてください (例えば ``raise Exception('Forced Exception')``)。
-次にブラウザでエラーを発生させるビューにアクセスします。ブラウザに
-インタラクティブ例外ハンドラが表示され、 post-mortem (検死) モードで
-値を調べることができるはずです。
+- エラーを発生させるために ``http://localhost:6543/foobars/edit_page`` に
+  アクセスしてください。それは ``NoResultFound: No row was found for one()``
+  エラーを発生させます。 :term:`pyramid_debugtoolbar` によって提供された
+  インタラクティブトレースバック機能が見られるでしょう。

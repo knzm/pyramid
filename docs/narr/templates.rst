@@ -46,20 +46,6 @@ within the body of a view callable like so:
                                  {'foo':1, 'bar':2}, 
                                  request=request)
 
-.. warning::
-
-   Earlier iterations of this documentation
-   (pre-version-1.3) encouraged the application developer to use
-   ZPT-specific APIs such as
-   :func:`pyramid.chameleon_zpt.render_template_to_response` and
-   :func:`pyramid.chameleon_zpt.render_template` to render templates
-   directly.  This style of rendering still works, but at least for
-   purposes of this documentation, those functions are deprecated.
-   Application developers are encouraged instead to use the functions
-   available in the :mod:`pyramid.renderers` module to perform
-   rendering tasks.  This set of functions works to render templates
-   for all renderer extensions registered with :app:`Pyramid`.
-
 The ``sample_view`` :term:`view callable` function above returns a
 :term:`response` object which contains the body of the
 ``templates/foo.pt`` template.  In this case, the ``templates``
@@ -79,12 +65,12 @@ prefix on Windows.
 .. warning::
 
    Only :term:`Chameleon` templates support defining a renderer for a
-   template relative to the location of the module where the view
-   callable is defined.  Mako templates, and other templating system
-   bindings work differently.  In particular, Mako templates use a
-   "lookup path" as defined by the ``mako.directories`` configuration
-   file instead of treating relative paths as relative to the current
-   view module.  See :ref:`mako_templates`.
+   template relative to the location of the module where the view callable is
+   defined.  Mako templates, and other templating system bindings work
+   differently.  In particular, Mako templates use a "lookup path" as defined
+   by the ``mako.directories`` configuration file instead of treating
+   relative paths as relative to the current view module.  See
+   :ref:`mako_templates`.
 
 The path can alternately be a :term:`asset specification` in the form
 ``some.dotted.package_name:relative/path``. This makes it possible to
@@ -123,7 +109,7 @@ supply the renderer with more correct system values (see
 to compose proper system values is present in the request.  If your
 template relies on the name ``request`` or ``context``, or if you've
 configured special :term:`renderer globals`, make sure to pass
-``request`` as a keyword argument in every call to to a
+``request`` as a keyword argument in every call to a
 ``pyramid.renderers.render_*`` function.
 
 Every view must return a :term:`response` object, except for views
@@ -253,16 +239,26 @@ System Values Used During Rendering
 
 When a template is rendered using
 :func:`~pyramid.renderers.render_to_response` or
-:func:`~pyramid.renderers.render`, the renderer representing the
-template will be provided with a number of *system* values.  These
-values are provided in a dictionary to the renderer and include:
-
-``context``
-  The current :app:`Pyramid` context if ``request`` was provided as
-  a keyword argument, or ``None``.
+:func:`~pyramid.renderers.render`, or a ``renderer=`` argument to view
+configuration (see :ref:`templates_used_as_renderers`), the renderer
+representing the template will be provided with a number of *system* values.
+These values are provided to the template:
 
 ``request``
-  The request provided as a keyword argument.
+  The value provided as the ``request`` keyword argument to
+  ``render_to_response`` or ``render`` *or* the request object passed to the
+  view when the ``renderer=`` argument to view configuration is being used to
+  render the template.
+
+``req``
+  An alias for ``request``.
+
+``context``
+  The current :app:`Pyramid` :term:`context` if ``request`` was provided as a
+  keyword argument to ``render_to_response`` or ``render``, or ``None`` if
+  the ``request`` keyword argument was not provided.  This value will always
+  be provided if the template is rendered as the result of a ``renderer=``
+  argument to view configuration being used.
 
 ``renderer_name``
   The renderer name used to perform the rendering,
@@ -270,17 +266,24 @@ values are provided in a dictionary to the renderer and include:
 
 ``renderer_info`` 
   An object implementing the :class:`pyramid.interfaces.IRendererInfo`
-  interface.  Basically, an object with the following attributes:
-  ``name``, ``package`` and ``type``.
+  interface.  Basically, an object with the following attributes: ``name``,
+  ``package`` and ``type``.
 
-You can define more values which will be passed to every template
-executed as a result of rendering by defining :term:`renderer
-globals`.
+``view``
+  The view callable object that was used to render this template.  If the
+  view callable is a method of a class-based view, this will be an instance
+  of the class that the method was defined on.  If the view callable is a
+  function or instance, it will be that function or instance.  Note that this
+  value will only be automatically present when a template is rendered as a
+  result of a ``renderer=`` argument; it will be ``None`` when the
+  ``render_to_response`` or ``render`` APIs are used.
+
+You can define more values which will be passed to every template executed as
+a result of rendering by defining :term:`renderer globals`.
 
 What any particular renderer does with these system values is up to the
-renderer itself, but most template renderers, including Chameleon and
-Mako renderers, make these names available as top-level template
-variables.
+renderer itself, but most template renderers, including Chameleon and Mako
+renderers, make these names available as top-level template variables.
 
 .. index::
    pair: renderer; templates
@@ -517,6 +520,33 @@ And ``templates/mytemplate.pt`` might look like so:
       </span>
     </html>
 
+
+Using A Chameleon Macro Name Within a Renderer Name
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sommetime you'd like to render a macro inside of a Chameleon ZPT template
+instead of the full Chameleon ZPT template. To render the content of a
+``define-macro`` field inside a Chameleon ZPT template, given a Chameleon
+template file named ``foo.pt`` and a macro named ``bar`` defined within it
+(e.g. ``<div metal:define-macro="bar">...</div>``), you can configure the
+template as a :term:`renderer` like so:
+
+.. code-block:: python
+   :linenos:
+
+   from pyramid.view import view_config
+
+   @view_config(renderer='foo#bar.pt')
+   def my_view(request):
+       return {'project':'my project'}
+
+The above will render only the ``bar`` macro defined within the ``foo.pt``
+template instead of the entire template.
+
+.. note::
+
+   This feature is new in Pyramid 1.4.
+
 .. index::
    single: Chameleon text templates
 
@@ -555,10 +585,6 @@ When the template is rendered, it will show:
 .. code-block:: text
 
    Hello, world!
-
-If you'd rather use templates directly within a view callable (without
-the indirection of using a renderer), see :ref:`chameleon_text_module`
-for the API description.
 
 See also :ref:`built_in_renderers` for more general information about
 renderers, including Chameleon text renderers.
@@ -696,6 +722,30 @@ This template doesn't use any advanced features of Mako, only the
 ``${}`` replacement syntax for names that are passed in as
 :term:`renderer globals`.  See the `the Mako documentation
 <http://www.makotemplates.org/>`_ to use more advanced features.
+
+Using A Mako def name Within a Renderer Name
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sommetime you'd like to render a ``def`` inside of a Mako template instead of
+the full Mako template. To render a def inside a Mako template, given a
+:term:`Mako` template file named ``foo.mak`` and a def named ``bar``, you can
+configure the template as a :term:`renderer` like so:
+
+.. code-block:: python
+   :linenos:
+
+   from pyramid.view import view_config
+
+   @view_config(renderer='foo#bar.mak')
+   def my_view(request):
+       return {'project':'my project'}
+
+The above will render the ``bar`` def from within the ``foo.mak`` template
+instead of the entire template.
+
+.. note::
+
+   This feature is new in Pyramid 1.4.
 
 .. index::
    single: automatic reloading of templates

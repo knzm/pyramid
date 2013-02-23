@@ -292,7 +292,37 @@ class TestChameleonRendererLookup(unittest.TestCase):
         if path.endswith('.pyc'): # pragma: no cover
             path = path[:-1]
         self.assertTrue(factory.path.startswith(path))
-        self.assertEqual(factory.kw, {})
+        self.assertEqual(factory.kw, {'macro':None})
+
+    def test___call__spec_withmacro(self):
+        from pyramid.interfaces import ITemplateRenderer
+        import os
+        from pyramid import tests
+        module_name = tests.__name__
+        relpath = 'fixtures/withmacro#foo.pt'
+        renderer = {}
+        factory = DummyFactory(renderer)
+        spec = '%s:%s' % (module_name, relpath)
+        reg = self.config.registry
+        info = DummyRendererInfo({
+            'name':spec,
+            'package':None,
+            'registry':reg,
+            'settings':{},
+            'type':'type',
+            })
+        lookup = self._makeOne(factory)
+        result = lookup(info)
+        self.assertTrue(result is renderer)
+        path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            'fixtures',
+            'withmacro.pt')
+        self.assertTrue(factory.path.startswith(path))
+        self.assertEqual(factory.kw, {'macro':'foo'})
+        self.assertTrue(
+            reg.getUtility(ITemplateRenderer, name=spec) is renderer
+            )
 
     def test___call__reload_assets_true(self):
         import pyramid.tests
@@ -340,34 +370,95 @@ class TestChameleonRendererLookup(unittest.TestCase):
         self.assertNotEqual(reg.queryUtility(ITemplateRenderer, name=spec),
                             None)
 
-class Test_json_renderer_factory(unittest.TestCase):
+class TestJSON(unittest.TestCase):
     def setUp(self):
         self.config = testing.setUp()
 
     def tearDown(self):
         testing.tearDown()
-        
-    def _callFUT(self, name):
-        from pyramid.renderers import json_renderer_factory
-        return json_renderer_factory(name)
+
+    def _makeOne(self, **kw):
+        from pyramid.renderers import JSON
+        return JSON(**kw)
 
     def test_it(self):
-        renderer = self._callFUT(None)
+        renderer = self._makeOne()(None)
         result = renderer({'a':1}, {})
         self.assertEqual(result, '{"a": 1}')
 
     def test_with_request_content_type_notset(self):
         request = testing.DummyRequest()
-        renderer = self._callFUT(None)
+        renderer = self._makeOne()(None)
         renderer({'a':1}, {'request':request})
         self.assertEqual(request.response.content_type, 'application/json')
 
     def test_with_request_content_type_set(self):
         request = testing.DummyRequest()
         request.response.content_type = 'text/mishmash'
-        renderer = self._callFUT(None)
+        renderer = self._makeOne()(None)
         renderer({'a':1}, {'request':request})
         self.assertEqual(request.response.content_type, 'text/mishmash')
+
+    def test_with_custom_adapter(self):
+        request = testing.DummyRequest()
+        from datetime import datetime
+        def adapter(obj, req):
+            self.assertEqual(req, request)
+            return obj.isoformat()
+        now = datetime.utcnow()
+        renderer = self._makeOne()
+        renderer.add_adapter(datetime, adapter)
+        result = renderer(None)({'a':now}, {'request':request})
+        self.assertEqual(result, '{"a": "%s"}' % now.isoformat())
+
+    def test_with_custom_adapter2(self):
+        request = testing.DummyRequest()
+        from datetime import datetime
+        def adapter(obj, req):
+            self.assertEqual(req, request)
+            return obj.isoformat()
+        now = datetime.utcnow()
+        renderer = self._makeOne(adapters=((datetime, adapter),))
+        result = renderer(None)({'a':now}, {'request':request})
+        self.assertEqual(result, '{"a": "%s"}' % now.isoformat())
+
+    def test_with_custom_serializer(self):
+        class Serializer(object):
+            def __call__(self, obj, **kw):
+                self.obj = obj
+                self.kw = kw
+                return 'foo'
+        serializer = Serializer()
+        renderer = self._makeOne(serializer=serializer, baz=5)
+        obj = {'a':'b'}
+        result = renderer(None)(obj, {})
+        self.assertEqual(result, 'foo')
+        self.assertEqual(serializer.obj, obj)
+        self.assertEqual(serializer.kw['baz'], 5)
+        self.assertTrue('default' in serializer.kw)
+
+    def test_with_object_adapter(self):
+        request = testing.DummyRequest()
+        outerself = self
+        class MyObject(object):
+            def __init__(self, x):
+                self.x = x
+            def __json__(self, req):
+                outerself.assertEqual(req, request)
+                return {'x': self.x}
+
+        objects = [MyObject(1), MyObject(2)]
+        renderer = self._makeOne()(None)
+        result = renderer(objects, {'request':request})
+        self.assertEqual(result, '[{"x": 1}, {"x": 2}]')
+
+    def test_with_object_adapter_no___json__(self):
+        class MyObject(object):
+            def __init__(self, x):
+                self.x = x
+        objects = [MyObject(1), MyObject(2)]
+        renderer = self._makeOne()(None)
+        self.assertRaises(TypeError, renderer, objects, {})
 
 class Test_string_renderer_factory(unittest.TestCase):
     def _callFUT(self, name):
@@ -447,6 +538,7 @@ class TestRendererHelper(unittest.TestCase):
         def renderer(*arg):
             def respond(*arg):
                 return arg
+            renderer.respond = respond
             return respond
         self.config.registry.registerUtility(renderer, IRendererFactory,
                                              name='.foo')
@@ -467,6 +559,11 @@ class TestRendererHelper(unittest.TestCase):
                                              request=request)
         self.assertEqual(response.body[0], 'values')
         self.assertEqual(response.body[1], {})
+
+    def test_get_renderer(self):
+        factory = self._registerRendererFactory()
+        helper = self._makeOne('loo.foo')
+        self.assertEqual(helper.get_renderer(), factory.respond)
 
     def test_render_view(self):
         self._registerRendererFactory()
@@ -566,6 +663,24 @@ class TestRendererHelper(unittest.TestCase):
         response = helper._make_response(la.encode('utf-8'), request)
         self.assertEqual(response.body, la.encode('utf-8'))
 
+    def test__make_response_result_is_None_no_body(self):
+        from pyramid.response import Response
+        request = testing.DummyRequest()
+        request.response = Response()
+        helper = self._makeOne('loo.foo')
+        response = helper._make_response(None, request)
+        self.assertEqual(response.body, b'')
+
+    def test__make_response_result_is_None_existing_body_not_molested(self):
+        from pyramid.response import Response
+        request = testing.DummyRequest()
+        response = Response()
+        response.body = b'abc'
+        request.response = response
+        helper = self._makeOne('loo.foo')
+        response = helper._make_response(None, request)
+        self.assertEqual(response.body, b'abc')
+        
     def test__make_response_with_content_type(self):
         from pyramid.response import Response
         request = testing.DummyRequest()
