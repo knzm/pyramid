@@ -1,12 +1,20 @@
+.. Renderers
+
 .. _renderers_chapter:
 
-Renderers
-=========
+レンダラー
+==========
 
-A view callable needn't *always* return a :term:`Response` object.  If a view
-happens to return something which does not implement the Pyramid Response
-interface, :app:`Pyramid` will attempt to use a :term:`renderer` to construct
-a response.  For example:
+.. A view callable needn't *always* return a :term:`Response` object.  If a view
+.. happens to return something which does not implement the Pyramid Response
+.. interface, :app:`Pyramid` will attempt to use a :term:`renderer` to construct
+.. a response.  For example:
+
+ビュー callbale は :term:`Response` オブジェクトを *常に* 必要とはしていません。
+もしビューが返すものが Pyramid の Response インタフェースを実装していなければ、
+:app:`Pyramid` は :term:`renderer` を使用してレスポンスを構築しようと試みます。
+例えば:
+
 
 .. code-block:: python
    :linenos:
@@ -17,76 +25,126 @@ a response.  For example:
    def hello_world(request):
        return {'content':'Hello!'}
 
-The above example returns a *dictionary* from the view callable.  A
-dictionary does not implement the Pyramid response interface, so you might
-believe that this example would fail.  However, since a ``renderer`` is
-associated with the view callable through its :term:`view configuration` (in
-this case, using a ``renderer`` argument passed to
-:func:`~pyramid.view.view_config`), if the view does *not* return a Response
-object, the renderer will attempt to convert the result of the view to a
-response on the developer's behalf.
+.. The above example returns a *dictionary* from the view callable.  A
+.. dictionary does not implement the Pyramid response interface, so you might
+.. believe that this example would fail.  However, since a ``renderer`` is
+.. associated with the view callable through its :term:`view configuration` (in
+.. this case, using a ``renderer`` argument passed to
+.. :func:`~pyramid.view.view_config`), if the view does *not* return a Response
+.. object, the renderer will attempt to convert the result of the view to a
+.. response on the developer's behalf.
 
-Of course, if no renderer is associated with a view's configuration,
-returning anything except an object which implements the Response interface
-will result in an error.  And, if a renderer *is* used, whatever is returned
-by the view must be compatible with the particular kind of renderer used, or
-an error may occur during view invocation.
+上記の例では、ビュー callable は *辞書* を返します。
+辞書は Pyramid の Response インタフェースを実装していませんので、この例は失敗だと思うかもしれません。
+しかし、 ``renderer`` が :term:`view configuration` を通してビュー callable に関連づけられていて
+(この場合は :func:`~pyramid.view.view_config` に渡された引数 ``renderer`` が使われます)
+ビューが Response オブジェクトを *返さない* 場合、このレンダラーはビューの結果を開発者に代わってレスポンスに変換しようと試みます。
 
-One exception exists: it is *always* OK to return a Response object, even
-when a ``renderer`` is configured.  If a view callable returns a response
-object from a view that is configured with a renderer, the renderer is
-bypassed entirely.
 
-Various types of renderers exist, including serialization renderers
-and renderers which use templating systems.  See also
-:ref:`views_which_use_a_renderer`.
+.. Of course, if no renderer is associated with a view's configuration,
+.. returning anything except an object which implements the Response interface
+.. will result in an error.  And, if a renderer *is* used, whatever is returned
+.. by the view must be compatible with the particular kind of renderer used, or
+.. an error may occur during view invocation.
+
+もちろん、ビュー設定に関連づけられたレンダラーが何もない状態で Response インタフェースを実装したオブジェクト以外のものを返せばエラーとなります。
+もしレンダラーが使われるなら、ビューが返すものはレンダラーが扱える種類のものと互換でなければならず、そうでなければビューの呼び出しの間にエラーが発生します。
+
+
+.. One exception exists: it is *always* OK to return a Response object, even
+.. when a ``renderer`` is configured.  If a view callable returns a response
+.. object from a view that is configured with a renderer, the renderer is
+.. bypassed entirely.
+
+ひとつ例外があります:
+たとえ ``renderer`` が設定されていても、レスポンスオブジェクトを返すことは *常に* 許可されます。
+ビュー callbale がレンダラーが設定されたビューからレスポンスオブジェクトを返すなら、レンダラーは無視されます。
+
+
+.. Various types of renderers exist, including serialization renderers
+.. and renderers which use templating systems.  See also
+.. :ref:`views_which_use_a_renderer`.
+
+シリアライズするレンダラーや、テンプレートシステムを使うレンダラーなど、さまざまな種類のレンダラーがあります。
+:ref:`views_which_use_a_renderer` も参照してください。
 
 
 .. index::
    single: renderer
    single: view renderer
 
+.. Writing View Callables Which Use a Renderer
+
 .. _views_which_use_a_renderer:
 
-Writing View Callables Which Use a Renderer
--------------------------------------------
+レンダラーを使うビュー Callable を書く
+--------------------------------------
 
-As we've seen, view callables needn't always return a Response object.
-Instead, they may return an arbitrary Python object, with the expectation
-that a :term:`renderer` will convert that object into a response instance on
-your behalf.  Some renderers use a templating system; other renderers use
-object serialization techniques.
+.. As we've seen, view callables needn't always return a Response object.
+.. Instead, they may return an arbitrary Python object, with the expectation
+.. that a :term:`renderer` will convert that object into a response instance on
+.. your behalf.  Some renderers use a templating system; other renderers use
+.. object serialization techniques.
 
-View configuration can vary the renderer associated with a view callable via
-the ``renderer`` attribute.  For example, this call to
-:meth:`~pyramid.config.Configurator.add_view` associates the ``json`` renderer
-with a view callable:
+すでに見てきたとおり、ビュー callable は常に Response オブジェクトを返す必要はありません。
+代わりに、 :term:`renderer` がレスポンスインスタンスに変換するであろう任意の Python オブジェクトを返してもよいのです。
+いくつかのレンダラーは、テンプレートシステムを用います; 他のレンダラーは、オブジェクトシリアライズの技術を用います。
+
+
+.. View configuration can vary the renderer associated with a view callable via
+.. the ``renderer`` attribute.  For example, this call to
+.. :meth:`~pyramid.config.Configurator.add_view` associates the ``json`` renderer
+.. with a view callable:
+
+ビュー設定で ``renderer`` 属性を用いて、ビュー callable と関連づけられるレンダラーを切り替えることができます。
+例として、 :meth:`~pyramid.config.Configurator.add_view` の呼び出しで
+``json`` レンダラーをビュー callable に関連づけてみます:
+
 
 .. code-block:: python
    :linenos:
 
    config.add_view('myproject.views.my_view', renderer='json')
 
-When this configuration is added to an application, the
-``myproject.views.my_view`` view callable will now use a ``json`` renderer,
-which renders view return values to a :term:`JSON` response serialization.
+.. When this configuration is added to an application, the
+.. ``myproject.views.my_view`` view callable will now use a ``json`` renderer,
+.. which renders view return values to a :term:`JSON` response serialization.
 
-Other built-in renderers include renderers which use the :term:`Chameleon`
-templating language to render a dictionary to a response.  Additional
-renderers can be added by developers to the system as necessary (see
-:ref:`adding_and_overriding_renderers`).
+この設定がアプリケーションに追加されると、ビュー callable ``myproject.views.my_view``
+は今後 ``json`` レンダラーを使うようになります。
+レンダラーはビューの戻り値を :term:`JSON` レスポンスにシリアライズします。
 
-Views which use a renderer and return a non-Response value can vary non-body
-response attributes (such as headers and the HTTP status code) by attaching a
-property to the ``request.response`` attribute See
-:ref:`request_response_attr`.
 
-If the :term:`view callable` associated with a :term:`view configuration`
-returns a Response object directly, any renderer associated with the view
-configuration is ignored, and the response is passed back to :app:`Pyramid`
-unchanged.  For example, if your view callable returns an instance of the
-:class:`pyramid.response.Response` class as a response, no renderer
-will be employed.
+.. Other built-in renderers include renderers which use the :term:`Chameleon`
+.. templating language to render a dictionary to a response.  Additional
+.. renderers can be added by developers to the system as necessary (see
+.. :ref:`adding_and_overriding_renderers`).
+
+他のビルトインのレンダラーには、 辞書をレスポンスに変換するのに :term:`Chameleon` テンプレート言語を使うレンダラーがあります。
+必要ならば、開発者は追加のレンダラーを登録できます (:ref:`adding_and_overriding_renderers` を参照) 。
+
+
+.. Views which use a renderer and return a non-Response value can vary non-body
+.. response attributes (such as headers and the HTTP status code) by attaching a
+.. property to the ``request.response`` attribute See
+.. :ref:`request_response_attr`.
+
+``request.response`` 属性のプロパティを設定することで、レンダラーを使う Response でない値を返すようなビューに様々な
+body でないレスポンス属性 (例えば、ヘッダーや HTTP ステータスコード等) を設定できます。
+:ref:`request_response_attr` を参照してください。
+
+
+.. If the :term:`view callable` associated with a :term:`view configuration`
+.. returns a Response object directly, any renderer associated with the view
+.. configuration is ignored, and the response is passed back to :app:`Pyramid`
+.. unchanged.  For example, if your view callable returns an instance of the
+.. :class:`pyramid.response.Response` class as a response, no renderer
+.. will be employed.
+
+:term:`view configuration` に関連づけられた :term:`view callable` がレスポンスオブジェクトを直接返す場合、
+ビュー設定によって関連づけられたすべてのレンダラーは無視され、レスポンスは :app:`Pyramid` に返されるまで変更されません。
+例えば、ビュー callable が :class:`pyramid.response.Response` のインスタンスを返す場合、どのレンダラーも使われることはありません。
+
 
 .. code-block:: python
    :linenos:
@@ -98,7 +156,10 @@ will be employed.
    def view(request):
        return Response('OK') # json renderer avoided
 
-Likewise for an :term:`HTTP exception` response:
+.. Likewise for an :term:`HTTP exception` response:
+
+:term:`HTTP exception` レスポンスの場合も同様です:
+
 
 .. code-block:: python
    :linenos:
@@ -110,8 +171,11 @@ Likewise for an :term:`HTTP exception` response:
    def view(request):
        return HTTPFound(location='http://example.com') # json renderer avoided
 
-You can of course also return the ``request.response`` attribute instead to
-avoid rendering:
+.. You can of course also return the ``request.response`` attribute instead to
+.. avoid rendering:
+
+もちろん、レンダリングする代わりに ``request.response`` 属性を返すこともできます:
+
 
 .. code-block:: python
    :linenos:
@@ -127,31 +191,51 @@ avoid rendering:
    single: renderers (built-in)
    single: built-in renderers
 
+.. Built-In Renderers
+
 .. _built_in_renderers:
 
-Built-In Renderers
-------------------
+ビルトインのレンダラー
+----------------------
 
-Several built-in renderers exist in :app:`Pyramid`.  These renderers can be
-used in the ``renderer`` attribute of view configurations.
+.. Several built-in renderers exist in :app:`Pyramid`.  These renderers can be
+.. used in the ``renderer`` attribute of view configurations.
+
+:app:`Pyramid` にはいくつかのビルトインのレンダラーがあります。
+これらのレンダラーは、ビュー設定の ``renderer`` 属性に設定できます。
+
 
 .. index::
    pair: renderer; string
 
-``string``: String Renderer
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. ``string``: String Renderer
 
-The ``string`` renderer is a renderer which renders a view callable result to
-a string.  If a view callable returns a non-Response object, and the
-``string`` renderer is associated in that view's configuration, the result
-will be to run the object through the Python ``str`` function to generate a
-string.  Note that if a Unicode object is returned by the view callable, it
-is not ``str()`` -ified.
+``string``: 文字列レンダラー
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here's an example of a view that returns a dictionary.  If the ``string``
-renderer is specified in the configuration for this view, the view will
-render the returned dictionary to the ``str()`` representation of the
-dictionary:
+.. The ``string`` renderer is a renderer which renders a view callable result to
+.. a string.  If a view callable returns a non-Response object, and the
+.. ``string`` renderer is associated in that view's configuration, the result
+.. will be to run the object through the Python ``str`` function to generate a
+.. string.  Note that if a Unicode object is returned by the view callable, it
+.. is not ``str()`` -ified.
+
+``string`` レンダラーは、ビュー callable の戻り値を文字列にレンダリングします。
+ビュー callable がレスポンスでないオブジェクトを返し、かつ ``string`` レンダラーが
+ビュー設定によって関連づけられていた場合、戻り値は Python の ``str``
+関数で文字列化されます。
+注意として、ビュー callable が Unicode オブジェクトを返す場合、それは ``str()`` されません。
+
+
+.. Here's an example of a view that returns a dictionary.  If the ``string``
+.. renderer is specified in the configuration for this view, the view will
+.. render the returned dictionary to the ``str()`` representation of the
+.. dictionary:
+
+以下は辞書を返すビューの例です。
+``string`` レンダラーがこのビューの設定に明記されていれば、このビューは戻り値の辞書をその
+``str()`` 表現に変換します。
+
 
 .. code-block:: python
    :linenos:
@@ -162,34 +246,56 @@ dictionary:
    def hello_world(request):
        return {'content':'Hello!'}
 
-The body of the response returned by such a view will be a string
-representing the ``str()`` serialization of the return value:
+.. The body of the response returned by such a view will be a string
+.. representing the ``str()`` serialization of the return value:
+
+このビューによって返されたレスポンスのボディは、戻り値の
+``str()`` シリアライズによる文字列表現となります。
+
 
 .. code-block:: python
    :linenos:
 
    {'content': 'Hello!'}
 
-Views which use the string renderer can vary non-body response attributes by
-using the API of the ``request.response`` attribute.  See
-:ref:`request_response_attr`.
+.. Views which use the string renderer can vary non-body response attributes by
+.. using the API of the ``request.response`` attribute.  See
+.. :ref:`request_response_attr`.
+
+文字列レンダラーを使うビューには、 ``request.response`` の API
+を使って、様々なボディでないレスポンス属性を設定することができます。
+:ref:`request_response_attr` を参照してください。
+
 
 .. index::
    pair: renderer; JSON
 
+.. JSON Renderer
+
 .. _json_renderer:
 
-JSON Renderer
-~~~~~~~~~~~~~
+JSON レンダラー
+~~~~~~~~~~~~~~~
 
-The ``json`` renderer renders view callable results to :term:`JSON`.  By
-default, it passes the return value through the ``json.dumps`` standard
-library function, and wraps the result in a response object.  It also sets
-the response content-type to ``application/json``.
+.. The ``json`` renderer renders view callable results to :term:`JSON`.  By
+.. default, it passes the return value through the ``json.dumps`` standard
+.. library function, and wraps the result in a response object.  It also sets
+.. the response content-type to ``application/json``.
 
-Here's an example of a view that returns a dictionary.  Since the ``json``
-renderer is specified in the configuration for this view, the view will
-render the returned dictionary to a JSON serialization:
+``json`` レンダラーは、ビュー callable の戻り値を :term:`JSON` にレンダリングします。
+デフォルトでは、戻り値をそのまま標準ライブラリ関数 ``json.dumps`` に渡し、その結果を
+レスポンスオブジェクトでラップします。また、レスポンスの content-type は
+``application/json`` に設定されます。
+
+
+.. Here's an example of a view that returns a dictionary.  Since the ``json``
+.. renderer is specified in the configuration for this view, the view will
+.. render the returned dictionary to a JSON serialization:
+
+以下は辞書を返すビューの例です。
+``json`` レンダラーがこのビューの設定に明記されていれば、このビューは戻り値の辞書を
+JSON にシリアライズします。
+
 
 .. code-block:: python
    :linenos:
@@ -200,26 +306,42 @@ render the returned dictionary to a JSON serialization:
    def hello_world(request):
        return {'content':'Hello!'}
 
-The body of the response returned by such a view will be a string
-representing the JSON serialization of the return value:
+.. The body of the response returned by such a view will be a string
+.. representing the JSON serialization of the return value:
+
+このビューのレスポンスボディは、戻り値のJSONシリアライズ結果の文字列表現になります。
+
 
 .. code-block:: python
    :linenos:
 
    '{"content": "Hello!"}'
 
-The return value needn't be a dictionary, but the return value must contain
-values serializable by the configured serializer (by default ``json.dumps``).
+.. The return value needn't be a dictionary, but the return value must contain
+.. values serializable by the configured serializer (by default ``json.dumps``).
+
+戻り値は辞書である必要はありませんが、設定されたシリアライザでシリアライズ可能でなければいけません
+(デフォルトでは ``json.dumps``) 。
+
+.. .. note::
+
+..   Extra arguments can be passed to the serializer by overriding the default
+..  ``json`` renderer. See :class:`pyramid.renderers.JSON` and
+..   :ref:`adding_and_overriding_renderers` for more information.
 
 .. note::
 
-   Extra arguments can be passed to the serializer by overriding the default
-   ``json`` renderer. See :class:`pyramid.renderers.JSON` and
-   :ref:`adding_and_overriding_renderers` for more information.
+   デフォルトの ``json`` レンダラーを上書きするために、追加の引数を渡すことができます。
+   詳細は :class:`pyramid.renderers.JSON` および :ref:`adding_and_overriding_renderers` を参照してください。
 
-You can configure a view to use the JSON renderer by naming ``json`` as the
-``renderer`` argument of a view configuration, e.g. by using
-:meth:`~pyramid.config.Configurator.add_view`:
+
+.. You can configure a view to use the JSON renderer by naming ``json`` as the
+.. ``renderer`` argument of a view configuration, e.g. by using
+.. :meth:`~pyramid.config.Configurator.add_view`:
+
+ビュー設定の ``renderer`` 引数に ``json`` を指定することで、JSON レンダラーを使うようにビューを設定できます。
+例えば :meth:`~pyramid.config.Configurator.add_view` を使って:
+
 
 .. code-block:: python
    :linenos:
@@ -229,20 +351,36 @@ You can configure a view to use the JSON renderer by naming ``json`` as the
                    context='myproject.resources.Hello',
                    renderer='json')
 
-Views which use the JSON renderer can vary non-body response attributes by
-using the api of the ``request.response`` attribute.  See
-:ref:`request_response_attr`.
+.. Views which use the JSON renderer can vary non-body response attributes by
+.. using the api of the ``request.response`` attribute.  See
+.. :ref:`request_response_attr`.
+
+JSON レンダラーを使うビューには、 ``request.response`` 属性の API
+を使って、様々なbody でないレスポンス属性を設定できます。
+:ref:`request_response_attr` を参照してください。
+
+
+
+.. Serializing Custom Objects
 
 .. _json_serializing_custom_objects:
 
-Serializing Custom Objects
-++++++++++++++++++++++++++
+カスタムオブジェクトのシリアライズ
+++++++++++++++++++++++++++++++++++
 
-Custom objects can be made easily JSON-serializable in Pyramid by defining a
-``__json__`` method on the object's class. This method should return values
-natively JSON-serializable (such as ints, lists, dictionaries, strings, and
-so forth).  It should accept a single additional argument, ``request``, which
-will be the active request object at render time.
+.. Custom objects can be made easily JSON-serializable in Pyramid by defining a
+.. ``__json__`` method on the object's class. This method should return values
+.. natively JSON-serializable (such as ints, lists, dictionaries, strings, and
+.. so forth).  It should accept a single additional argument, ``request``, which
+.. will be the active request object at render time.
+
+Pyramid では、カスタムオブジェクトのクラスに ``__json__``
+メソッドを定義すればそのオブジェクトを JSON シリアライズ可能にできます。
+このメソッドはネイティブな JSON シリアライズ可能な値
+(例えば整数、リスト、辞書、文字列、その他) を返すべきです。
+このメソッドは、追加の引数をひとつ受け取れるべきです。引数 ``request``
+は、レンダリング時点でのアクティブなリクエストオブジェクトです。
+
 
 .. code-block:: python
    :linenos:
@@ -263,14 +401,23 @@ will be the active request object at render time.
    # the JSON value returned by ``objects`` will be:
    #    [{"x": 1}, {"x": 2}]
 
-If you aren't the author of the objects being serialized, it won't be
-possible (or at least not reasonable) to add a custom ``__json__`` method
-to their classes in order to influence serialization.  If the object passed
-to the renderer is not a serializable type, and has no ``__json__`` method,
-usually a :exc:`TypeError` will be raised during serialization.  You can
-change this behavior by creating a custom JSON renderer and adding adapters
-to handle custom types. The renderer will attempt to adapt non-serializable
-objects using the registered adapters. A short example follows:
+
+.. If you aren't the author of the objects being serialized, it won't be
+.. possible (or at least not reasonable) to add a custom ``__json__`` method
+.. to their classes in order to influence serialization.  If the object passed
+.. to the renderer is not a serializable type, and has no ``__json__`` method,
+.. usually a :exc:`TypeError` will be raised during serialization.  You can
+.. change this behavior by creating a custom JSON renderer and adding adapters
+.. to handle custom types. The renderer will attempt to adapt non-serializable
+.. objects using the registered adapters. A short example follows:
+
+あなたがシリアライズ対象のオブジェクトの作者でないなら、そのオブジェクトをシリアライズするためにそれらのクラスにカスタムの
+``__json__`` メソッドを追加することはできない (あるいは、少なくとも合理的でない) かもしれません。
+レンダラーに渡されたオブジェクトがシリアライズ可能な型ではなく、また
+``__json__`` メソッドもない場合、通常はシリアライズの過程で :exc:`TypeError` が送出されます。
+この振る舞いは、カスタムの JSON レンダラーを作り、
+カスタムの型をハンドルするアダプターを追加することで変更することができます。
+このレンダラーは、シリアライズ不可能なオブジェクトを登録されたアダプターに適合させようと試みます。
 
 .. code-block:: python
    :linenos:
@@ -286,17 +433,30 @@ objects using the registered adapters. A short example follows:
    config = Configurator()
    config.add_renderer('json', json_renderer)
 
-The adapter should accept two arguments: the object needing to be serialized
-and ``request``, which will be the current request object at render time.
-The adapter should raise a :exc:`TypeError` if it can't determine what to do
-with the object.
+.. The adapter should accept two arguments: the object needing to be serialized
+.. and ``request``, which will be the current request object at render time.
+.. The adapter should raise a :exc:`TypeError` if it can't determine what to do
+.. with the object.
 
-See :class:`pyramid.renderers.JSON` and
-:ref:`adding_and_overriding_renderers` for more information.
+このアダプターはふたつの引数を取るべきです: シリアライズが必要なオブジェクトと ``request`` です。
+``request`` はレンダリング時点でのリクエストオブジェクトです。
+アダプターは、オブジェクトにすべきことを決定できない場合は :exc:`TypeError` を送出すべきです。
+
+
+.. See :class:`pyramid.renderers.JSON` and
+.. :ref:`adding_and_overriding_renderers` for more information.
+
+詳細は :class:`pyramid.renderers.JSON` および :ref:`adding_and_overriding_renderers` を参照してください。
+
+
+.. .. note::
+
+..   Serializing custom objects is a feature new in Pyramid 1.4.
 
 .. note::
 
-   Serializing custom objects is a feature new in Pyramid 1.4.
+   カスタムオブジェクトのシリアライズは Pyramid 1.4 で追加された機能です。
+
 
 .. index::
    pair: renderer; JSONP
