@@ -231,7 +231,7 @@ equivalent.  The edit view would sensibly be provided by a request for
 Hopefully it's clear that the first portion of the edit view's URL path is
 going to resolve to the same resource as the non-edit version, specifically
 the resource returned by ``get_root()['joeschmoe']['photos']['photo1']``.
-But traveral ends there; the ``photo1`` resource doesn't have an ``edit``
+But traversal ends there; the ``photo1`` resource doesn't have an ``edit``
 key.  In fact, it might not even be a dictionary-like object, in which case
 ``photo1['edit']`` would be meaningless.  When the :app:`Pyramid` resource
 location has been resolved to a *leaf* resource, but the entire request path
